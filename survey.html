@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>만능맨 베타테스트 피드백 설문</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', 'Segoe UI', sans-serif;
+      background-color: #f0f4f8;
+      background-image: url('백그라운드배경/백그라운드.png');
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center center;
+      background-repeat: no-repeat;
+      color: #1e293b;
+      font-size: 16px;
+      line-height: 1.65;
+    }
+
+    /* ── 진행률 바 ── */
+    #progress-bar-wrap {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: rgba(240, 244, 248, 0.95);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+    }
+    #progress-bar-inner {
+      display: flex;
+      align-items: center;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 10px 16px;
+      gap: 12px;
+    }
+    #header-info-bar {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 6px 16px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      border-top: 1px solid rgba(0,0,0,.06);
+    }
+    .header-phone {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a56db;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .header-phone:hover { color: #1240a8; }
+    .header-phone svg { flex-shrink: 0; }
+    .partners-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 13px;
+      background: #1a56db;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 700;
+      border-radius: 99px;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background .2s;
+    }
+    .partners-btn:hover { background: #1240a8; }
+    .logo-img {
+      height: 48px;
+      width: auto;
+      max-width: 160px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+    #progress-track {
+      flex: 1;
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    #progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #1a56db, #3b82f6);
+      border-radius: 99px;
+      width: 0%;
+      transition: width .4s ease;
+    }
+    #progress-label {
+      font-size: 13px;
+      color: #64748b;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ── 배너 섹션 (패턴 완전 차단) ── */
+    #banner-section {
+      background: #fff;
+      width: 100%;
+      padding-top: 104px; /* 고정 헤더(진행바+정보바) 높이만큼 */
+      position: relative;
+    }
+    /* 배너 하단 → 설문 본문으로 자연스러운 페이드 전환 */
+    #banner-section::after {
+      content: '';
+      position: absolute;
+      bottom: -30px;
+      left: 0; right: 0;
+      height: 30px;
+      background: linear-gradient(to bottom, #fff 0%, transparent 100%);
+      pointer-events: none;
+      z-index: 3;
+    }
+    .banner-inner {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 16px 16px 18px;
+    }
+
+    /* ── 메인 래퍼 ── */
+    #survey-page {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 30px 16px 60px; /* 30px top = 페이드 오버레이 영역 */
+      position: relative;
+      z-index: 2;
+    }
+    #complete-page {
+      display: none;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 80px 16px 60px;
+    }
+
+    /* ── 카드 ── */
+    .card {
+      background: rgba(255, 255, 255, 0.88);
+      border-radius: 14px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.10);
+      margin-bottom: 18px;
+      overflow: hidden;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+    }
+
+    /* ── 배너 ── */
+    .banner-wrap {
+      position: relative;
+      margin-bottom: 0;
+      line-height: 0;
+    }
+    .banner-img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: cover;
+      border-radius: 14px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    /* ── 섹션 카드 ── */
+    .section-card .section-header {
+      background: #1a56db;
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-card .section-num {
+      background: rgba(255,255,255,.2);
+      color: #fff;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 2px 8px;
+      border-radius: 99px;
+    }
+    .section-card .section-title {
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    .section-card .section-body { padding: 8px 24px 24px; }
+
+    /* ── 질문 블록 ── */
+    .q-block {
+      margin-top: 22px;
+      padding-top: 22px;
+      border-top: 1px solid #f1f5f9;
+    }
+    .q-block:first-child { border-top: none; }
+
+    .q-label {
+      font-size: 15.5px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+    .req {
+      display: inline-block;
+      background: #dc2626;
+      color: #fff;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 99px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+
+    /* ── 토스트 팝업 ── */
+    #validation-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 16px;
+      z-index: 200;
+      background: #fff;
+      border: 1.5px solid #fca5a5;
+      border-radius: 14px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.18);
+      padding: 14px 16px;
+      max-width: 260px;
+      width: calc(100% - 32px);
+      display: none;
+      animation: toastIn .25s ease;
+    }
+    #validation-toast.visible { display: block; }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .toast-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .toast-header-text { font-size: 13px; font-weight: 700; color: #b91c1c; }
+    .toast-close-btn {
+      cursor: pointer; font-size: 15px; color: #94a3b8;
+      line-height: 1; padding: 2px 4px; border: none; background: none;
+    }
+    .toast-close-btn:hover { color: #475569; }
+    .toast-list { display: flex; flex-wrap: wrap; gap: 6px; }
+    .toast-item {
+      background: #fef2f2;
+      border: 1.5px solid #fca5a5;
+      color: #b91c1c;
+      font-size: 12.5px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 99px;
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+    }
+    .toast-item:hover { background: #fee2e2; border-color: #f87171; }
+
+    /* ── 라디오 선택지 ── */
+    .radio-group { display: flex; flex-direction: column; gap: 8px; }
+    .radio-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      padding: 11px 14px;
+      border-radius: 8px;
+      border: 1.5px solid #e2e8f0;
+      transition: border-color .15s, background .15s;
+      user-select: none;
+    }
+    .radio-option:hover { border-color: #93c5fd; background: #f0f9ff; }
+    .radio-option input[type="radio"] { display: none; }
+    .radio-dot {
+      width: 18px; height: 18px;
+      border-radius: 50%;
+      border: 2px solid #cbd5e1;
+      background: #fff;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color .15s, background .15s;
+    }
+    .radio-dot::after {
+      content: '';
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      background: #1a56db;
+      display: none;
+    }
+    .radio-option.selected { border-color: #1a56db; background: #eff6ff; }
+    .radio-option.selected .radio-dot { border-color: #1a56db; background: #1a56db; }
+    .radio-option.selected .radio-dot::after { display: block; background: #fff; }
+    .radio-option .option-text { font-size: 15px; color: #374151; }
+
+    /* ── 체크박스 선택지 ── */
+    .checkbox-group { display: flex; flex-direction: column; gap: 8px; }
+    .checkbox-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      padding: 11px 14px;
+      border-radius: 8px;
+      border: 1.5px solid #e2e8f0;
+      transition: border-color .15s, background .15s;
+      user-select: none;
+    }
+    .checkbox-option:hover { border-color: #93c5fd; background: #f0f9ff; }
+    .checkbox-option input[type="checkbox"] { display: none; }
+    .checkbox-box {
+      width: 18px; height: 18px;
+      border-radius: 4px;
+      border: 2px solid #cbd5e1;
+      background: #fff;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color .15s, background .15s;
+    }
+    .checkbox-box::after {
+      content: '';
+      width: 10px; height: 7px;
+      border-left: 2.5px solid #fff;
+      border-bottom: 2.5px solid #fff;
+      transform: rotate(-45deg) translate(1px, -1px);
+      display: none;
+    }
+    .checkbox-option.checked { border-color: #1a56db; background: #eff6ff; }
+    .checkbox-option.checked .checkbox-box { border-color: #1a56db; background: #1a56db; }
+    .checkbox-option.checked .checkbox-box::after { display: block; }
+    .checkbox-option .option-text { font-size: 15px; color: #374151; }
+
+    /* ── 텍스트 입력 ── */
+    .text-input, .textarea-input {
+      width: 100%;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 11px 14px;
+      font-size: 15px;
+      font-family: inherit;
+      color: #1e293b;
+      background: #fff;
+      transition: border-color .2s;
+      outline: none;
+      resize: vertical;
+    }
+    .text-input:focus, .textarea-input:focus { border-color: #1a56db; }
+    .textarea-input { min-height: 120px; }
+
+    /* ── 기기 조건 인라인 ── */
+    .device-sub {
+      display: none;
+      margin-top: 10px;
+      padding: 12px 14px;
+      background: #f8fafc;
+      border-radius: 8px;
+      border: 1px dashed #bfdbfe;
+      animation: slideDown .2s ease;
+    }
+    .device-sub.visible { display: block; }
+    .device-sub-label {
+      font-size: 13.5px;
+      color: #64748b;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+
+    /* ── 개인정보 동의 ── */
+    .privacy-box {
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 14px;
+      font-size: 14px;
+      color: #475569;
+      line-height: 1.7;
+    }
+    .consent-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      color: #1e293b;
+      padding: 12px 14px;
+      border-radius: 8px;
+      border: 1.5px solid #e2e8f0;
+      transition: border-color .15s, background .15s;
+      user-select: none;
+    }
+    .consent-label:hover { border-color: #93c5fd; background: #f0f9ff; }
+    .consent-label.checked { border-color: #1a56db; background: #eff6ff; }
+    .consent-cb {
+      width: 18px; height: 18px;
+      border-radius: 4px;
+      border: 2px solid #cbd5e1;
+      background: #fff;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color .15s, background .15s;
+    }
+    .consent-cb::after {
+      content: '';
+      width: 10px; height: 7px;
+      border-left: 2.5px solid #fff;
+      border-bottom: 2.5px solid #fff;
+      transform: rotate(-45deg) translate(1px, -1px);
+      display: none;
+    }
+    .consent-label.checked .consent-cb { border-color: #1a56db; background: #1a56db; }
+    .consent-label.checked .consent-cb::after { display: block; }
+    .consent-label input[type="checkbox"] { display: none; }
+    .contact-inputs { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+    .contact-inputs .contact-label {
+      font-size: 13.5px;
+      color: #64748b;
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+
+    /* ── 제출 버튼 ── */
+    .submit-area { margin-top: 10px; }
+    .btn-submit {
+      width: 100%;
+      padding: 16px;
+      background: #1a56db;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s, transform .1s;
+      letter-spacing: .3px;
+    }
+    .btn-submit:hover { background: #1e40af; }
+    .btn-submit:active { transform: scale(.98); }
+    .btn-submit:disabled { background: #94a3b8; cursor: not-allowed; }
+
+    /* ── 오류 안내 ── */
+    .error-msg {
+      background: #fef2f2;
+      border: 1.5px solid #fca5a5;
+      color: #b91c1c;
+      border-radius: 8px;
+      padding: 12px 14px;
+      font-size: 14px;
+      margin-top: 12px;
+      display: none;
+    }
+    .error-msg.visible { display: block; }
+    .q-block.error-field .q-label { color: #dc2626; }
+    .q-block.error-field .radio-group,
+    .q-block.error-field .checkbox-group,
+    .q-block.error-field .text-input,
+    .q-block.error-field .textarea-input,
+    .q-block.error-field .contact-inputs .text-input {
+      outline: 2px solid #f87171;
+      border-radius: 8px;
+    }
+
+    /* ── 완료 화면 ── */
+    .complete-card {
+      border-top: 5px solid #16a34a;
+      padding: 48px 28px 40px;
+      text-align: center;
+    }
+    .complete-icon {
+      width: 64px; height: 64px;
+      background: #dcfce7;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 32px;
+    }
+    .complete-card h2 { font-size: 22px; font-weight: 800; color: #1e293b; margin-bottom: 12px; }
+    .complete-card p { font-size: 16px; color: #64748b; line-height: 1.8; }
+    .complete-gift {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 20px;
+      background: #fef9c3;
+      color: #854d0e;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 99px;
+      border: 1px solid #fde68a;
+    }
+
+    /* ── 로딩 오버레이 ── */
+    #loading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,.85);
+      z-index: 999;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+    #loading-overlay.visible { display: flex; }
+    .spinner {
+      width: 44px; height: 44px;
+      border: 4px solid #e2e8f0;
+      border-top-color: #1a56db;
+      border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #loading-overlay span { font-size: 15px; color: #64748b; }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── 반응형 ── */
+    @media (max-width: 480px) {
+      body { font-size: 15px; background-attachment: scroll; }
+      .section-card .section-body { padding: 20px 18px; }
+      .section-card .section-header { padding: 12px 18px; }
+      .q-label { font-size: 15px; }
+      .logo-img { height: 38px; }
+      #banner-section { padding-top: 94px; }
+      .header-phone { font-size: 13px; }
+      .partners-btn { font-size: 12px; padding: 4px 10px; }
+    }
+    @media (max-width: 360px) {
+      .logo-img { height: 32px; max-width: 120px; }
+      #banner-section { padding-top: 88px; }
+      .header-phone { font-size: 12px; }
+      .partners-btn { font-size: 11px; padding: 4px 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- 진행률 바 -->
+<div id="progress-bar-wrap">
+  <div id="progress-bar-inner">
+    <img src="LOGO/만능맨logo_partners.png" alt="만능맨" class="logo-img">
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <span id="progress-label">0 / 6 섹션</span>
+  </div>
+  <div id="header-info-bar">
+    <a href="tel:18998827" class="header-phone">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 11.5a19.79 19.79 0 01-3.07-8.67A2 2 0 012 .82h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+      1899-8827
+    </a>
+    <a href="https://partners.10000man.co.kr/" target="_blank" rel="noopener noreferrer" class="partners-btn">
+      파트너스 신청하러가기 →
+    </a>
+  </div>
+</div>
+
+<!-- 로딩 오버레이 -->
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <span>제출 중입니다...</span>
+</div>
+
+<!-- 유효성 검사 토스트 팝업 -->
+<div id="validation-toast">
+  <div class="toast-header">
+    <span class="toast-header-text">⚠ 필수 항목 미작성</span>
+    <button class="toast-close-btn" id="toast-close-btn" aria-label="닫기">✕</button>
+  </div>
+  <div class="toast-list" id="toast-list"></div>
+</div>
+
+<!-- ══════════════ 배너 섹션 (흰색 배경 단색) ══════════════ -->
+<div id="banner-section">
+  <div class="banner-inner">
+    <div class="banner-wrap">
+      <img src="배너/배너.png" alt="만능맨 베타테스트 피드백 설문" class="banner-img">
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ 설문 페이지 (배경 패턴 노출 시작) ══════════════ -->
+<div id="survey-page">
+
+  <form id="survey-form" novalidate>
+
+    <!-- ══ 섹션 1: 기본 정보 ══ -->
+    <div class="card section-card" data-section="1">
+      <div class="section-header">
+        <span class="section-num">1</span>
+        <span class="section-title">기본 정보</span>
+      </div>
+      <div class="section-body">
+
+        <!-- Q1 -->
+        <div class="q-block" id="qb-q1">
+          <div class="q-label">Q1. 테스트 참여자 유형을 선택해주세요.</div>
+          <div class="radio-group" data-name="participantType" data-required="true">
+            <label class="radio-option"><input type="radio" name="participantType" value="일반 사용자"><span class="radio-dot"></span><span class="option-text">일반 사용자</span></label>
+            <label class="radio-option"><input type="radio" name="participantType" value="임직원"><span class="radio-dot"></span><span class="option-text">임직원</span></label>
+            <label class="radio-option"><input type="radio" name="participantType" value="관리사무소 관계자"><span class="radio-dot"></span><span class="option-text">관리사무소 관계자</span></label>
+            <label class="radio-option"><input type="radio" name="participantType" value="설비·수리·시공 업체"><span class="radio-dot"></span><span class="option-text">설비·수리·시공 업체</span></label>
+            <label class="radio-option"><input type="radio" name="participantType" value="기타"><span class="radio-dot"></span><span class="option-text">기타</span></label>
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="q-block" id="qb-q2">
+          <div class="q-label">Q2. 이번 테스트는 어떤 입장에서 확인하셨나요?</div>
+          <div class="radio-group" data-name="testRole" data-required="true">
+            <label class="radio-option"><input type="radio" name="testRole" value="견적을 요청하는 사용자 입장"><span class="radio-dot"></span><span class="option-text">견적을 요청하는 사용자 입장</span></label>
+            <label class="radio-option"><input type="radio" name="testRole" value="견적을 받는 파트너스/전문가 입장"><span class="radio-dot"></span><span class="option-text">견적을 받는 파트너스/전문가 입장</span></label>
+            <label class="radio-option"><input type="radio" name="testRole" value="사용자와 파트너스 양쪽 모두 확인"><span class="radio-dot"></span><span class="option-text">사용자와 파트너스 양쪽 모두 확인</span></label>
+            <label class="radio-option"><input type="radio" name="testRole" value="시연 화면만 확인"><span class="radio-dot"></span><span class="option-text">시연 화면만 확인</span></label>
+            <label class="radio-option"><input type="radio" name="testRole" value="기타"><span class="radio-dot"></span><span class="option-text">기타</span></label>
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="q-block" id="qb-q3">
+          <div class="q-label">Q3. 성별을 선택해주세요.</div>
+          <div class="radio-group" data-name="gender" data-required="true">
+            <label class="radio-option"><input type="radio" name="gender" value="남성"><span class="radio-dot"></span><span class="option-text">남성</span></label>
+            <label class="radio-option"><input type="radio" name="gender" value="여성"><span class="radio-dot"></span><span class="option-text">여성</span></label>
+          </div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="q-block" id="qb-q4">
+          <div class="q-label">Q4. 연령대를 선택해주세요.</div>
+          <div class="radio-group" data-name="ageGroup" data-required="true">
+            <label class="radio-option"><input type="radio" name="ageGroup" value="20대 이하"><span class="radio-dot"></span><span class="option-text">20대 이하</span></label>
+            <label class="radio-option"><input type="radio" name="ageGroup" value="30대"><span class="radio-dot"></span><span class="option-text">30대</span></label>
+            <label class="radio-option"><input type="radio" name="ageGroup" value="40대"><span class="radio-dot"></span><span class="option-text">40대</span></label>
+            <label class="radio-option"><input type="radio" name="ageGroup" value="50대"><span class="radio-dot"></span><span class="option-text">50대</span></label>
+            <label class="radio-option"><input type="radio" name="ageGroup" value="60대 이상"><span class="radio-dot"></span><span class="option-text">60대 이상</span></label>
+          </div>
+        </div>
+
+        <!-- Q5 (기기 + 인라인 조건분기) -->
+        <div class="q-block" id="qb-q5">
+          <div class="q-label">Q5. 테스트한 기기를 선택해주세요.</div>
+          <div class="radio-group" data-name="testDevice" data-required="true" data-trigger-multi="q5-phone:휴대폰,q5-pc:PC">
+            <label class="radio-option"><input type="radio" name="testDevice" value="휴대폰"><span class="radio-dot"></span><span class="option-text">휴대폰</span></label>
+            <label class="radio-option"><input type="radio" name="testDevice" value="PC"><span class="radio-dot"></span><span class="option-text">PC</span></label>
+            <label class="radio-option"><input type="radio" name="testDevice" value="태블릿"><span class="radio-dot"></span><span class="option-text">태블릿</span></label>
+            <label class="radio-option"><input type="radio" name="testDevice" value="기타"><span class="radio-dot"></span><span class="option-text">기타</span></label>
+          </div>
+          <!-- 휴대폰 인라인 -->
+          <div class="device-sub" id="cond-q5-phone">
+            <div class="device-sub-label">↳ 어떤 휴대폰을 사용하셨나요?</div>
+            <div class="radio-group" data-name="phoneType">
+              <label class="radio-option"><input type="radio" name="phoneType" value="안드로이드"><span class="radio-dot"></span><span class="option-text">안드로이드</span></label>
+              <label class="radio-option"><input type="radio" name="phoneType" value="아이폰"><span class="radio-dot"></span><span class="option-text">아이폰</span></label>
+              <label class="radio-option"><input type="radio" name="phoneType" value="잘 모르겠음"><span class="radio-dot"></span><span class="option-text">잘 모르겠음</span></label>
+            </div>
+          </div>
+          <!-- PC 인라인 -->
+          <div class="device-sub" id="cond-q5-pc">
+            <div class="device-sub-label">↳ 어떤 PC 환경을 사용하셨나요?</div>
+            <div class="radio-group" data-name="pcType">
+              <label class="radio-option"><input type="radio" name="pcType" value="윈도우 PC"><span class="radio-dot"></span><span class="option-text">윈도우 PC</span></label>
+              <label class="radio-option"><input type="radio" name="pcType" value="맥북·아이맥"><span class="radio-dot"></span><span class="option-text">맥북·아이맥</span></label>
+              <label class="radio-option"><input type="radio" name="pcType" value="잘 모르겠음"><span class="radio-dot"></span><span class="option-text">잘 모르겠음</span></label>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ 섹션 2: 만능맨 서비스 이해도 ══ -->
+    <div class="card section-card" data-section="2">
+      <div class="section-header">
+        <span class="section-num">2</span>
+        <span class="section-title">만능맨 서비스 이해도</span>
+      </div>
+      <div class="section-body">
+
+        <!-- Q6 -->
+        <div class="q-block" id="qb-q6">
+          <div class="q-label">Q6. 첫 화면을 보고 만능맨이 어떤 서비스인지 이해되었나요?</div>
+          <div class="radio-group" data-name="serviceUnderstanding" data-required="true">
+            <label class="radio-option"><input type="radio" name="serviceUnderstanding" value="매우 잘 이해됐다"><span class="radio-dot"></span><span class="option-text">매우 잘 이해됐다</span></label>
+            <label class="radio-option"><input type="radio" name="serviceUnderstanding" value="어느 정도 이해됐다"><span class="radio-dot"></span><span class="option-text">어느 정도 이해됐다</span></label>
+            <label class="radio-option"><input type="radio" name="serviceUnderstanding" value="보통이다"><span class="radio-dot"></span><span class="option-text">보통이다</span></label>
+            <label class="radio-option"><input type="radio" name="serviceUnderstanding" value="잘 이해되지 않았다"><span class="radio-dot"></span><span class="option-text">잘 이해되지 않았다</span></label>
+            <label class="radio-option"><input type="radio" name="serviceUnderstanding" value="전혀 이해되지 않았다"><span class="radio-dot"></span><span class="option-text">전혀 이해되지 않았다</span></label>
+          </div>
+        </div>
+
+        <!-- Q7 -->
+        <div class="q-block" id="qb-q7">
+          <div class="q-label">Q7. 만능맨에서 무엇을 해야 하는지, 다음 행동을 찾기 쉬웠나요?</div>
+          <div class="radio-group" data-name="nextActionEase">
+            <label class="radio-option"><input type="radio" name="nextActionEase" value="매우 쉬웠다"><span class="radio-dot"></span><span class="option-text">매우 쉬웠다</span></label>
+            <label class="radio-option"><input type="radio" name="nextActionEase" value="쉬운 편이었다"><span class="radio-dot"></span><span class="option-text">쉬운 편이었다</span></label>
+            <label class="radio-option"><input type="radio" name="nextActionEase" value="보통이다"><span class="radio-dot"></span><span class="option-text">보통이다</span></label>
+            <label class="radio-option"><input type="radio" name="nextActionEase" value="어려웠다"><span class="radio-dot"></span><span class="option-text">어려웠다</span></label>
+            <label class="radio-option"><input type="radio" name="nextActionEase" value="매우 어려웠다"><span class="radio-dot"></span><span class="option-text">매우 어려웠다</span></label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ 섹션 3: 견적요청 / 카테고리 ══ -->
+    <div class="card section-card" data-section="3">
+      <div class="section-header">
+        <span class="section-num">3</span>
+        <span class="section-title">견적요청 / 카테고리</span>
+      </div>
+      <div class="section-body">
+
+        <!-- Q8 -->
+        <div class="q-block" id="qb-q8">
+          <div class="q-label">Q8. 견적요청을 시작하는 버튼이나 위치를 쉽게 찾을 수 있었나요?</div>
+          <div class="radio-group" data-name="estimateButtonFindability">
+            <label class="radio-option"><input type="radio" name="estimateButtonFindability" value="매우 쉽게 찾았다"><span class="radio-dot"></span><span class="option-text">매우 쉽게 찾았다</span></label>
+            <label class="radio-option"><input type="radio" name="estimateButtonFindability" value="어느 정도 찾았다"><span class="radio-dot"></span><span class="option-text">어느 정도 찾았다</span></label>
+            <label class="radio-option"><input type="radio" name="estimateButtonFindability" value="보통이다"><span class="radio-dot"></span><span class="option-text">보통이다</span></label>
+            <label class="radio-option"><input type="radio" name="estimateButtonFindability" value="찾기 어려웠다"><span class="radio-dot"></span><span class="option-text">찾기 어려웠다</span></label>
+            <label class="radio-option"><input type="radio" name="estimateButtonFindability" value="찾지 못했다"><span class="radio-dot"></span><span class="option-text">찾지 못했다</span></label>
+          </div>
+        </div>
+
+        <!-- Q9 -->
+        <div class="q-block" id="qb-q9">
+          <div class="q-label">Q9. 내가 겪는 문제에 맞는 카테고리와 사전질문을 선택하기 쉬웠나요?</div>
+          <div class="radio-group" data-name="categoryPreQuestionEase">
+            <label class="radio-option"><input type="radio" name="categoryPreQuestionEase" value="매우 쉬웠다"><span class="radio-dot"></span><span class="option-text">매우 쉬웠다</span></label>
+            <label class="radio-option"><input type="radio" name="categoryPreQuestionEase" value="쉬운 편이었다"><span class="radio-dot"></span><span class="option-text">쉬운 편이었다</span></label>
+            <label class="radio-option"><input type="radio" name="categoryPreQuestionEase" value="보통이다"><span class="radio-dot"></span><span class="option-text">보통이다</span></label>
+            <label class="radio-option"><input type="radio" name="categoryPreQuestionEase" value="어려웠다"><span class="radio-dot"></span><span class="option-text">어려웠다</span></label>
+            <label class="radio-option"><input type="radio" name="categoryPreQuestionEase" value="매우 어려웠다"><span class="radio-dot"></span><span class="option-text">매우 어려웠다</span></label>
+          </div>
+        </div>
+
+        <!-- Q10 -->
+        <div class="q-block" id="qb-q10">
+          <div class="q-label">Q10. 견적요청 과정에서 가장 불편했던 부분은 무엇인가요? <span style="font-weight:400;font-size:13.5px;color:#64748b;">(복수 선택 가능)</span></div>
+          <div class="checkbox-group" data-name="estimatePainPoints">
+            <label class="checkbox-option"><input type="checkbox" name="estimatePainPoints" value="회원가입/로그인"><span class="checkbox-box"></span><span class="option-text">회원가입/로그인</span></label>
+            <label class="checkbox-option"><input type="checkbox" name="estimatePainPoints" value="본인인증"><span class="checkbox-box"></span><span class="option-text">본인인증</span></label>
+            <label class="checkbox-option"><input type="checkbox" name="estimatePainPoints" value="카테고리 선택"><span class="checkbox-box"></span><span class="option-text">카테고리 선택</span></label>
+            <label class="checkbox-option"><input type="checkbox" name="estimatePainPoints" value="사전질문 답변"><span class="checkbox-box"></span><span class="option-text">사전질문 답변</span></label>
+            <label class="checkbox-option"><input type="checkbox" name="estimatePainPoints" value="사진 첨부"><span class="checkbox-box"></span><span class="option-text">사진 첨부</span></label>
+            <label class="checkbox-option"><input type="checkbox" name="estimatePainPoints" value="주소/현장 정보 입력"><span class="checkbox-box"></span><span class="option-text">주소/현장 정보 입력</span></label>
+            <label class="checkbox-option"><input type="checkbox" name="estimatePainPoints" value="작업 희망일 선택"><span class="checkbox-box"></span><span class="option-text">작업 희망일 선택</span></label>
+            <label class="checkbox-option"><input type="checkbox" name="estimatePainPoints" value="전문가 선택"><span class="checkbox-box"></span><span class="option-text">전문가 선택</span></label>
+            <label class="checkbox-option"><input type="checkbox" name="estimatePainPoints" value="특별히 불편한 점 없음"><span class="checkbox-box"></span><span class="option-text">특별히 불편한 점 없음</span></label>
+            <label class="checkbox-option"><input type="checkbox" name="estimatePainPoints" value="기타"><span class="checkbox-box"></span><span class="option-text">기타</span></label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ 섹션 4: 전문가 / 채팅 / 계약 흐름 ══ -->
+    <div class="card section-card" data-section="4">
+      <div class="section-header">
+        <span class="section-num">4</span>
+        <span class="section-title">전문가 / 채팅 / 계약 흐름</span>
+      </div>
+      <div class="section-body">
+
+        <!-- Q11 -->
+        <div class="q-block" id="qb-q11">
+          <div class="q-label">Q11. 전문가 프로필을 보고 신뢰감이 들었나요?</div>
+          <div class="radio-group" data-name="expertTrust">
+            <label class="radio-option"><input type="radio" name="expertTrust" value="매우 신뢰가 갔다"><span class="radio-dot"></span><span class="option-text">매우 신뢰가 갔다</span></label>
+            <label class="radio-option"><input type="radio" name="expertTrust" value="신뢰가 간 편이다"><span class="radio-dot"></span><span class="option-text">신뢰가 간 편이다</span></label>
+            <label class="radio-option"><input type="radio" name="expertTrust" value="보통이다"><span class="radio-dot"></span><span class="option-text">보통이다</span></label>
+            <label class="radio-option"><input type="radio" name="expertTrust" value="신뢰가 부족했다"><span class="radio-dot"></span><span class="option-text">신뢰가 부족했다</span></label>
+            <label class="radio-option"><input type="radio" name="expertTrust" value="전혀 신뢰가 가지 않았다"><span class="radio-dot"></span><span class="option-text">전혀 신뢰가 가지 않았다</span></label>
+          </div>
+        </div>
+
+        <!-- Q12 -->
+        <div class="q-block" id="qb-q12">
+          <div class="q-label">Q12. 채팅/상담 기능은 사용하기 편하고 개인정보가 안전하게 느껴졌나요?</div>
+          <div class="radio-group" data-name="chatPrivacyEase">
+            <label class="radio-option"><input type="radio" name="chatPrivacyEase" value="편하고 안전하게 느껴졌다"><span class="radio-dot"></span><span class="option-text">편하고 안전하게 느껴졌다</span></label>
+            <label class="radio-option"><input type="radio" name="chatPrivacyEase" value="대체로 괜찮았다"><span class="radio-dot"></span><span class="option-text">대체로 괜찮았다</span></label>
+            <label class="radio-option"><input type="radio" name="chatPrivacyEase" value="보통이다"><span class="radio-dot"></span><span class="option-text">보통이다</span></label>
+            <label class="radio-option"><input type="radio" name="chatPrivacyEase" value="조금 불편하거나 불안했다"><span class="radio-dot"></span><span class="option-text">조금 불편하거나 불안했다</span></label>
+            <label class="radio-option"><input type="radio" name="chatPrivacyEase" value="매우 불편하거나 불안했다"><span class="radio-dot"></span><span class="option-text">매우 불편하거나 불안했다</span></label>
+            <label class="radio-option"><input type="radio" name="chatPrivacyEase" value="사용해보지 않았다"><span class="radio-dot"></span><span class="option-text">사용해보지 않았다</span></label>
+          </div>
+        </div>
+
+        <!-- Q13 -->
+        <div class="q-block" id="qb-q13">
+          <div class="q-label">Q13. 여러 전문가 중 선택하거나 계약/결제/에스크로로 이어지는 흐름이 이해되었나요?</div>
+          <div class="radio-group" data-name="contractPaymentUnderstanding">
+            <label class="radio-option"><input type="radio" name="contractPaymentUnderstanding" value="쉽게 이해됐다"><span class="radio-dot"></span><span class="option-text">쉽게 이해됐다</span></label>
+            <label class="radio-option"><input type="radio" name="contractPaymentUnderstanding" value="어느 정도 이해됐다"><span class="radio-dot"></span><span class="option-text">어느 정도 이해됐다</span></label>
+            <label class="radio-option"><input type="radio" name="contractPaymentUnderstanding" value="보통이다"><span class="radio-dot"></span><span class="option-text">보통이다</span></label>
+            <label class="radio-option"><input type="radio" name="contractPaymentUnderstanding" value="헷갈렸다"><span class="radio-dot"></span><span class="option-text">헷갈렸다</span></label>
+            <label class="radio-option"><input type="radio" name="contractPaymentUnderstanding" value="불안하거나 어려웠다"><span class="radio-dot"></span><span class="option-text">불안하거나 어려웠다</span></label>
+            <label class="radio-option"><input type="radio" name="contractPaymentUnderstanding" value="해당 화면을 보지 못했다"><span class="radio-dot"></span><span class="option-text">해당 화면을 보지 못했다</span></label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ 섹션 5: 오류 / 최종 의견 ══ -->
+    <div class="card section-card" data-section="5">
+      <div class="section-header">
+        <span class="section-num">5</span>
+        <span class="section-title">오류 / 최종 의견</span>
+      </div>
+      <div class="section-body">
+
+        <!-- Q14 -->
+        <div class="q-block" id="qb-q14">
+          <div class="q-label">Q14. 사용 중 오류, 불편했던 점, 또는 정식 오픈 전 가장 먼저 고쳐야 할 점을 적어주세요.</div>
+          <div style="font-size:13.5px;color:#64748b;background:#f8fafc;border-left:3px solid #93c5fd;padding:8px 12px;border-radius:0 6px 6px 0;margin-bottom:12px;">
+            예: 버튼이 안 눌림, 화면이 헷갈림, 카테고리를 못 찾겠음, 결제가 불안함, 글씨가 작음, 어떤 전문가를 선택해야 할지 모르겠음 등
+          </div>
+          <textarea class="textarea-input" name="urgentFeedback" placeholder="솔직한 의견을 자유롭게 적어주세요. 작은 것도 도움이 됩니다." rows="5"></textarea>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ 섹션 6: 커피 기프티콘 지급 정보 ══ -->
+    <div class="card section-card" data-section="6">
+      <div class="section-header">
+        <span class="section-num">6</span>
+        <span class="section-title">커피 기프티콘 지급 정보</span>
+      </div>
+      <div class="section-body">
+
+        <!-- Q15 -->
+        <div class="q-block" id="qb-q15">
+          <div class="q-label">Q15. 커피 기프티콘 지급을 받을 이름과 연락처를 입력하고 개인정보 수집에 동의해주세요.</div>
+          <div class="contact-inputs">
+            <div>
+              <div class="contact-label">이름</div>
+              <input type="text" class="text-input" name="name" id="input-name" placeholder="이름을 입력해주세요.">
+            </div>
+            <div>
+              <div class="contact-label">연락처</div>
+              <input type="text" class="text-input" name="phone" id="input-phone" placeholder="예: 010-0000-0000">
+            </div>
+          </div>
+          <div class="privacy-box">
+            베타테스트 참여 확인 및 커피 기프티콘 지급 안내를 위해 이름과 연락처를 수집합니다.<br>
+            수집된 정보는 베타테스트 운영 및 커피 기프티콘 지급 안내 목적 외에는 사용하지 않으며, 운영 종료 후 삭제됩니다.
+          </div>
+          <label class="consent-label" id="consent-label">
+            <input type="checkbox" id="privacyConsent" name="privacyConsent" value="true">
+            <span class="consent-cb"></span>
+            동의합니다.          </label>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- 에러 메시지 -->
+    <div class="error-msg" id="error-msg"></div>
+
+    <!-- 제출 버튼 -->
+    <div class="submit-area">
+      <button type="submit" class="btn-submit" id="btn-submit">설문 제출하기</button>
+    </div>
+
+  </form>
+</div>
+
+<!-- ══════════════ 완료 화면 ══════════════ -->
+<div id="complete-page">
+  <div class="card complete-card">
+    <div class="complete-icon">✓</div>
+    <h2>소중한 의견 감사합니다!</h2>
+    <p>정식 오픈 전 개선에 반영하겠습니다.<br><br>
+    만능맨 베타테스트에 참여해주셔서 진심으로 감사드립니다.<br>
+    작성해주신 내용을 꼼꼼히 검토하겠습니다.</p>
+    <div class="complete-gift">☕ 커피 기프티콘은 담당자가 순차적으로 안내해 드릴 예정입니다.</div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════
+// 설정값
+// ════════════════════════════════
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzCiSZFIZHgZjULeAO5AjsabpaD593YjUuoZyRvgJ3dS88rokzunuiulNCh-2SxPey2/exec';
+
+// ────────────────────────────────
+// 진행률 바 (섹션 기반)
+// ────────────────────────────────
+function updateProgress() {
+  const form = document.getElementById('survey-form');
+  if (!form) return;
+  const sections = form.querySelectorAll('.section-card');
+  const total = sections.length;
+  let filled = 0;
+  sections.forEach(sec => {
+    const inputs = sec.querySelectorAll('input[type="radio"]:checked, input[type="checkbox"]:checked');
+    const texts = [...sec.querySelectorAll('input[type="text"], textarea')].filter(t => t.value.trim());
+    if (inputs.length > 0 || texts.length > 0) filled++;
+  });
+  const pct = Math.round((filled / total) * 100);
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('progress-label').textContent = filled + ' / ' + total + ' 섹션';
+}
+
+// ────────────────────────────────
+// 라디오/체크박스 커스텀 스타일
+// ────────────────────────────────
+function initChoiceUI() {
+  document.querySelectorAll('.radio-option input[type="radio"]').forEach(input => {
+    input.addEventListener('change', function () {
+      const group = this.closest('.radio-group');
+      group.querySelectorAll('.radio-option').forEach(o => o.classList.remove('selected'));
+      this.closest('.radio-option').classList.add('selected');
+      handleConditional(group);
+      updateProgress();
+    });
+  });
+
+  document.querySelectorAll('.checkbox-option input[type="checkbox"]').forEach(input => {
+    input.addEventListener('change', function () {
+      const opt = this.closest('.checkbox-option');
+      if (this.checked) opt.classList.add('checked');
+      else opt.classList.remove('checked');
+      updateProgress();
+    });
+  });
+
+  document.querySelectorAll('input[type="text"], textarea').forEach(el => {
+    el.addEventListener('input', updateProgress);
+  });
+
+  // 동의 체크박스
+  const privacyCb = document.getElementById('privacyConsent');
+  const consentLabel = document.getElementById('consent-label');
+  if (privacyCb && consentLabel) {
+    consentLabel.addEventListener('click', function(e) {
+      privacyCb.checked = !privacyCb.checked;
+      if (privacyCb.checked) consentLabel.classList.add('checked');
+      else consentLabel.classList.remove('checked');
+      updateProgress();
+      e.preventDefault();
+    });
+  }
+}
+
+// ────────────────────────────────
+// 조건분기 처리
+// ────────────────────────────────
+function handleConditional(group) {
+  // 다중 독립 트리거 (data-trigger-multi="q5-phone:휴대폰,q5-pc:PC")
+  const multi = group.dataset.triggerMulti;
+  if (multi) {
+    const selected = group.querySelector('input:checked');
+    const val = selected ? selected.value : '';
+    multi.split(',').forEach(pair => {
+      const [condId, condVal] = pair.split(':');
+      const cond = document.getElementById('cond-' + condId);
+      if (cond) {
+        if (val === condVal) cond.classList.add('visible');
+        else cond.classList.remove('visible');
+      }
+    });
+  }
+}
+
+// ────────────────────────────────
+// 폼 데이터 수집
+// ────────────────────────────────
+function collectFormData() {
+  const data = {};
+
+  document.querySelectorAll('.radio-group[data-name]').forEach(group => {
+    const name = group.dataset.name;
+    const checked = group.querySelector('input:checked');
+    data[name] = checked ? checked.value : '';
+  });
+
+  document.querySelectorAll('.checkbox-group[data-name]').forEach(group => {
+    const name = group.dataset.name;
+    const vals = [...group.querySelectorAll('input:checked')].map(i => i.value);
+    data[name] = vals.join(',');
+  });
+
+  document.querySelectorAll('input[type="text"][name], textarea[name]').forEach(el => {
+    data[el.name] = el.value.trim();
+  });
+
+  data.privacyConsent = document.getElementById('privacyConsent').checked ? 'true' : 'false';
+
+  return data;
+}
+
+// ────────────────────────────────
+// 유효성 검사
+// ────────────────────────────────
+const REQUIRED_FIELDS = [
+  { id: 'qb-q1',  name: 'participantType',             type: 'radio',    label: 'Q1. 참여자 유형' },
+  { id: 'qb-q2',  name: 'testRole',                    type: 'radio',    label: 'Q2. 테스트 입장' },
+  { id: 'qb-q3',  name: 'gender',                      type: 'radio',    label: 'Q3. 성별' },
+  { id: 'qb-q4',  name: 'ageGroup',                    type: 'radio',    label: 'Q4. 연령대' },
+  { id: 'qb-q5',  name: 'testDevice',                  type: 'radio',    label: 'Q5. 테스트 기기' },
+  { id: 'qb-q6',  name: 'serviceUnderstanding',        type: 'radio',    label: 'Q6. 서비스 이해도' },
+  { id: 'qb-q7',  name: 'nextActionEase',              type: 'radio',    label: 'Q7. 다음 행동 찾기' },
+  { id: 'qb-q8',  name: 'estimateButtonFindability',   type: 'radio',    label: 'Q8. 견적요청 버튼 찾기' },
+  { id: 'qb-q9',  name: 'categoryPreQuestionEase',     type: 'radio',    label: 'Q9. 카테고리/사전질문' },
+  { id: 'qb-q10', name: 'estimatePainPoints',          type: 'checkbox', label: 'Q10. 불편한 부분' },
+  { id: 'qb-q11', name: 'expertTrust',                 type: 'radio',    label: 'Q11. 전문가 신뢰감' },
+  { id: 'qb-q12', name: 'chatPrivacyEase',             type: 'radio',    label: 'Q12. 채팅/개인정보' },
+  { id: 'qb-q13', name: 'contractPaymentUnderstanding',type: 'radio',    label: 'Q13. 계약/결제 이해도' },
+  { id: 'qb-q14', name: 'urgentFeedback',              type: 'text',     label: 'Q14. 오류/개선 의견' },
+  { id: 'qb-q15', name: 'name',                        type: 'text',     label: 'Q15. 이름' },
+  { id: 'qb-q15', name: 'phone',                       type: 'text',     label: 'Q15. 연락처' },
+];
+
+function validateForm(data) {
+  const errors = [];
+  document.querySelectorAll('.q-block.error-field').forEach(el => el.classList.remove('error-field'));
+
+  REQUIRED_FIELDS.forEach(field => {
+    const val = data[field.name];
+    if (!val || val.trim() === '') {
+      if (!errors.find(e => e.id === field.id)) {
+        errors.push({ id: field.id, label: field.label });
+      }
+      const el = document.getElementById(field.id);
+      if (el) el.classList.add('error-field');
+    }
+  });
+
+  const consentLabel = document.getElementById('consent-label');
+  if (data.privacyConsent !== 'true') {
+    errors.push({ id: 'qb-q15', label: 'Q15. 개인정보 동의' });
+    if (consentLabel) consentLabel.style.borderColor = '#f87171';
+  } else {
+    if (consentLabel) consentLabel.style.borderColor = '';
+  }
+
+  return errors;
+}
+
+function showValidationToast(errors) {
+  const toast = document.getElementById('validation-toast');
+  const list = document.getElementById('toast-list');
+  list.innerHTML = '';
+  const seen = new Set();
+  errors.forEach(err => {
+    const qNum = err.label.split('.')[0];
+    if (seen.has(qNum)) return;
+    seen.add(qNum);
+    const chip = document.createElement('span');
+    chip.className = 'toast-item';
+    chip.textContent = qNum;
+    chip.title = err.label;
+    chip.addEventListener('click', () => {
+      const el = document.getElementById(err.id);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    list.appendChild(chip);
+  });
+  toast.classList.add('visible');
+}
+
+// ────────────────────────────────
+// 제출 처리
+// ────────────────────────────────
+document.getElementById('survey-form').addEventListener('submit', async function (e) {
+  e.preventDefault();
+
+  const data = collectFormData();
+  const errors = validateForm(data);
+  const errBox = document.getElementById('error-msg');
+
+  if (errors.length > 0) {
+    showValidationToast(errors);
+    const firstError = document.querySelector('.q-block.error-field');
+    if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+
+  document.getElementById('validation-toast').classList.remove('visible');
+  errBox.classList.remove('visible');
+  document.getElementById('loading-overlay').classList.add('visible');
+  document.getElementById('btn-submit').disabled = true;
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify(data)
+    });
+    showComplete();
+  } catch (err) {
+    document.getElementById('loading-overlay').classList.remove('visible');
+    document.getElementById('btn-submit').disabled = false;
+    errBox.textContent = '일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+    errBox.classList.add('visible');
+  }
+});
+
+function showComplete() {
+  document.getElementById('loading-overlay').classList.remove('visible');
+  document.getElementById('validation-toast').classList.remove('visible');
+  document.getElementById('banner-section').style.display = 'none';
+  document.getElementById('survey-page').style.display = 'none';
+  document.getElementById('complete-page').style.display = 'block';
+  document.getElementById('progress-bar-wrap').style.display = 'none';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ────────────────────────────────
+// 초기화
+// ────────────────────────────────
+initChoiceUI();
+updateProgress();
+
+document.getElementById('toast-close-btn').addEventListener('click', () => {
+  document.getElementById('validation-toast').classList.remove('visible');
+});
+</script>
+</body>
+</html>
