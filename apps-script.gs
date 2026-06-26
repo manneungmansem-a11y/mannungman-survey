@@ -485,7 +485,14 @@ function sheetToObjects(ss, sheetName) {
   const headers = values[0];
   return values.slice(1).map(row => {
     const obj = {};
-    headers.forEach((h, i) => { obj[h] = row[i] !== undefined ? String(row[i]) : ''; });
+    headers.forEach((h, i) => {
+      let val = row[i];
+      // Google Sheets가 날짜 문자열을 Date 객체로 자동 변환하는 것을 원래 형식으로 복원
+      if (val instanceof Date) {
+        val = Utilities.formatDate(val, 'Asia/Seoul', 'yyyy-MM-dd HH:mm:ss');
+      }
+      obj[h] = (val !== undefined && val !== null) ? String(val) : '';
+    });
     return obj;
   });
 }
