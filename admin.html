@@ -438,7 +438,7 @@
 // ════════════════════════════════
 // 설정값
 // ════════════════════════════════
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzCiSZFIZHgZjULeAO5AjsabpaD593YjUuoZyRvgJ3dS88rokzunuiulNCh-2SxPey2/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzyCSchoqbY1f-FlgwVWj6Y1mZpNvZ8fzDWnmfCi-VbidQ09gW7qVQ1zKNbk21slF_N/exec';
 const ADMIN_PASSWORD = '9923';
 
 // ────────────────────────────────
@@ -539,17 +539,33 @@ async function fetchAllData() {
   try {
     const url = `${SCRIPT_URL}?action=list&password=${encodeURIComponent(adminPassword)}`;
     const res = await fetch(url);
+    if (!res.ok) throw new Error('HTTP ' + res.status);
     const json = await res.json();
     if (json.success && json.data) {
       allResponses = json.data;
       filteredResponses = [...allResponses];
+    } else if (json.error === 'UNAUTHORIZED') {
+      showFetchError('비밀번호가 올바르지 않거나 Apps Script 배포 설정을 확인해주세요.');
+      allResponses = [];
     } else {
       allResponses = [];
     }
   } catch (e) {
     console.error('데이터 로딩 실패:', e);
+    const isCors = e instanceof TypeError;
+    showFetchError(isCors
+      ? 'Apps Script 서버에 연결할 수 없습니다.<br>① SCRIPT_URL이 최신 배포 URL인지 확인<br>② 배포 액세스 권한이 <b>"모든 사용자"</b>인지 확인'
+      : '오류: ' + e.message);
     allResponses = [];
   }
+}
+
+function showFetchError(msg) {
+  document.getElementById('summary-content').innerHTML =
+    `<div style="background:#fef2f2;border:1.5px solid #fca5a5;color:#b91c1c;border-radius:10px;padding:18px 20px;line-height:1.8;">
+      ⚠ <b>데이터 로딩 실패</b><br>${msg}
+      <br><br><span style="font-size:12px;color:#94a3b8;word-break:break-all;">SCRIPT_URL: ${SCRIPT_URL}</span>
+    </div>`;
 }
 
 // ────────────────────────────────
