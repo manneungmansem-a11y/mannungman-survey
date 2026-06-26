@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" translate="no">
 <head>
   <meta charset="UTF-8">
+  <meta name="google" content="notranslate">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>만능맨 베타테스트 피드백 설문</title>
   <style>
@@ -896,7 +897,7 @@
 // ════════════════════════════════
 // 설정값
 // ════════════════════════════════
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzCiSZFIZHgZjULeAO5AjsabpaD593YjUuoZyRvgJ3dS88rokzunuiulNCh-2SxPey2/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzyCSchoqbY1f-FlgwVWj6Y1mZpNvZ8fzDWnmfCi-VbidQ09gW7qVQ1zKNbk21slF_N/exec';
 
 // ────────────────────────────────
 // 진행률 바 (섹션 기반)
@@ -1076,6 +1077,21 @@ function showValidationToast(errors) {
 }
 
 // ────────────────────────────────
+// 폼 데이터 전송 (no-cors — GitHub Pages 환경 안정 전송)
+// ────────────────────────────────
+async function submitViaFetch(data) {
+  // no-cors 모드: Apps Script 응답을 읽을 수 없으나 전송 자체는 정상 처리됨
+  // privacyConsent는 collectFormData()에서 이미 'true' 문자열로 보정됨
+  await fetch(SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify(data)
+  });
+  // 저장 성공 여부는 Apps Script logs 시트에서 확인
+}
+
+// ────────────────────────────────
 // 제출 처리
 // ────────────────────────────────
 document.getElementById('survey-form').addEventListener('submit', async function (e) {
@@ -1098,16 +1114,12 @@ document.getElementById('survey-form').addEventListener('submit', async function
   document.getElementById('btn-submit').disabled = true;
 
   try {
-    await fetch(SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      body: JSON.stringify(data)
-    });
+    await submitViaFetch(data);
     showComplete();
   } catch (err) {
     document.getElementById('loading-overlay').classList.remove('visible');
     document.getElementById('btn-submit').disabled = false;
-    errBox.textContent = '일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+    errBox.textContent = err.message || '일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
     errBox.classList.add('visible');
   }
 });
@@ -1123,9 +1135,55 @@ function showComplete() {
 }
 
 // ────────────────────────────────
+// 연락처·이름 입력 처리
+// ────────────────────────────────
+function initContactInputs() {
+  // 연락처: 숫자만 허용, 자동 하이픈 포맷(3-4-4)
+  const phoneInput = document.getElementById('input-phone');
+  if (phoneInput) {
+    phoneInput.addEventListener('keydown', function(e) {
+      const allowed = ['Backspace','Delete','ArrowLeft','ArrowRight','Tab','Home','End'];
+      if (allowed.includes(e.key) || e.ctrlKey || e.metaKey) return;
+      if (!/^\d$/.test(e.key)) e.preventDefault();
+    });
+    phoneInput.addEventListener('input', function() {
+      const digits = this.value.replace(/\D/g, '').slice(0, 11);
+      let fmt = digits;
+      if (digits.length > 7) {
+        fmt = digits.slice(0, 3) + '-' + digits.slice(3, 7) + '-' + digits.slice(7);
+      } else if (digits.length > 3) {
+        fmt = digits.slice(0, 3) + '-' + digits.slice(3);
+      }
+      this.value = fmt;
+      updateProgress();
+    });
+  }
+
+  // 이름: 완성된 한글 음절만 허용(초성·자음 단독 입력 차단)
+  const nameInput = document.getElementById('input-name');
+  if (nameInput) {
+    let composing = false;
+    nameInput.addEventListener('compositionstart', () => { composing = true; });
+    nameInput.addEventListener('compositionend', function() {
+      composing = false;
+      // 완성 음절(AC00-D7A3)과 공백만 남기고 나머지(자음·모음 단독 등) 제거
+      this.value = this.value.replace(/[^가-힣\s]/g, '');
+      updateProgress();
+    });
+    nameInput.addEventListener('input', function() {
+      if (!composing) {
+        this.value = this.value.replace(/[^가-힣\s]/g, '');
+        updateProgress();
+      }
+    });
+  }
+}
+
+// ────────────────────────────────
 // 초기화
 // ────────────────────────────────
 initChoiceUI();
+initContactInputs();
 updateProgress();
 
 document.getElementById('toast-close-btn').addEventListener('click', () => {
