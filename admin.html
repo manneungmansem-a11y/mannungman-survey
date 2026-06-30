@@ -605,14 +605,36 @@ const TYPE_QUESTIONS = {
     {key:'일반_Q14', label:'Q14. 개선 필요 부분'},
     {key:'일반_Q15', label:'Q15. 전체 만족도'}
   ],
-  '임직원': (() => {
-    const q = [];
-    for(let i=1;i<=25;i++) q.push({key:`임직원_Q${i}`, label:`Q${i}`});
-    return q;
-  })(),
+  '임직원': [
+    {key:'임직원_Q1',  label:'Q1. 이름'},
+    {key:'임직원_Q2',  label:'Q2. 소속 부서/직무'},
+    {key:'임직원_Q3',  label:'Q3. 테스트 기기'},
+    {key:'임직원_Q4',  label:'Q4. 테스트 화면'},
+    {key:'임직원_Q5',  label:'Q5. 서비스 직관성'},
+    {key:'임직원_Q6',  label:'Q6. 서비스 전달 명확성'},
+    {key:'임직원_Q7',  label:'Q7. 카테고리 구조 적절성'},
+    {key:'임직원_Q8',  label:'Q8. 카테고리 개선 필요 부분'},
+    {key:'임직원_Q9',  label:'Q9. 이탈 가능성 높은 지점'},
+    {key:'임직원_Q10', label:'Q10. 용어 이해 용이성'},
+    {key:'임직원_Q11', label:'Q11. 수정 필요 용어'},
+    {key:'임직원_Q12', label:'Q12. 전문가 프로필 신뢰도'},
+    {key:'임직원_Q13', label:'Q13. 인증/배지 가시성'},
+    {key:'임직원_Q14', label:'Q14. 견적 비교 구조 명확성'},
+    {key:'임직원_Q15', label:'Q15. 결제/수수료 오해 가능성'},
+    {key:'임직원_Q16', label:'Q16. 운영 리스크 요소'},
+    {key:'임직원_Q17', label:'Q17. 오픈베타 전 보완 기능'},
+    {key:'임직원_Q18', label:'Q18. 신뢰 부족 지점'},
+    {key:'임직원_Q19', label:'Q19. 운영 구조 충분도'},
+    // Q20(기능추가 관련) 삭제 — 기존 데이터의 임직원_Q20 컬럼은 시트에 보존됨
+    {key:'임직원_Q21', label:'Q20. 경쟁사 대비 강점'},
+    {key:'임직원_Q22', label:'Q21. 핵심 메시지'},
+    {key:'임직원_Q23', label:'Q22. 오픈베타 진행 가능성'},
+    {key:'임직원_Q24', label:'Q23. 우선 수정 3가지'},
+    {key:'임직원_Q25', label:'Q24. 종합 의견'}
+  ],
   '파트너': (() => {
     const q = [];
-    for(let i=1;i<=20;i++) q.push({key:`파트너_Q${i}`, label:`Q${i}`});
+    for(let i=1;i<=22;i++) q.push({key:`파트너_Q${i}`, label:`Q${i}`});
     return q;
   })()
 };
@@ -621,7 +643,7 @@ const TYPE_QUESTIONS = {
 const OPINION_KEYS = {
   '일반사용자': [{key:'일반_Q14', label:'Q14. 가장 개선이 필요한 부분'}],
   '임직원':    [{key:'임직원_Q24', label:'Q24. 우선 수정 3가지'}, {key:'임직원_Q25', label:'Q25. 종합 의견'}],
-  '파트너':    [{key:'파트너_Q18', label:'Q18. 가입 불편 부분'}, {key:'파트너_Q19', label:'Q19. 개선 필요 기능'}, {key:'파트너_Q20', label:'Q20. 종합 의견'}]
+  '파트너':    [{key:'파트너_Q18', label:'Q18. 가입 불편 부분'}, {key:'파트너_Q19', label:'Q19. 개선 필요 기능'}, {key:'파트너_Q20', label:'Q20. 종합 의견'}, {key:'파트너_Q22', label:'Q22. 수수료 관련 추가 의견'}]
 };
 
 // ════════════════════════════════════════════════════════
@@ -890,8 +912,9 @@ function renderStats() {
       <div class="chart-card"><h4>일반사용자 — 서비스 이해도 (Q3)</h4><canvas id="chart-gen-q3"></canvas></div>
       <div class="chart-card"><h4>일반사용자 — 이용 의향 (Q12)</h4><canvas id="chart-gen-q12"></canvas></div>
       <div class="chart-card"><h4>일반사용자 — 전체 만족도 (Q15)</h4><canvas id="chart-gen-q15"></canvas></div>
-      <div class="chart-card"><h4>임직원 — 오픈베타 가능성 (Q23)</h4><canvas id="chart-emp-q23"></canvas></div>
+      <div class="chart-card"><h4>임직원 — 오픈베타 가능성 (Q22)</h4><canvas id="chart-emp-q23"></canvas></div>
       <div class="chart-card"><h4>파트너 — 참여 의향 (Q17)</h4><canvas id="chart-part-q17"></canvas></div>
+      <div class="chart-card"><h4>파트너 — 적정 수수료 부담 수준 (Q21)</h4><canvas id="chart-part-q21"></canvas></div>
     </div>
     <div class="summary-grid" style="margin-bottom:24px;">
       <div class="stat-card"><div class="sc-label">일반사용자 응답</div><div class="sc-value">${genData.length}</div></div>
@@ -913,6 +936,9 @@ function renderStats() {
     ]);
     makeBar('chart-part-q17', countBy(partData, '파트너_Q17'), [
       '바로 참여 의향 있음','조건 확인 후 참여 가능','조금 더 지켜보고 결정','참여 의향 낮음','참여하지 않음'
+    ]);
+    makeBar('chart-part-q21', countBy(partData, '파트너_Q21'), [
+      '1% 이하','2%','3%','4%','5%','6% 이상','고정 수수료 방식이 더 적절하다고 생각함','아직 판단하기 어려움'
     ]);
   }, 100);
 }
@@ -1010,6 +1036,8 @@ function openDetail(responseId) {
       ['참여자유형', r.participantType],
       ['이름',     r.name, true],
       ['연락처',   r.phone, true],
+      ['개인정보동의', r['개인정보동의'] || '-'],
+      ['동의일시',   r['개인정보동의일시'] || '-'],
       ['처리상태', r['처리상태']],
       ['관리자메모', r['관리자메모']]
     ]},
@@ -1080,17 +1108,18 @@ function downloadExcel(mode) {
     // 전체 — 유형별 컬럼 모두 포함
     for (let i=1;i<=15;i++) typeCols.push('일반_Q'+i);
     for (let i=1;i<=25;i++) typeCols.push('임직원_Q'+i);
-    for (let i=1;i<=20;i++) typeCols.push('파트너_Q'+i);
+    for (let i=1;i<=22;i++) typeCols.push('파트너_Q'+i);
   } else {
     const typeMap = {'일반사용자':'일반', '임직원':'임직원', '파트너':'파트너'};
-    const counts  = {'일반사용자':15, '임직원':25, '파트너':20};
+    const counts  = {'일반사용자':15, '임직원':25, '파트너':22};
     const prefix  = typeMap[typeFilter];
     const cnt     = counts[typeFilter] || 0;
     for (let i=1;i<=cnt;i++) typeCols.push(`${prefix}_Q${i}`);
   }
 
-  const adminCols = ['처리상태','관리자메모'];
-  const allCols   = [...commonCols, ...typeCols, ...adminCols];
+  const adminCols   = ['처리상태','관리자메모'];
+  const consentCols = ['개인정보동의', '개인정보동의일시'];
+  const allCols     = [...commonCols, ...typeCols, ...adminCols, ...consentCols];
   const rows      = data.map(r => allCols.map(k => r[k] || ''));
 
   exportCsv(`만능맨_설문응답_${typeFilter||'전체'}_${ts}.csv`, [allCols, ...rows]);

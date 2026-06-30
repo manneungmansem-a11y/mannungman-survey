@@ -39,7 +39,7 @@ function buildEmployeeCols() {
 }
 function buildPartnerCols() {
   var cols = [];
-  for (var i = 1; i <= 20; i++) cols.push('파트너_Q' + i);
+  for (var i = 1; i <= 22; i++) cols.push('파트너_Q' + i); // Q21 수수료, Q22 수수료 의견 추가
   return cols;
 }
 
@@ -48,8 +48,10 @@ var GENERAL_COLS  = buildGeneralCols();
 var EMPLOYEE_COLS = buildEmployeeCols();
 var PARTNER_COLS  = buildPartnerCols();
 var ADMIN_COLS    = ['처리상태', '관리자메모'];
+// 개인정보 동의 관련 컬럼 — 기존 시트에 없을 경우 fixSheets() 실행 필요
+var CONSENT_COLS  = ['개인정보동의', '개인정보동의일시'];
 
-var RESPONSE_HEADERS = COMMON_COLS.concat(GENERAL_COLS).concat(EMPLOYEE_COLS).concat(PARTNER_COLS).concat(ADMIN_COLS);
+var RESPONSE_HEADERS = COMMON_COLS.concat(GENERAL_COLS).concat(EMPLOYEE_COLS).concat(PARTNER_COLS).concat(ADMIN_COLS).concat(CONSENT_COLS);
 var LOG_HEADERS      = ['loggedAt', 'type', 'message', 'detail'];
 var SETTINGS_HEADERS = ['key', 'value'];
 
@@ -301,6 +303,41 @@ function migrateToNewStructure() {
 }
 
 // ════════════════════════════════════════════════════════════
+// fixSheets — 누락된 헤더 컬럼 자동 추가 (스키마 변경 시 1회 실행)
+// 기존 데이터는 유지하면서 responses 시트에 새 컬럼 헤더를 추가합니다.
+// ════════════════════════════════════════════════════════════
+function fixSheets() {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sheet = ss.getSheetByName(SHEET_RESPONSES);
+  if (!sheet) {
+    setupSheets();
+    Logger.log('responses 시트가 없어 새로 생성했습니다.');
+    return;
+  }
+
+  var lastCol = sheet.getLastColumn();
+  var headerRow = lastCol > 0 ? sheet.getRange(1, 1, 1, lastCol).getValues()[0].map(String) : [];
+
+  var added = [];
+  RESPONSE_HEADERS.forEach(function(h) {
+    if (headerRow.indexOf(h) === -1) {
+      var newCol = sheet.getLastColumn() + 1;
+      sheet.getRange(1, newCol).setValue(h);
+      var cell = sheet.getRange(1, newCol);
+      cell.setFontWeight('bold').setBackground('#1a56db').setFontColor('#ffffff');
+      added.push(h);
+      headerRow.push(h);
+    }
+  });
+
+  if (added.length === 0) {
+    Logger.log('fixSheets: 추가할 컬럼 없음 (현재 ' + lastCol + '컬럼)');
+  } else {
+    Logger.log('fixSheets: 추가된 컬럼 (' + added.length + '개) — ' + added.join(', '));
+  }
+}
+
+// ════════════════════════════════════════════════════════════
 // 테스트 함수 — Apps Script 편집기에서 실행
 // ════════════════════════════════════════════════════════════
 function testDoPost_general() {
@@ -308,6 +345,8 @@ function testDoPost_general() {
     participantType: '일반사용자',
     name: '테스트 일반',
     phone: '010-1111-2222',
+    개인정보동의: '동의',
+    개인정보동의일시: '2026-06-30 12:00:00',
     일반_Q1: '테스트 일반',
     일반_Q2: '010-1111-2222',
     일반_Q3: '집수리/설비 전문가를 연결해주는 서비스',
@@ -329,15 +368,29 @@ function testDoPost_general() {
 }
 
 function testDoPost_employee() {
-  var testData = { participantType: '임직원', name: '테스트 임직원', phone: '010-3333-4444' };
+  var testData = {
+    participantType: '임직원',
+    name: '테스트 임직원',
+    phone: '010-3333-4444',
+    개인정보동의: '동의',
+    개인정보동의일시: '2026-06-30 12:00:00'
+  };
   for (var i = 1; i <= 25; i++) testData['임직원_Q' + i] = '테스트 응답 ' + i;
   var result = doPost({ postData: { contents: JSON.stringify(testData) }, parameter: testData });
   Logger.log('testDoPost_employee 결과: ' + result.getContent());
 }
 
 function testDoPost_partner() {
-  var testData = { participantType: '파트너', name: '테스트 파트너', phone: '010-5555-6666' };
-  for (var i = 1; i <= 20; i++) testData['파트너_Q' + i] = '테스트 응답 ' + i;
+  var testData = {
+    participantType: '파트너',
+    name: '테스트 파트너',
+    phone: '010-5555-6666',
+    개인정보동의: '동의',
+    개인정보동의일시: '2026-06-30 12:00:00'
+  };
+  for (var i = 1; i <= 22; i++) testData['파트너_Q' + i] = '테스트 응답 ' + i;
+  testData['파트너_Q21'] = '3%';
+  testData['파트너_Q22'] = '테스트 수수료 의견';
   var result = doPost({ postData: { contents: JSON.stringify(testData) }, parameter: testData });
   Logger.log('testDoPost_partner 결과: ' + result.getContent());
 }

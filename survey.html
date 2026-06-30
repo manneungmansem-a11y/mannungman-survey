@@ -745,6 +745,177 @@
     .consent-label.checked .consent-cb { border-color: #1a56db; background: #1a56db; }
     .consent-label.checked .consent-cb::after { display: block; }
 
+    /* ── 질문 설명 ── */
+    .q-desc {
+      font-size: 13.5px;
+      color: #64748b;
+      margin-top: -4px;
+      margin-bottom: 12px;
+      line-height: 1.6;
+    }
+
+    /* ── 개인정보 동의 모달 ── */
+    #privacy-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      z-index: 400;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    #privacy-modal-overlay.visible { display: flex; }
+    .privacy-modal {
+      background: #fff;
+      border-radius: 18px;
+      width: 100%;
+      max-width: 520px;
+      max-height: 92vh;
+      box-shadow: 0 8px 40px rgba(0,0,0,.25);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    .privacy-modal-header {
+      padding: 22px 24px 16px;
+      text-align: center;
+      border-bottom: 1px solid #f1f5f9;
+      flex-shrink: 0;
+    }
+    .privacy-modal-header-icon { font-size: 30px; margin-bottom: 8px; }
+    .privacy-modal-header h3 { font-size: 18px; font-weight: 800; color: #1e293b; }
+    .privacy-modal-body {
+      padding: 20px 24px;
+      overflow-y: auto;
+      flex: 1;
+      -webkit-overflow-scrolling: touch;
+    }
+    .privacy-modal-footer {
+      padding: 14px 24px 20px;
+      border-top: 1px solid #f1f5f9;
+      flex-shrink: 0;
+    }
+    .privacy-intro {
+      font-size: 14px;
+      color: #374151;
+      line-height: 1.75;
+      margin-bottom: 18px;
+      background: #eff6ff;
+      padding: 13px 15px;
+      border-radius: 10px;
+      border-left: 3px solid #1a56db;
+    }
+    .privacy-section { margin-bottom: 16px; }
+    .privacy-section-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 7px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .privacy-section-title::before {
+      content: '';
+      width: 3px;
+      height: 13px;
+      background: #1a56db;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .privacy-list { list-style: none; padding: 0; margin: 0; }
+    .privacy-list li {
+      font-size: 13.5px;
+      color: #374151;
+      padding: 3px 0 3px 15px;
+      position: relative;
+      line-height: 1.6;
+    }
+    .privacy-list li::before {
+      content: '·';
+      position: absolute;
+      left: 4px;
+      color: #1a56db;
+      font-weight: 700;
+    }
+    .privacy-text { font-size: 13.5px; color: #374151; line-height: 1.7; }
+    .privacy-notice {
+      font-size: 13px;
+      color: #64748b;
+      line-height: 1.65;
+      padding: 11px 13px;
+      background: #f8fafc;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+    .privacy-consent-row { margin-bottom: 12px; }
+    .privacy-consent-label {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      cursor: pointer;
+      font-size: 14.5px;
+      font-weight: 600;
+      color: #1e293b;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 1.5px solid #e2e8f0;
+      transition: border-color .15s, background .15s;
+      user-select: none;
+      line-height: 1.5;
+    }
+    .privacy-consent-label:hover { border-color: #93c5fd; background: #f0f9ff; }
+    .privacy-consent-label.checked { border-color: #1a56db; background: #eff6ff; }
+    .privacy-cb {
+      width: 20px; height: 20px;
+      border-radius: 5px;
+      border: 2px solid #cbd5e1;
+      background: #fff;
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color .15s, background .15s;
+      margin-top: 1px;
+    }
+    .privacy-cb::after {
+      content: '';
+      width: 11px; height: 8px;
+      border-left: 2.5px solid #fff;
+      border-bottom: 2.5px solid #fff;
+      transform: rotate(-45deg) translate(1px, -1px);
+      display: none;
+    }
+    .privacy-consent-label.checked .privacy-cb { border-color: #1a56db; background: #1a56db; }
+    .privacy-consent-label.checked .privacy-cb::after { display: block; }
+    .privacy-modal-btns { display: flex; gap: 10px; }
+    .btn-privacy-cancel {
+      flex: 1;
+      padding: 13px;
+      background: #f1f5f9;
+      color: #64748b;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .btn-privacy-cancel:hover { background: #e2e8f0; }
+    .btn-privacy-start {
+      flex: 2;
+      padding: 13px;
+      background: #1a56db;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .btn-privacy-start:hover:not(:disabled) { background: #1e40af; }
+    .btn-privacy-start:disabled { background: #94a3b8; cursor: not-allowed; }
+
     /* ── 반응형 ── */
     @media (max-width: 480px) {
       body { font-size: 15px; background-attachment: scroll; }
@@ -815,6 +986,74 @@
     <div class="code-modal-btns">
       <button class="btn-code-cancel" onclick="closeCodeModal()">취소</button>
       <button class="btn-code-confirm" id="btn-code-confirm" onclick="confirmCode()">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- 개인정보 수집 안내 모달 -->
+<!-- 최종 문구는 법무 검토 후 확정 필요 -->
+<div id="privacy-modal-overlay">
+  <div class="privacy-modal">
+    <div class="privacy-modal-header">
+      <div class="privacy-modal-header-icon">🔒</div>
+      <h3>개인정보 수집 및 이용 안내</h3>
+    </div>
+    <div class="privacy-modal-body">
+      <div class="privacy-intro">
+        베타테스트 참여 확인과 리워드 지급을 위해 아래와 같이 개인정보를 수집·이용합니다.<br>
+        입력해주신 정보는 베타테스트 운영, 참여자 확인, 리워드 지급 및 관련 안내 목적 외에는 사용하지 않습니다.
+      </div>
+      <div class="privacy-section">
+        <div class="privacy-section-title">수집 항목</div>
+        <ul class="privacy-list">
+          <li>이름</li>
+          <li>연락처</li>
+          <li>사용자 유형 (일반 사용자 / 임직원 / 파트너)</li>
+          <li>설문 응답 내용</li>
+          <li>리워드 지급 및 안내에 필요한 정보</li>
+        </ul>
+      </div>
+      <div class="privacy-section">
+        <div class="privacy-section-title">수집 및 이용 목적</div>
+        <ul class="privacy-list">
+          <li>베타테스트 참여자 확인 및 중복·부정 참여 방지</li>
+          <li>설문 응답 확인 및 통계 분석</li>
+          <li>우수 피드백 선정</li>
+          <li>이벤트 리워드 또는 상품 지급 안내</li>
+          <li>베타테스트 운영 관련 안내</li>
+        </ul>
+      </div>
+      <div class="privacy-section">
+        <div class="privacy-section-title">보유 및 이용 기간</div>
+        <p class="privacy-text">
+          수집된 개인정보는 베타테스트 운영 및 리워드 지급 완료 후 내부 정산·분쟁 대응을 위해 필요한 기간 동안 보관한 뒤 파기합니다.<br>
+          단, 관련 법령에 따라 보관이 필요한 경우에는 해당 법령에서 정한 기간 동안 보관합니다.
+        </p>
+      </div>
+      <div class="privacy-section">
+        <div class="privacy-section-title">제3자 제공 안내</div>
+        <p class="privacy-text">
+          수집된 개인정보는 원칙적으로 외부에 제공하지 않습니다.<br>
+          다만, 리워드·상품 지급을 위해 기프티콘 발송 대행사 등 외부 업체를 이용하는 경우, 지급에 필요한 최소한의 정보(이름·연락처)가 해당 업체에 제공될 수 있습니다. 이 경우 사전에 별도 고지합니다.
+        </p>
+      </div>
+      <div class="privacy-section">
+        <div class="privacy-notice">
+          📌 개인정보 수집 및 이용에 동의하지 않으실 수 있습니다. 다만, 동의하지 않으실 경우 베타테스트 설문 참여 및 리워드 지급 대상 선정이 제한될 수 있습니다.
+        </div>
+      </div>
+    </div>
+    <div class="privacy-modal-footer">
+      <div class="privacy-consent-row">
+        <label class="privacy-consent-label" id="privacy-consent-label" onclick="togglePrivacyConsent()">
+          <span class="privacy-cb" id="privacy-cb"></span>
+          위 개인정보 수집 및 이용 안내를 확인했으며 이에 동의합니다.
+        </label>
+      </div>
+      <div class="privacy-modal-btns">
+        <button class="btn-privacy-cancel" onclick="closePrivacyModal()">취소</button>
+        <button class="btn-privacy-start" id="btn-privacy-start" onclick="startSurveyWithConsent()" disabled>설문 시작하기</button>
+      </div>
     </div>
   </div>
 </div>
@@ -1120,39 +1359,34 @@ const questionsByType = {
       scaleMin: 1, scaleMax: 5,
       scaleMinLabel: '전혀 충분하지 않음', scaleMaxLabel: '매우 충분함'
     },
-    {
-      id: 'employee_Q20', colKey: '임직원_Q20',
-      title: 'Q20. 관리자 또는 운영자 관점에서 추가로 필요한 기능을 적어주세요.',
-      type: 'textarea', required: true,
-      placeholder: '예: 응답 빠른 통계 요약, 파트너 승인 프로세스, 실시간 알림 등'
-    },
+    // 기능추가 관련 Q20 삭제 (colKey 임직원_Q20은 기존 시트에 보존, 신규 응답에는 미저장)
     {
       id: 'employee_Q21', colKey: '임직원_Q21',
-      title: 'Q21. 경쟁 서비스와 비교했을 때 만능맨의 강점이 보인다고 느꼈나요?',
+      title: 'Q20. 경쟁 서비스와 비교했을 때 만능맨의 강점이 보인다고 느꼈나요?',
       type: 'radio', required: true,
       options: ['뚜렷하게 보임','어느 정도 보임','아직 부족함','강점이 잘 전달되지 않음','판단 어려움']
     },
     {
       id: 'employee_Q22', colKey: '임직원_Q22',
-      title: 'Q22. 만능맨이 가장 먼저 강조해야 할 핵심 메시지는 무엇이라고 생각하나요?',
+      title: 'Q21. 만능맨이 가장 먼저 강조해야 할 핵심 메시지는 무엇이라고 생각하나요?',
       type: 'radio', required: true,
       options: ['믿을 수 있는 전문가 연결','빠른 견적 비교','지역 기반 설비/수리 해결','본사 인증 파트너','간편한 의뢰 접수','합리적인 비용','기타']
     },
     {
       id: 'employee_Q23', colKey: '임직원_Q23',
-      title: 'Q23. 오픈베타 진행 가능성을 현재 기준으로 평가해주세요.',
+      title: 'Q22. 오픈베타 진행 가능성을 현재 기준으로 평가해주세요.',
       type: 'radio', required: true,
       options: ['바로 진행 가능','일부 수정 후 가능','핵심 기능 보완 후 가능','아직 위험함','판단 어려움']
     },
     {
       id: 'employee_Q24', colKey: '임직원_Q24',
-      title: 'Q24. 오픈베타 전 가장 우선적으로 수정해야 할 3가지를 적어주세요.',
+      title: 'Q23. 오픈베타 전 가장 우선적으로 수정해야 할 3가지를 적어주세요.',
       type: 'textarea', required: true,
       placeholder: '1. \n2. \n3. '
     },
     {
       id: 'employee_Q25', colKey: '임직원_Q25',
-      title: 'Q25. 종합 의견을 자유롭게 작성해주세요.',
+      title: 'Q24. 종합 의견을 자유롭게 작성해주세요.',
       type: 'textarea', required: true,
       placeholder: '서비스 전반에 대한 의견을 자유롭게 작성해주세요.'
     }
@@ -1280,6 +1514,19 @@ const questionsByType = {
       title: 'Q20. 만능맨 파트너 서비스에 대한 종합 의견을 자유롭게 작성해주세요.',
       type: 'textarea', required: true,
       placeholder: '서비스 전반에 대한 의견을 자유롭게 작성해주세요.'
+    },
+    {
+      id: 'partner_Q21', colKey: '파트너_Q21',
+      title: 'Q21. 플랫폼 이용 시 적정하다고 생각하는 수수료 부담 수준은 어느 정도인가요?',
+      desc: '만능맨 플랫폼을 통해 실제 고객 의뢰를 연결받는 경우, 파트너 입장에서 부담 가능하다고 생각하는 수수료 수준을 선택해주세요.',
+      type: 'radio', required: true,
+      options: ['1% 이하','2%','3%','4%','5%','6% 이상','고정 수수료 방식이 더 적절하다고 생각함','아직 판단하기 어려움']
+    },
+    {
+      id: 'partner_Q22', colKey: '파트너_Q22',
+      title: 'Q22. 수수료와 관련해 의견이 있다면 자유롭게 작성해주세요.',
+      type: 'textarea', required: false,
+      placeholder: '수수료 관련 추가 의견을 자유롭게 적어주세요.'
     }
   ]
 };
@@ -1298,6 +1545,9 @@ const completeMessages = {
 // ════════════════════════════════════════════════════════
 let currentType = null;
 let pendingType = null;
+let pendingPrivacyType = null;
+let privacyConsented = false;
+let consentTimestamp = null;
 
 // ════════════════════════════════════════════════════════
 // 화면 초기화
@@ -1322,7 +1572,7 @@ function showEntry() {
 // ════════════════════════════════════════════════════════
 function selectType(type) {
   if (type === 'general') {
-    enterSurvey('general');
+    showPrivacyModal('general');
   } else {
     pendingType = type;
     openCodeModal(type);
@@ -1348,6 +1598,46 @@ function closeCodeModal() {
   pendingType = null;
 }
 
+// ════════════════════════════════════════════════════════
+// 개인정보 동의 모달
+// ════════════════════════════════════════════════════════
+function showPrivacyModal(type) {
+  pendingPrivacyType = type;
+  privacyConsented = false;
+  document.getElementById('privacy-consent-label').classList.remove('checked');
+  document.getElementById('btn-privacy-start').disabled = true;
+  document.getElementById('privacy-modal-overlay').classList.add('visible');
+}
+
+function closePrivacyModal() {
+  document.getElementById('privacy-modal-overlay').classList.remove('visible');
+  pendingPrivacyType = null;
+  privacyConsented = false;
+}
+
+function togglePrivacyConsent() {
+  privacyConsented = !privacyConsented;
+  const label = document.getElementById('privacy-consent-label');
+  const btn   = document.getElementById('btn-privacy-start');
+  if (privacyConsented) {
+    label.classList.add('checked');
+    btn.disabled = false;
+  } else {
+    label.classList.remove('checked');
+    btn.disabled = true;
+  }
+}
+
+function startSurveyWithConsent() {
+  if (!privacyConsented || !pendingPrivacyType) return;
+  const now = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  consentTimestamp = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+  document.getElementById('privacy-modal-overlay').classList.remove('visible');
+  enterSurvey(pendingPrivacyType);
+  pendingPrivacyType = null;
+}
+
 document.getElementById('code-input').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') confirmCode();
 });
@@ -1369,7 +1659,7 @@ async function confirmCode() {
     const json = await res.json();
     if (json.valid) {
       document.getElementById('code-modal-overlay').classList.remove('visible');
-      enterSurvey(pendingType);
+      showPrivacyModal(pendingType);
       pendingType = null;
     } else {
       document.getElementById('code-modal-error').textContent = '비밀코드가 올바르지 않습니다. 다시 확인해주세요.';
@@ -1446,8 +1736,15 @@ function buildQuestionBlock(q, idx) {
 
   const isMulti = q.type === 'checkbox';
   const multiHint = isMulti ? '<span class="multi-hint">(복수 선택 가능)</span>' : '';
-  label.innerHTML = `${q.title}<span class="req">필수</span>${multiHint}`;
+  label.innerHTML = `${q.title}${q.required !== false ? '<span class="req">필수</span>' : ''}${multiHint}`;
   block.appendChild(label);
+
+  if (q.desc) {
+    const descEl = document.createElement('div');
+    descEl.className = 'q-desc';
+    descEl.textContent = q.desc;
+    block.appendChild(descEl);
+  }
 
   if (q.type === 'name') {
     const input = document.createElement('input');
@@ -1632,11 +1929,12 @@ function clearError(block) {
 // ════════════════════════════════════════════════════════
 function updateProgress() {
   const questions = questionsByType[currentType] || [];
-  const total = questions.length;
+  const requiredQs = questions.filter(q => q.required !== false);
+  const total = requiredQs.length;
   if (total === 0) return;
 
   let answered = 0;
-  questions.forEach(q => {
+  requiredQs.forEach(q => {
     const val = getAnswerValue(q);
     if (val && val.trim()) answered++;
   });
@@ -1682,7 +1980,9 @@ function getAnswerValue(q) {
 function collectFormData() {
   const typeLabels = { general: '일반사용자', employee: '임직원', partner: '파트너' };
   const data = {
-    participantType: typeLabels[currentType] || currentType
+    participantType: typeLabels[currentType] || currentType,
+    개인정보동의: '동의',
+    개인정보동의일시: consentTimestamp || ''
   };
 
   const questions = questionsByType[currentType] || [];
@@ -1828,6 +2128,11 @@ document.getElementById('toast-close-btn').addEventListener('click', () => {
 // 모달 배경 클릭 닫기
 document.getElementById('code-modal-overlay').addEventListener('click', function(e) {
   if (e.target === this) closeCodeModal();
+});
+
+// 개인정보 모달 배경 클릭 시 닫기 (유형 선택 화면으로 복귀)
+document.getElementById('privacy-modal-overlay').addEventListener('click', function(e) {
+  if (e.target === this) closePrivacyModal();
 });
 
 // ════════════════════════════════════════════════════════
