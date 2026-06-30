@@ -32,6 +32,7 @@
       text-align: center;
     }
     .login-logo { font-size: 24px; font-weight: 800; color: #1a56db; margin-bottom: 6px; }
+    .login-logo span { color: #6366f1; }
     .login-subtitle { font-size: 13px; color: #64748b; margin-bottom: 28px; }
     .login-box input[type="password"] {
       width: 100%;
@@ -142,18 +143,18 @@
     /* ── 요약 카드 그리드 ── */
     .summary-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
       gap: 14px;
-      margin-bottom: 28px;
+      margin-bottom: 24px;
     }
     .stat-card { background: #fff; border-radius: 12px; padding: 18px 20px; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
     .stat-card .sc-label { font-size: 12px; color: #64748b; margin-bottom: 6px; }
     .stat-card .sc-value { font-size: 26px; font-weight: 800; color: #1e293b; }
     .stat-card .sc-sub { font-size: 12px; color: #94a3b8; margin-top: 4px; }
-    .stat-card.blue .sc-value { color: #1a56db; }
-    .stat-card.green .sc-value { color: #16a34a; }
+    .stat-card.blue   .sc-value { color: #1a56db; }
+    .stat-card.green  .sc-value { color: #16a34a; }
+    .stat-card.purple .sc-value { color: #7c3aed; }
     .stat-card.orange .sc-value { color: #ea580c; }
-    .stat-card.red .sc-value { color: #dc2626; }
 
     /* ── 차트 영역 ── */
     .chart-grid {
@@ -190,16 +191,29 @@
       padding: 10px 12px;
       border-bottom: 1px solid #f1f5f9;
       color: #374151;
-      vertical-align: top;
+      vertical-align: middle;
     }
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: #f8fafc; }
     .badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; }
-    .badge-blue { background: #dbeafe; color: #1d4ed8; }
-    .badge-green { background: #dcfce7; color: #15803d; }
-    .badge-red { background: #fee2e2; color: #b91c1c; }
-    .badge-gray { background: #f1f5f9; color: #475569; }
+    .badge-blue   { background: #dbeafe; color: #1d4ed8; }
+    .badge-green  { background: #dcfce7; color: #15803d; }
+    .badge-purple { background: #ede9fe; color: #6d28d9; }
+    .badge-red    { background: #fee2e2; color: #b91c1c; }
+    .badge-gray   { background: #f1f5f9; color: #475569; }
     .badge-orange { background: #ffedd5; color: #c2410c; }
+
+    /* ── 처리상태 셀렉트 ── */
+    .status-select {
+      padding: 4px 8px;
+      border: 1px solid #e2e8f0;
+      border-radius: 5px;
+      font-size: 12px;
+      color: #374151;
+      background: #fff;
+      cursor: pointer;
+    }
+    .status-select:focus { outline: none; border-color: #1a56db; }
 
     /* ── 버튼 ── */
     .btn-primary { padding: 7px 14px; background: #1a56db; color: #fff; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background .15s; }
@@ -207,6 +221,9 @@
     .btn-sm { padding: 5px 10px; font-size: 11px; border-radius: 5px; }
     .btn-outline { padding: 7px 14px; background: transparent; color: #1a56db; border: 1px solid #1a56db; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: background .15s; }
     .btn-outline:hover { background: #eff6ff; }
+    .btn-success { padding: 7px 14px; background: #16a34a; color: #fff; border: none; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; }
+    .btn-success:hover { background: #15803d; }
+    .btn-success:disabled { background: #94a3b8; cursor: not-allowed; }
 
     /* ── 필터 바 ── */
     .filter-bar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 16px; align-items: center; }
@@ -242,22 +259,62 @@
     .modal-body { padding: 20px 24px; max-height: 75vh; overflow-y: auto; }
     .detail-section { margin-bottom: 20px; border: 1px solid #e2e8f0; border-radius: 10px; overflow: hidden; }
     .detail-section-title { background: #f8fafc; padding: 10px 16px; font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: .5px; }
-    .detail-row { display: grid; grid-template-columns: 180px 1fr; border-top: 1px solid #f1f5f9; }
-    .detail-row:first-child { border-top: none; }
+    .detail-row { display: grid; grid-template-columns: 200px 1fr; border-top: 1px solid #f1f5f9; }
     .detail-label { padding: 10px 16px; font-size: 12px; color: #64748b; background: #fafafa; font-weight: 500; }
-    .detail-value { padding: 10px 16px; font-size: 13px; color: #1e293b; word-break: break-word; }
+    .detail-value { padding: 10px 16px; font-size: 13px; color: #1e293b; word-break: break-word; white-space: pre-wrap; }
     .detail-value.private { filter: blur(5px); cursor: pointer; transition: filter .2s; user-select: none; }
     .detail-value.private.revealed { filter: none; }
     .reveal-hint { font-size: 11px; color: #94a3b8; margin-top: 4px; }
 
-    /* ── 의견 카드 ── */
-    .opinion-list { display: flex; flex-direction: column; gap: 12px; }
-    .opinion-item { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; }
-    .opinion-item .op-meta { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
-    .opinion-item .op-text { font-size: 13.5px; color: #1e293b; line-height: 1.7; white-space: pre-wrap; }
+    /* ── 메모 입력 인라인 ── */
+    .memo-input {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid #e2e8f0;
+      border-radius: 5px;
+      font-size: 12px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 56px;
+    }
+    .memo-input:focus { outline: none; border-color: #1a56db; }
 
-    /* ── CSV 버튼 그룹 ── */
-    .csv-group { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+    /* ── 비밀코드 관리 ── */
+    .code-manage-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+      margin-bottom: 18px;
+    }
+    .code-manage-card h4 { font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 6px; }
+    .code-manage-card .card-desc { font-size: 13px; color: #64748b; margin-bottom: 18px; }
+    .code-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .code-row label { font-size: 13px; font-weight: 600; color: #374151; min-width: 60px; }
+    .code-text-input {
+      padding: 9px 12px;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 7px;
+      font-size: 14px;
+      width: 200px;
+      outline: none;
+      font-family: monospace;
+      letter-spacing: 2px;
+      transition: border-color .2s;
+    }
+    .code-text-input:focus { border-color: #1a56db; }
+    .code-save-msg { font-size: 13px; margin-top: 10px; min-height: 20px; }
+    .code-save-msg.ok  { color: #16a34a; }
+    .code-save-msg.err { color: #dc2626; }
+
+    /* ── CSV/엑셀 버튼 그룹 ── */
+    .csv-group { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
     .csv-btn-card {
       background: #fff;
       border: 1px solid #e2e8f0;
@@ -273,7 +330,13 @@
     .csv-btn-card h5 { font-size: 14px; font-weight: 700; color: #1e293b; margin-bottom: 4px; }
     .csv-btn-card p { font-size: 12px; color: #64748b; }
 
-    /* ── 로딩 ── */
+    /* ── 의견 리스트 ── */
+    .opinion-list { display: flex; flex-direction: column; gap: 12px; }
+    .opinion-item { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 16px; }
+    .opinion-item .op-meta { display: flex; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+    .opinion-item .op-text { font-size: 13.5px; color: #1e293b; line-height: 1.7; white-space: pre-wrap; }
+
+    /* ── 로딩/빈 상태 ── */
     .loading-state { display: flex; align-items: center; justify-content: center; gap: 12px; padding: 48px; color: #64748b; font-size: 14px; }
     .spin { width: 24px; height: 24px; border: 3px solid #e2e8f0; border-top-color: #1a56db; border-radius: 50%; animation: spin .7s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
@@ -287,6 +350,7 @@
       .summary-grid { grid-template-columns: repeat(2, 1fr); }
       .chart-grid { grid-template-columns: 1fr; }
       .detail-row { grid-template-columns: 1fr; }
+      .content-area { padding: 16px; }
     }
   </style>
 </head>
@@ -311,20 +375,23 @@
     <nav class="sidebar">
       <div class="sidebar-logo">만능맨 <span>Admin</span></div>
       <div class="sidebar-menu">
-        <div class="sidebar-item active" data-view="summary" onclick="switchView(this, 'summary')">
+        <div class="sidebar-item active" data-view="summary" onclick="switchView(this,'summary')">
           <span class="icon">📊</span> 전체 요약
         </div>
-        <div class="sidebar-item" data-view="list" onclick="switchView(this, 'list')">
+        <div class="sidebar-item" data-view="list" onclick="switchView(this,'list')">
           <span class="icon">📋</span> 개별 응답 목록
         </div>
-        <div class="sidebar-item" data-view="stats" onclick="switchView(this, 'stats')">
+        <div class="sidebar-item" data-view="stats" onclick="switchView(this,'stats')">
           <span class="icon">📈</span> 통계 분석
         </div>
-        <div class="sidebar-item" data-view="opinions" onclick="switchView(this, 'opinions')">
-          <span class="icon">💬</span> 오류/개선 의견
+        <div class="sidebar-item" data-view="opinions" onclick="switchView(this,'opinions')">
+          <span class="icon">💬</span> 주관식 의견
         </div>
-        <div class="sidebar-item" data-view="csv" onclick="switchView(this, 'csv')">
-          <span class="icon">⬇️</span> CSV 다운로드
+        <div class="sidebar-item" data-view="download" onclick="switchView(this,'download')">
+          <span class="icon">⬇️</span> 엑셀 다운로드
+        </div>
+        <div class="sidebar-item" data-view="codes" onclick="switchView(this,'codes')">
+          <span class="icon">🔐</span> 설문 진입 코드 관리
         </div>
       </div>
       <div class="sidebar-footer">
@@ -359,23 +426,17 @@
             <span style="font-size:12px;color:#64748b">~</span>
             <input type="date" id="filter-date-to">
             <select id="filter-type">
-              <option value="">참여자 유형 전체</option>
-              <option>일반 사용자</option>
-              <option>임직원</option>
-              <option>관리사무소 관계자</option>
-              <option>설비·수리·시공 업체</option>
-              <option>기타</option>
+              <option value="">유형 전체</option>
+              <option value="일반사용자">일반 사용자</option>
+              <option value="임직원">임직원</option>
+              <option value="파트너">파트너</option>
             </select>
-            <select id="filter-age">
-              <option value="">연령대 전체</option>
-              <option>20대 이하</option><option>30대</option><option>40대</option>
-              <option>50대</option><option>60대 이상</option>
+            <select id="filter-status">
+              <option value="">상태 전체</option>
+              <option>접수</option><option>확인중</option>
+              <option>반영예정</option><option>반영완료</option><option>보류</option>
             </select>
-            <select id="filter-device">
-              <option value="">기기 전체</option>
-              <option>휴대폰</option><option>PC</option><option>태블릿</option><option>기타</option>
-            </select>
-            <input type="text" id="filter-keyword" placeholder="키워드 검색..." style="min-width:160px;">
+            <input type="text" id="filter-keyword" placeholder="이름/연락처/내용 검색..." style="min-width:180px;">
             <button class="btn-primary btn-sm" onclick="applyFilters()">적용</button>
             <button class="btn-outline btn-sm" onclick="resetFilters()">초기화</button>
           </div>
@@ -391,30 +452,87 @@
           </div>
         </div>
 
-        <!-- ── 오류/개선 의견 ── -->
+        <!-- ── 주관식 의견 ── -->
         <div class="view-panel" id="view-opinions">
+          <div class="filter-bar" style="margin-bottom:16px;">
+            <select id="opinion-type-filter" onchange="renderOpinions()">
+              <option value="">유형 전체</option>
+              <option value="일반사용자">일반 사용자</option>
+              <option value="임직원">임직원</option>
+              <option value="파트너">파트너</option>
+            </select>
+          </div>
           <div id="opinions-content">
             <div class="loading-state"><div class="spin"></div> 데이터 로딩 중...</div>
           </div>
         </div>
 
-        <!-- ── CSV 다운로드 ── -->
-        <div class="view-panel" id="view-csv">
+        <!-- ── 엑셀 다운로드 ── -->
+        <div class="view-panel" id="view-download">
           <div class="table-card">
-            <h4>CSV 다운로드</h4>
-            <p style="font-size:13px;color:#64748b;margin-bottom:8px;">응답 데이터를 CSV 파일로 다운로드합니다. 엑셀에서 바로 열 수 있습니다.</p>
+            <h4>엑셀(CSV) 다운로드</h4>
+            <p style="font-size:13px;color:#64748b;margin-bottom:4px;">응답 데이터를 CSV 파일로 다운로드합니다. 엑셀에서 바로 열 수 있습니다.</p>
+            <p style="font-size:12px;color:#94a3b8;margin-bottom:4px;">• BOM 처리로 한글 깨짐 없음 &nbsp;|&nbsp; • 현재 필터 적용 상태로 다운로드</p>
+            <div style="margin-bottom:12px;margin-top:16px;">
+              <select id="dl-type-filter" style="padding:7px 10px;border:1px solid #e2e8f0;border-radius:7px;font-size:13px;">
+                <option value="">유형 전체</option>
+                <option value="일반사용자">일반 사용자만</option>
+                <option value="임직원">임직원만</option>
+                <option value="파트너">파트너만</option>
+              </select>
+            </div>
             <div class="csv-group">
-              <div class="csv-btn-card" onclick="downloadCSV('all')">
+              <div class="csv-btn-card" onclick="downloadExcel('all')">
                 <div class="csv-icon">📄</div>
                 <h5>전체 응답 다운로드</h5>
-                <p>모든 설문 응답 데이터 (이름/연락처 제외)</p>
+                <p>공통 + 유형별 응답 컬럼 포함 (이름/연락처 제외)</p>
               </div>
-              <div class="csv-btn-card" onclick="downloadCSV('opinions')">
+              <div class="csv-btn-card" onclick="downloadExcel('with_contact')">
+                <div class="csv-icon">📞</div>
+                <h5>이름/연락처 포함 다운로드</h5>
+                <p>이름, 연락처 컬럼 포함 (내부 관리용)</p>
+              </div>
+              <div class="csv-btn-card" onclick="downloadExcel('opinions')">
                 <div class="csv-icon">💬</div>
-                <h5>오류/개선 의견만 다운로드</h5>
-                <p>Q14 주관식 답변 항목만 포함</p>
+                <h5>주관식 의견만 다운로드</h5>
+                <p>유형별 마지막 주관식 답변 항목만 포함</p>
               </div>
             </div>
+          </div>
+        </div>
+
+        <!-- ── 설문 진입 코드 관리 ── -->
+        <div class="view-panel" id="view-codes">
+          <div class="code-manage-card">
+            <h4>🔐 설문 진입 코드 관리</h4>
+            <p class="card-desc">임직원과 파트너 설문 진입 비밀코드를 변경할 수 있습니다.<br>변경 즉시 설문 페이지에 반영됩니다.</p>
+
+            <div class="code-row">
+              <label>임직원</label>
+              <input type="text" class="code-text-input" id="code-employee" placeholder="비밀코드" autocomplete="off">
+              <button class="btn-success" onclick="saveSecretCode('employee')">저장</button>
+            </div>
+            <div class="code-row">
+              <label>파트너</label>
+              <input type="text" class="code-text-input" id="code-partner" placeholder="비밀코드" autocomplete="off">
+              <button class="btn-success" onclick="saveSecretCode('partner')">저장</button>
+            </div>
+
+            <div class="code-save-msg" id="code-save-msg"></div>
+          </div>
+
+          <div class="table-card">
+            <h4>비밀코드 안내</h4>
+            <table>
+              <thead>
+                <tr><th>유형</th><th>적용 대상</th><th>비고</th></tr>
+              </thead>
+              <tbody>
+                <tr><td><span class="badge badge-blue">일반 사용자</span></td><td>비밀코드 없음 — 바로 진입</td><td>코드 불필요</td></tr>
+                <tr><td><span class="badge badge-green">임직원</span></td><td>내부 직원 전용 비밀코드 필요</td><td>위에서 변경 가능</td></tr>
+                <tr><td><span class="badge badge-purple">파트너</span></td><td>설비업체/전문가 전용 비밀코드 필요</td><td>위에서 변경 가능</td></tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -435,15 +553,15 @@
 </div>
 
 <script>
-// ════════════════════════════════
+// ════════════════════════════════════════════════════════
 // 설정값
-// ════════════════════════════════
+// ════════════════════════════════════════════════════════
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzyCSchoqbY1f-FlgwVWj6Y1mZpNvZ8fzDWnmfCi-VbidQ09gW7qVQ1zKNbk21slF_N/exec';
-const ADMIN_PASSWORD = '9923';
+const ADMIN_PASSWORD_LOCAL = '9923'; // 로컬 로그인 체크용
 
-// ────────────────────────────────
+// ════════════════════════════════════════════════════════
 // 전역 상태
-// ────────────────────────────────
+// ════════════════════════════════════════════════════════
 let allResponses = [];
 let filteredResponses = [];
 let currentView = 'summary';
@@ -451,43 +569,76 @@ let adminPassword = '';
 let chartInstances = {};
 
 const VIEW_TITLES = {
-  summary: '전체 요약',
-  list: '개별 응답 목록',
-  stats: '통계 분석',
-  opinions: '오류/개선 의견 (Q14)',
-  csv: 'CSV 다운로드'
+  summary:  '전체 요약',
+  list:     '개별 응답 목록',
+  stats:    '통계 분석',
+  opinions: '주관식 의견',
+  download: '엑셀 다운로드',
+  codes:    '설문 진입 코드 관리'
 };
 
-const SCORE_MAPS = {
-  understanding5: {
-    '매우 잘 이해됐다': 5, '쉽게 이해됐다': 5, '매우 쉬웠다': 5,
-    '어느 정도 이해됐다': 4, '쉬운 편이었다': 4, '어느 정도 찾았다': 4,
-    '보통이다': 3,
-    '잘 이해되지 않았다': 2, '어려웠다': 2, '찾기 어려웠다': 2, '헷갈렸다': 2,
-    '전혀 이해되지 않았다': 1, '매우 어려웠다': 1, '찾지 못했다': 1
-  },
-  trust: {
-    '매우 신뢰가 갔다': 5, '신뢰가 간 편이다': 4, '보통이다': 3,
-    '신뢰가 부족했다': 2, '전혀 신뢰가 가지 않았다': 1
-  }
+// 처리상태 배지 색상
+const STATUS_COLORS = {
+  '접수':   'badge-blue',
+  '확인중': 'badge-orange',
+  '반영예정': 'badge-purple',
+  '반영완료': 'badge-green',
+  '보류':   'badge-gray'
 };
 
-function toScore(val, map) { return map[val] || 0; }
+// 유형별 컬럼 키 & 질문 제목 매핑
+const TYPE_QUESTIONS = {
+  '일반사용자': [
+    {key:'일반_Q1',  label:'Q1. 이름'},
+    {key:'일반_Q2',  label:'Q2. 연락처'},
+    {key:'일반_Q3',  label:'Q3. 서비스 이해'},
+    {key:'일반_Q4',  label:'Q4. 문제 찾기 편의성'},
+    {key:'일반_Q5',  label:'Q5. 테스트 문제 유형'},
+    {key:'일반_Q6',  label:'Q6. 카테고리 헷갈림'},
+    {key:'일반_Q7',  label:'Q7. 견적 요청서 이해도'},
+    {key:'일반_Q8',  label:'Q8. 사진/설명 부담'},
+    {key:'일반_Q9',  label:'Q9. 막힌 부분'},
+    {key:'일반_Q10', label:'Q10. 전문가 신뢰도'},
+    {key:'일반_Q11', label:'Q11. 견적 구조 이해'},
+    {key:'일반_Q12', label:'Q12. 이용 의향'},
+    {key:'일반_Q13', label:'Q13. 이용 망설임 요소'},
+    {key:'일반_Q14', label:'Q14. 개선 필요 부분'},
+    {key:'일반_Q15', label:'Q15. 전체 만족도'}
+  ],
+  '임직원': (() => {
+    const q = [];
+    for(let i=1;i<=25;i++) q.push({key:`임직원_Q${i}`, label:`Q${i}`});
+    return q;
+  })(),
+  '파트너': (() => {
+    const q = [];
+    for(let i=1;i<=20;i++) q.push({key:`파트너_Q${i}`, label:`Q${i}`});
+    return q;
+  })()
+};
 
-// ────────────────────────────────
+// 주관식 의견 컬럼 (유형별 마지막 주관식)
+const OPINION_KEYS = {
+  '일반사용자': [{key:'일반_Q14', label:'Q14. 가장 개선이 필요한 부분'}],
+  '임직원':    [{key:'임직원_Q24', label:'Q24. 우선 수정 3가지'}, {key:'임직원_Q25', label:'Q25. 종합 의견'}],
+  '파트너':    [{key:'파트너_Q18', label:'Q18. 가입 불편 부분'}, {key:'파트너_Q19', label:'Q19. 개선 필요 기능'}, {key:'파트너_Q20', label:'Q20. 종합 의견'}]
+};
+
+// ════════════════════════════════════════════════════════
 // 로그인
-// ────────────────────────────────
+// ════════════════════════════════════════════════════════
 document.getElementById('pw-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') doLogin();
 });
 
 function doLogin() {
   const pw = document.getElementById('pw-input').value;
-  if (pw === ADMIN_PASSWORD) {
+  if (pw === ADMIN_PASSWORD_LOCAL) {
     adminPassword = pw;
     document.getElementById('login-screen').style.display = 'none';
     document.getElementById('dashboard').style.display = 'block';
     fetchAllData().then(() => renderCurrentView());
+    loadSecretCodes();
   } else {
     document.getElementById('login-error').style.display = 'block';
     document.getElementById('pw-input').value = '';
@@ -503,9 +654,9 @@ function doLogout() {
   document.getElementById('pw-input').value = '';
 }
 
-// ────────────────────────────────
+// ════════════════════════════════════════════════════════
 // 뷰 전환
-// ────────────────────────────────
+// ════════════════════════════════════════════════════════
 function switchView(el, view) {
   document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
   el.classList.add('active');
@@ -527,14 +678,15 @@ function renderCurrentView() {
     case 'list':     renderList(filteredResponses.length ? filteredResponses : allResponses); break;
     case 'stats':    renderStats(); break;
     case 'opinions': renderOpinions(); break;
-    case 'csv':      break;
+    case 'download': break;
+    case 'codes':    break;
   }
   document.getElementById('last-updated').textContent = '업데이트: ' + new Date().toLocaleTimeString('ko-KR');
 }
 
-// ────────────────────────────────
+// ════════════════════════════════════════════════════════
 // 데이터 로딩
-// ────────────────────────────────
+// ════════════════════════════════════════════════════════
 async function fetchAllData() {
   try {
     const url = `${SCRIPT_URL}?action=list&password=${encodeURIComponent(adminPassword)}`;
@@ -550,12 +702,9 @@ async function fetchAllData() {
     } else {
       allResponses = [];
     }
-  } catch (e) {
+  } catch(e) {
     console.error('데이터 로딩 실패:', e);
-    const isCors = e instanceof TypeError;
-    showFetchError(isCors
-      ? 'Apps Script 서버에 연결할 수 없습니다.<br>① SCRIPT_URL이 최신 배포 URL인지 확인<br>② 배포 액세스 권한이 <b>"모든 사용자"</b>인지 확인'
-      : '오류: ' + e.message);
+    showFetchError('Apps Script 서버에 연결할 수 없습니다.<br>배포 URL과 액세스 권한("모든 사용자")을 확인해주세요.');
     allResponses = [];
   }
 }
@@ -564,41 +713,26 @@ function showFetchError(msg) {
   document.getElementById('summary-content').innerHTML =
     `<div style="background:#fef2f2;border:1.5px solid #fca5a5;color:#b91c1c;border-radius:10px;padding:18px 20px;line-height:1.8;">
       ⚠ <b>데이터 로딩 실패</b><br>${msg}
-      <br><br><span style="font-size:12px;color:#94a3b8;word-break:break-all;">SCRIPT_URL: ${SCRIPT_URL}</span>
     </div>`;
 }
 
-// ────────────────────────────────
-// 요약 렌더링
-// ────────────────────────────────
+// ════════════════════════════════════════════════════════
+// 전체 요약
+// ════════════════════════════════════════════════════════
 function renderSummary() {
   const data = allResponses;
   const n = data.length;
+
   if (n === 0) {
     document.getElementById('summary-content').innerHTML = '<div class="empty-state">아직 응답이 없습니다.</div>';
     return;
   }
 
-  const today = new Date().toISOString().slice(0, 10);
-  const todayCount = data.filter(r => r.submittedAt && r.submittedAt.startsWith(today)).length;
-  const feedbackCount = data.filter(r => r.urgentFeedback && r.urgentFeedback.trim()).length;
-
-  const avgUnderstanding = avg(data.map(r => toScore(r.serviceUnderstanding, SCORE_MAPS.understanding5)));
-  const avgNextAction    = avg(data.map(r => toScore(r.nextActionEase, SCORE_MAPS.understanding5)));
-  const avgEstimateBtn   = avg(data.map(r => toScore(r.estimateButtonFindability, SCORE_MAPS.understanding5)));
-  const avgCategory      = avg(data.map(r => toScore(r.categoryPreQuestionEase, SCORE_MAPS.understanding5)));
-  const avgTrust         = avg(data.map(r => toScore(r.expertTrust, SCORE_MAPS.trust)));
-
-  const painCounts = {};
-  data.forEach(r => {
-    if (r.estimatePainPoints) {
-      r.estimatePainPoints.split(',').forEach(p => {
-        const t = p.trim();
-        if (t && t !== '특별히 불편한 점 없음') painCounts[t] = (painCounts[t] || 0) + 1;
-      });
-    }
-  });
-  const topPain = Object.entries(painCounts).sort((a,b) => b[1]-a[1]).slice(0,1)[0];
+  const today = new Date().toISOString().slice(0,10);
+  const todayCount   = data.filter(r => r.submittedAt && r.submittedAt.startsWith(today)).length;
+  const generalCount = data.filter(r => r.participantType === '일반사용자').length;
+  const employeeCount= data.filter(r => r.participantType === '임직원').length;
+  const partnerCount = data.filter(r => r.participantType === '파트너').length;
 
   document.getElementById('summary-content').innerHTML = `
     <div class="summary-grid">
@@ -612,72 +746,43 @@ function renderSummary() {
         <div class="sc-value">${todayCount}</div>
         <div class="sc-sub">${today}</div>
       </div>
+      <div class="stat-card">
+        <div class="sc-label">일반 사용자</div>
+        <div class="sc-value">${generalCount}</div>
+        <div class="sc-sub">👤 General</div>
+      </div>
       <div class="stat-card green">
-        <div class="sc-label">평균 서비스 이해도</div>
-        <div class="sc-value">${avgUnderstanding.toFixed(1)}<span style="font-size:14px;font-weight:400">/5</span></div>
-        <div class="sc-sub">Q6 첫 화면 이해도</div>
+        <div class="sc-label">임직원</div>
+        <div class="sc-value">${employeeCount}</div>
+        <div class="sc-sub">🏢 Employee</div>
       </div>
-      <div class="stat-card">
-        <div class="sc-label">평균 다음 행동 편의성</div>
-        <div class="sc-value">${avgNextAction.toFixed(1)}<span style="font-size:14px;font-weight:400">/5</span></div>
-        <div class="sc-sub">Q7 기준</div>
-      </div>
-      <div class="stat-card">
-        <div class="sc-label">평균 견적요청 버튼 찾기</div>
-        <div class="sc-value">${avgEstimateBtn.toFixed(1)}<span style="font-size:14px;font-weight:400">/5</span></div>
-        <div class="sc-sub">Q8 기준</div>
-      </div>
-      <div class="stat-card">
-        <div class="sc-label">평균 카테고리 편의성</div>
-        <div class="sc-value">${avgCategory.toFixed(1)}<span style="font-size:14px;font-weight:400">/5</span></div>
-        <div class="sc-sub">Q9 기준</div>
-      </div>
-      <div class="stat-card">
-        <div class="sc-label">평균 전문가 신뢰도</div>
-        <div class="sc-value">${avgTrust.toFixed(1)}<span style="font-size:14px;font-weight:400">/5</span></div>
-        <div class="sc-sub">Q11 기준</div>
-      </div>
-      <div class="stat-card ${feedbackCount > 0 ? 'orange' : 'green'}">
-        <div class="sc-label">오류/개선 의견 작성 수</div>
-        <div class="sc-value">${feedbackCount}</div>
-        <div class="sc-sub">Q14 작성 건수</div>
+      <div class="stat-card purple">
+        <div class="sc-label">파트너</div>
+        <div class="sc-value">${partnerCount}</div>
+        <div class="sc-sub">🔧 Partner</div>
       </div>
     </div>
 
-    ${Object.keys(painCounts).length > 0 ? `
-    <div class="table-card" style="margin-bottom:18px;">
-      <h4>가장 많이 불편했던 구간 Top 5</h4>
-      ${renderPainTop5(painCounts)}
-    </div>` : ''}
+    <div class="chart-grid" style="margin-bottom:24px;">
+      <div class="chart-card"><h4>참여자 유형 비율</h4><canvas id="chart-type-summary"></canvas></div>
+      <div class="chart-card"><h4>일반사용자 — 전체 만족도 분포 (Q15)</h4><canvas id="chart-general-sat"></canvas></div>
+    </div>
 
     <div class="table-card">
-      <h4>최근 응답 5건</h4>
-      ${renderResponseTable(data.slice(-5).reverse())}
-    </div>
-  `;
+      <h4>최근 응답 10건</h4>
+      ${renderResponseTable(data.slice(-10).reverse())}
+    </div>`;
+
+  setTimeout(() => {
+    makeDonut('chart-type-summary', countBy(data, 'participantType'));
+    const genData = data.filter(r => r.participantType === '일반사용자');
+    makeBar('chart-general-sat', countBy(genData, '일반_Q15'), ['1','2','3','4','5']);
+  }, 100);
 }
 
-function renderPainTop5(painCounts) {
-  const sorted = Object.entries(painCounts).sort((a,b) => b[1]-a[1]).slice(0,5);
-  const max = sorted[0]?.[1] || 1;
-  return `<table><thead><tr><th>순위</th><th>구간</th><th>응답 수</th><th style="width:200px">비율 바</th></tr></thead><tbody>` +
-    sorted.map(([name, cnt], i) => `
-      <tr>
-        <td><span class="badge badge-${i===0?'red':i===1?'orange':i===2?'blue':'gray'}">${i+1}위</span></td>
-        <td>${name}</td>
-        <td><strong>${cnt}</strong></td>
-        <td>
-          <div style="background:#f1f5f9;border-radius:99px;height:8px;overflow:hidden;">
-            <div style="background:#1a56db;width:${Math.round(cnt/max*100)}%;height:100%;border-radius:99px;"></div>
-          </div>
-        </td>
-      </tr>`).join('') +
-    '</tbody></table>';
-}
-
-// ────────────────────────────────
+// ════════════════════════════════════════════════════════
 // 목록 렌더링
-// ────────────────────────────────
+// ════════════════════════════════════════════════════════
 function renderList(data) {
   const container = document.getElementById('list-content');
   if (data.length === 0) {
@@ -694,19 +799,28 @@ function renderList(data) {
 function renderResponseTable(data) {
   return `<table>
     <thead><tr>
-      <th>제출일시</th><th>응답ID</th><th>참여자 유형</th>
-      <th>연령대</th><th>테스트 기기</th>
-      <th>서비스 이해도</th><th>전문가 신뢰도</th><th></th>
+      <th>제출일시</th><th>응답ID</th><th>유형</th>
+      <th>이름</th><th>연락처</th>
+      <th>처리상태</th><th>관리자메모</th><th></th>
     </tr></thead>
     <tbody>
       ${data.map(r => `<tr>
-        <td style="white-space:nowrap">${fmt(r.submittedAt)}</td>
+        <td style="white-space:nowrap;font-size:12px">${fmt(r.submittedAt)}</td>
         <td><code style="font-size:11px;color:#6366f1">${r.responseId || '-'}</code></td>
         <td>${typeBadge(r.participantType)}</td>
-        <td>${r.ageGroup || '-'}</td>
-        <td>${r.testDevice || '-'}</td>
-        <td>${scoreBadge(r.serviceUnderstanding, SCORE_MAPS.understanding5)}</td>
-        <td>${scoreBadge(r.expertTrust, SCORE_MAPS.trust)}</td>
+        <td style="font-size:13px">${esc(r.name) || '<span style="color:#94a3b8">-</span>'}</td>
+        <td style="font-size:12px;color:#64748b">${esc(r.phone) || '-'}</td>
+        <td>
+          <select class="status-select" onchange="updateStatus('${r.responseId}', this.value)">
+            ${['접수','확인중','반영예정','반영완료','보류'].map(s =>
+              `<option value="${s}"${r['처리상태']===s?' selected':''}>${s}</option>`
+            ).join('')}
+          </select>
+        </td>
+        <td style="min-width:140px">
+          <textarea class="memo-input" rows="2" placeholder="메모 입력..."
+            onblur="updateMemo('${r.responseId}', this.value)">${esc(r['관리자메모'] || '')}</textarea>
+        </td>
         <td><button class="btn-primary btn-sm" onclick="openDetail('${r.responseId}')">상세</button></td>
       </tr>`).join('')}
     </tbody>
@@ -715,25 +829,47 @@ function renderResponseTable(data) {
 
 function typeBadge(val) {
   if (!val) return '-';
-  const colors = { '일반 사용자': 'blue', '임직원': 'green', '관리사무소 관계자': 'orange', '설비·수리·시공 업체': 'gray' };
-  return `<span class="badge badge-${colors[val] || 'gray'}">${val}</span>`;
-}
-
-function scoreBadge(val, map) {
-  if (!val || !map[val]) return `<span style="color:#94a3b8">${val || '-'}</span>`;
-  const score = map[val];
-  const cls = score >= 4 ? 'green' : score >= 3 ? 'blue' : 'red';
-  return `<span class="badge badge-${cls}">${val}</span>`;
+  const cls = { '일반사용자': 'badge-blue', '임직원': 'badge-green', '파트너': 'badge-purple' };
+  return `<span class="badge ${cls[val] || 'badge-gray'}">${val}</span>`;
 }
 
 function fmt(dt) {
   if (!dt) return '-';
-  return dt.slice(0, 16).replace('T', ' ');
+  return dt.slice(0,16).replace('T',' ');
 }
 
-// ────────────────────────────────
-// 통계 렌더링
-// ────────────────────────────────
+// ════════════════════════════════════════════════════════
+// 처리상태 / 메모 업데이트
+// ════════════════════════════════════════════════════════
+async function updateStatus(responseId, status) {
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'updateResponse', password: adminPassword, responseId, status })
+    });
+    const r = allResponses.find(x => x.responseId === responseId);
+    if (r) r['처리상태'] = status;
+  } catch(e) { console.error('상태 업데이트 실패', e); }
+}
+
+async function updateMemo(responseId, memo) {
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'updateResponse', password: adminPassword, responseId, memo })
+    });
+    const r = allResponses.find(x => x.responseId === responseId);
+    if (r) r['관리자메모'] = memo;
+  } catch(e) { console.error('메모 업데이트 실패', e); }
+}
+
+// ════════════════════════════════════════════════════════
+// 통계 분석
+// ════════════════════════════════════════════════════════
 function renderStats() {
   const data = allResponses;
   if (data.length === 0) {
@@ -744,59 +880,296 @@ function renderStats() {
   Object.values(chartInstances).forEach(c => c.destroy());
   chartInstances = {};
 
+  const genData  = data.filter(r => r.participantType === '일반사용자');
+  const empData  = data.filter(r => r.participantType === '임직원');
+  const partData = data.filter(r => r.participantType === '파트너');
+
   document.getElementById('stats-content').innerHTML = `
     <div class="chart-grid">
       <div class="chart-card"><h4>참여자 유형 비율</h4><canvas id="chart-type"></canvas></div>
-      <div class="chart-card"><h4>연령대 분포</h4><canvas id="chart-age"></canvas></div>
-      <div class="chart-card"><h4>테스트 기기 비율</h4><canvas id="chart-device"></canvas></div>
-      <div class="chart-card"><h4>서비스 이해도 분포 (Q6)</h4><canvas id="chart-understanding"></canvas></div>
-      <div class="chart-card"><h4>카테고리/사전질문 편의성 분포 (Q9)</h4><canvas id="chart-category"></canvas></div>
-      <div class="chart-card"><h4>전문가 신뢰도 분포 (Q11)</h4><canvas id="chart-trust"></canvas></div>
-      <div class="chart-card"><h4>채팅/개인정보 안정감 분포 (Q12)</h4><canvas id="chart-chat"></canvas></div>
-      <div class="chart-card"><h4>계약/결제 이해도 분포 (Q13)</h4><canvas id="chart-contract"></canvas></div>
+      <div class="chart-card"><h4>일반사용자 — 서비스 이해도 (Q3)</h4><canvas id="chart-gen-q3"></canvas></div>
+      <div class="chart-card"><h4>일반사용자 — 이용 의향 (Q12)</h4><canvas id="chart-gen-q12"></canvas></div>
+      <div class="chart-card"><h4>일반사용자 — 전체 만족도 (Q15)</h4><canvas id="chart-gen-q15"></canvas></div>
+      <div class="chart-card"><h4>임직원 — 오픈베타 가능성 (Q23)</h4><canvas id="chart-emp-q23"></canvas></div>
+      <div class="chart-card"><h4>파트너 — 참여 의향 (Q17)</h4><canvas id="chart-part-q17"></canvas></div>
     </div>
-    <div class="table-card">
-      <h4>견적요청 불편 구간 Top 5 (Q10)</h4>
-      ${renderPainTop5(countPainPoints(data))}
+    <div class="summary-grid" style="margin-bottom:24px;">
+      <div class="stat-card"><div class="sc-label">일반사용자 응답</div><div class="sc-value">${genData.length}</div></div>
+      <div class="stat-card green"><div class="sc-label">임직원 응답</div><div class="sc-value">${empData.length}</div></div>
+      <div class="stat-card purple"><div class="sc-label">파트너 응답</div><div class="sc-value">${partData.length}</div></div>
     </div>`;
 
   setTimeout(() => {
-    makeDonut('chart-type',   countBy(data, 'participantType'));
-    makeBar('chart-age',      countBy(data, 'ageGroup'), ['20대 이하','30대','40대','50대','60대 이상']);
-    makeDonut('chart-device', countBy(data, 'testDevice'));
-    makeBar('chart-understanding', countBy(data, 'serviceUnderstanding'),
-      ['매우 잘 이해됐다','어느 정도 이해됐다','보통이다','잘 이해되지 않았다','전혀 이해되지 않았다']);
-    makeBar('chart-category', countBy(data, 'categoryPreQuestionEase'),
-      ['매우 쉬웠다','쉬운 편이었다','보통이다','어려웠다','매우 어려웠다']);
-    makeBar('chart-trust', countBy(data, 'expertTrust'),
-      ['매우 신뢰가 갔다','신뢰가 간 편이다','보통이다','신뢰가 부족했다','전혀 신뢰가 가지 않았다']);
-    makeBar('chart-chat', countBy(data, 'chatPrivacyEase'),
-      ['편하고 안전하게 느껴졌다','대체로 괜찮았다','보통이다','조금 불편하거나 불안했다','매우 불편하거나 불안했다','사용해보지 않았다']);
-    makeBar('chart-contract', countBy(data, 'contractPaymentUnderstanding'),
-      ['쉽게 이해됐다','어느 정도 이해됐다','보통이다','헷갈렸다','불안하거나 어려웠다','해당 화면을 보지 못했다']);
+    makeDonut('chart-type', countBy(data, 'participantType'));
+    makeBar('chart-gen-q3', countBy(genData, '일반_Q3'), [
+      '집수리/설비 전문가를 연결해주는 서비스','견적 비교 서비스','채팅 상담 서비스','정확히 이해하기 어려웠음','기타'
+    ]);
+    makeBar('chart-gen-q12', countBy(genData, '일반_Q12'), [
+      '바로 이용해볼 것 같음','필요할 때 이용할 것 같음','조금 더 신뢰가 생기면 이용할 것 같음','이용하지 않을 것 같음'
+    ]);
+    makeBar('chart-gen-q15', countBy(genData, '일반_Q15'), ['1','2','3','4','5']);
+    makeBar('chart-emp-q23', countBy(empData, '임직원_Q23'), [
+      '바로 진행 가능','일부 수정 후 가능','핵심 기능 보완 후 가능','아직 위험함','판단 어려움'
+    ]);
+    makeBar('chart-part-q17', countBy(partData, '파트너_Q17'), [
+      '바로 참여 의향 있음','조건 확인 후 참여 가능','조금 더 지켜보고 결정','참여 의향 낮음','참여하지 않음'
+    ]);
   }, 100);
 }
 
-function countPainPoints(data) {
-  const counts = {};
+// ════════════════════════════════════════════════════════
+// 주관식 의견
+// ════════════════════════════════════════════════════════
+function renderOpinions() {
+  const container = document.getElementById('opinions-content');
+  const typeFilter = document.getElementById('opinion-type-filter').value;
+  let data = allResponses;
+  if (typeFilter) data = data.filter(r => r.participantType === typeFilter);
+
+  const items = [];
   data.forEach(r => {
-    if (r.estimatePainPoints) {
-      r.estimatePainPoints.split(',').forEach(p => {
-        const t = p.trim();
-        if (t && t !== '특별히 불편한 점 없음') counts[t] = (counts[t] || 0) + 1;
-      });
-    }
+    const keys = OPINION_KEYS[r.participantType] || [];
+    keys.forEach(({key, label}) => {
+      const val = r[key];
+      if (val && val.trim() && val !== '-') {
+        items.push({ r, key, label, val });
+      }
+    });
   });
-  return counts;
+
+  if (items.length === 0) {
+    container.innerHTML = '<div class="empty-state">작성된 의견이 없습니다.</div>';
+    return;
+  }
+
+  container.innerHTML = `
+    <div style="margin-bottom:14px;">
+      <span style="font-size:14px;font-weight:700;color:#1e293b;">주관식 의견</span>
+      <span style="font-size:13px;color:#64748b;"> (총 ${items.length}건)</span>
+    </div>
+    <div class="opinion-list">
+      ${items.map(({r, label, val}) => `<div class="opinion-item">
+        <div class="op-meta">
+          <span class="badge badge-gray" style="font-size:11px">${fmt(r.submittedAt)}</span>
+          <span class="badge ${r.participantType==='일반사용자'?'badge-blue':r.participantType==='임직원'?'badge-green':'badge-purple'}" style="font-size:11px">${r.participantType}</span>
+          <span class="badge badge-gray" style="font-size:11px">${label}</span>
+          <span style="font-size:11px;color:#94a3b8">${esc(r.name)||''}</span>
+        </div>
+        <div class="op-text">${esc(val)}</div>
+      </div>`).join('')}
+    </div>`;
 }
 
-const CHART_COLORS = ['#1a56db','#3b82f6','#60a5fa','#93c5fd','#bfdbfe','#6366f1','#8b5cf6','#a78bfa','#10b981','#34d399'];
+// ════════════════════════════════════════════════════════
+// 필터
+// ════════════════════════════════════════════════════════
+function applyFilters() {
+  const dateFrom = document.getElementById('filter-date-from').value;
+  const dateTo   = document.getElementById('filter-date-to').value;
+  const type     = document.getElementById('filter-type').value;
+  const status   = document.getElementById('filter-status').value;
+  const kw       = document.getElementById('filter-keyword').value.toLowerCase();
+
+  filteredResponses = allResponses.filter(r => {
+    if (dateFrom && r.submittedAt && r.submittedAt < dateFrom) return false;
+    if (dateTo   && r.submittedAt && r.submittedAt > dateTo + 'T23:59:59') return false;
+    if (type   && r.participantType !== type)  return false;
+    if (status && r['처리상태'] !== status)   return false;
+    if (kw) {
+      const str = JSON.stringify(r).toLowerCase();
+      if (!str.includes(kw)) return false;
+    }
+    return true;
+  });
+
+  renderList(filteredResponses);
+}
+
+function resetFilters() {
+  ['filter-date-from','filter-date-to','filter-keyword'].forEach(id => document.getElementById(id).value = '');
+  ['filter-type','filter-status'].forEach(id => document.getElementById(id).value = '');
+  filteredResponses = [...allResponses];
+  renderList(filteredResponses);
+}
+
+// ════════════════════════════════════════════════════════
+// 상세 보기 모달
+// ════════════════════════════════════════════════════════
+function openDetail(responseId) {
+  const r = allResponses.find(x => x.responseId === responseId);
+  if (!r) return;
+
+  document.getElementById('modal-title').textContent = `응답 상세 — ${r.responseId}`;
+
+  const typeQuestions = TYPE_QUESTIONS[r.participantType] || [];
+
+  const sections = [
+    { title: '기본 정보', fields: [
+      ['제출일시', r.submittedAt],
+      ['응답ID',   r.responseId],
+      ['참여자유형', r.participantType],
+      ['이름',     r.name, true],
+      ['연락처',   r.phone, true],
+      ['처리상태', r['처리상태']],
+      ['관리자메모', r['관리자메모']]
+    ]},
+    { title: r.participantType + ' 설문 응답', fields:
+      typeQuestions.map(({key, label}) => [label, r[key]])
+    }
+  ];
+
+  document.getElementById('modal-body').innerHTML = sections.map(s => `
+    <div class="detail-section">
+      <div class="detail-section-title">${s.title}</div>
+      ${s.fields.filter(f => f[1] !== undefined && f[1] !== '').map(([label, val, priv]) => `
+        <div class="detail-row">
+          <div class="detail-label">${label}</div>
+          <div class="detail-value${priv ? ' private' : ''}" ${priv ? 'onclick="this.classList.toggle(\'revealed\')" title="클릭하여 보기"' : ''}>
+            ${esc(val) || '<span style="color:#94a3b8">-</span>'}
+            ${priv ? '<div class="reveal-hint">클릭하면 표시됩니다</div>' : ''}
+          </div>
+        </div>`).join('')}
+    </div>`).join('');
+
+  document.getElementById('detail-modal').classList.add('visible');
+}
+
+function closeModal() {
+  document.getElementById('detail-modal').classList.remove('visible');
+}
+
+document.getElementById('detail-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// ════════════════════════════════════════════════════════
+// 엑셀(CSV) 다운로드
+// ════════════════════════════════════════════════════════
+function downloadExcel(mode) {
+  const typeFilter = document.getElementById('dl-type-filter').value;
+  let data = typeFilter ? allResponses.filter(r => r.participantType === typeFilter) : [...allResponses];
+
+  const now = new Date();
+  const ts  = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+
+  if (mode === 'opinions') {
+    const headers = ['제출일시','응답ID','참여자유형','이름','질문','의견내용'];
+    const rows = [];
+    data.forEach(r => {
+      const keys = OPINION_KEYS[r.participantType] || [];
+      keys.forEach(({key, label}) => {
+        const val = r[key];
+        if (val && val.trim() && val !== '-') {
+          rows.push([r.submittedAt, r.responseId, r.participantType, r.name || '', label, val]);
+        }
+      });
+    });
+    exportCsv(`만능맨_주관식의견_${ts}.csv`, [headers, ...rows]);
+    return;
+  }
+
+  const includeContact = (mode === 'with_contact');
+  const privateFields  = includeContact ? [] : ['name', 'phone'];
+
+  // 공통 컬럼 + 선택 유형 컬럼만 포함
+  const commonCols = ['submittedAt', 'participantType', 'responseId'];
+  if (includeContact) { commonCols.push('name'); commonCols.push('phone'); }
+
+  let typeCols = [];
+  if (!typeFilter) {
+    // 전체 — 유형별 컬럼 모두 포함
+    for (let i=1;i<=15;i++) typeCols.push('일반_Q'+i);
+    for (let i=1;i<=25;i++) typeCols.push('임직원_Q'+i);
+    for (let i=1;i<=20;i++) typeCols.push('파트너_Q'+i);
+  } else {
+    const typeMap = {'일반사용자':'일반', '임직원':'임직원', '파트너':'파트너'};
+    const counts  = {'일반사용자':15, '임직원':25, '파트너':20};
+    const prefix  = typeMap[typeFilter];
+    const cnt     = counts[typeFilter] || 0;
+    for (let i=1;i<=cnt;i++) typeCols.push(`${prefix}_Q${i}`);
+  }
+
+  const adminCols = ['처리상태','관리자메모'];
+  const allCols   = [...commonCols, ...typeCols, ...adminCols];
+  const rows      = data.map(r => allCols.map(k => r[k] || ''));
+
+  exportCsv(`만능맨_설문응답_${typeFilter||'전체'}_${ts}.csv`, [allCols, ...rows]);
+}
+
+function exportCsv(filename, rows) {
+  const csvContent = rows
+    .map(row => row.map(cell => `"${String(cell).replace(/"/g,'""').replace(/\n/g,' ')}"`).join(','))
+    .join('\r\n');
+  const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// ════════════════════════════════════════════════════════
+// 설문 진입 코드 관리
+// ════════════════════════════════════════════════════════
+async function loadSecretCodes() {
+  try {
+    const url = `${SCRIPT_URL}?action=getSecretCodes&password=${encodeURIComponent(adminPassword)}`;
+    const res = await fetch(url);
+    const json = await res.json();
+    if (json.success && json.data) {
+      document.getElementById('code-employee').value = json.data.employee || '';
+      document.getElementById('code-partner').value  = json.data.partner  || '';
+    }
+  } catch(e) {
+    console.error('코드 로딩 실패', e);
+  }
+}
+
+async function saveSecretCode(type) {
+  const inputId = 'code-' + type;
+  const code    = document.getElementById(inputId).value.trim();
+  const msgEl   = document.getElementById('code-save-msg');
+
+  if (!code) {
+    msgEl.className = 'code-save-msg err';
+    msgEl.textContent = '비밀코드가 비어 있습니다. 저장되지 않았습니다.';
+    return;
+  }
+
+  msgEl.className = 'code-save-msg';
+  msgEl.textContent = '저장 중...';
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        action: 'setSecretCode',
+        password: adminPassword,
+        codeType: type,
+        code: code
+      })
+    });
+    msgEl.className = 'code-save-msg ok';
+    msgEl.textContent = '비밀코드가 저장되었습니다. 즉시 설문 페이지에 반영됩니다.';
+  } catch(e) {
+    msgEl.className = 'code-save-msg err';
+    msgEl.textContent = '저장 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
+  }
+
+  setTimeout(() => { msgEl.textContent = ''; }, 4000);
+}
+
+// ════════════════════════════════════════════════════════
+// 차트 헬퍼
+// ════════════════════════════════════════════════════════
+const CHART_COLORS = ['#1a56db','#3b82f6','#60a5fa','#93c5fd','#10b981','#34d399','#6366f1','#8b5cf6','#f59e0b','#ef4444'];
 
 function countBy(data, field) {
   const counts = {};
   data.forEach(r => {
     const v = r[field];
-    if (v) counts[v] = (counts[v] || 0) + 1;
+    if (v && v.trim()) counts[v] = (counts[v] || 0) + 1;
   });
   return counts;
 }
@@ -836,182 +1209,9 @@ function makeBar(id, counts, orderedKeys) {
   });
 }
 
-// ────────────────────────────────
-// 오류/개선 의견 렌더링 (Q14)
-// ────────────────────────────────
-function renderOpinions() {
-  const container = document.getElementById('opinions-content');
-  const items = allResponses.filter(r => r.urgentFeedback && r.urgentFeedback.trim());
-
-  if (items.length === 0) {
-    container.innerHTML = '<div class="empty-state">작성된 의견이 없습니다.</div>';
-    return;
-  }
-
-  container.innerHTML = `
-    <div style="margin-bottom:14px;">
-      <span style="font-size:14px;font-weight:700;color:#1e293b;">오류/불편/개선 의견 </span>
-      <span style="font-size:13px;color:#64748b;">(Q14 · 총 ${items.length}건)</span>
-    </div>
-    <div class="opinion-list">
-      ${items.map(r => `<div class="opinion-item">
-        <div class="op-meta">
-          <span class="badge badge-gray" style="font-size:11px">${fmt(r.submittedAt)}</span>
-          <span class="badge badge-blue" style="font-size:11px">${r.participantType || '?'}</span>
-          <span class="badge badge-gray" style="font-size:11px">${r.ageGroup || '?'}</span>
-          <span class="badge badge-gray" style="font-size:11px">${r.testDevice || '?'}</span>
-        </div>
-        <div class="op-text">${esc(r.urgentFeedback)}</div>
-      </div>`).join('')}
-    </div>`;
-}
-
-// ────────────────────────────────
-// 필터
-// ────────────────────────────────
-function applyFilters() {
-  const dateFrom = document.getElementById('filter-date-from').value;
-  const dateTo   = document.getElementById('filter-date-to').value;
-  const type     = document.getElementById('filter-type').value;
-  const age      = document.getElementById('filter-age').value;
-  const device   = document.getElementById('filter-device').value;
-  const kw       = document.getElementById('filter-keyword').value.toLowerCase();
-
-  filteredResponses = allResponses.filter(r => {
-    if (dateFrom && r.submittedAt && r.submittedAt < dateFrom) return false;
-    if (dateTo   && r.submittedAt && r.submittedAt > dateTo + 'T23:59:59') return false;
-    if (type   && r.participantType !== type)   return false;
-    if (age    && r.ageGroup !== age)           return false;
-    if (device && r.testDevice !== device)      return false;
-    if (kw) {
-      const str = JSON.stringify(r).toLowerCase();
-      if (!str.includes(kw)) return false;
-    }
-    return true;
-  });
-
-  renderList(filteredResponses);
-}
-
-function resetFilters() {
-  ['filter-date-from','filter-date-to','filter-keyword'].forEach(id => document.getElementById(id).value = '');
-  ['filter-type','filter-age','filter-device'].forEach(id => document.getElementById(id).value = '');
-  filteredResponses = [...allResponses];
-  renderList(filteredResponses);
-}
-
-// ────────────────────────────────
-// 상세 보기 모달
-// ────────────────────────────────
-function openDetail(responseId) {
-  const r = allResponses.find(x => x.responseId === responseId);
-  if (!r) return;
-
-  document.getElementById('modal-title').textContent = `응답 상세 — ${r.responseId}`;
-
-  const sections = [
-    { title: '기본 정보', fields: [
-      ['제출일시', r.submittedAt],
-      ['응답ID', r.responseId],
-      ['참여자 유형', r.participantType],
-      ['테스트 입장', r.testRole],
-      ['성별', r.gender],
-      ['연령대', r.ageGroup],
-      ['테스트 기기', r.testDevice],
-      ['휴대폰 종류', r.phoneType],
-      ['PC 환경', r.pcType],
-    ]},
-    { title: '서비스 이해도', fields: [
-      ['첫 화면 이해도 (Q6)', r.serviceUnderstanding],
-      ['다음 행동 찾기 (Q7)', r.nextActionEase],
-    ]},
-    { title: '견적요청 / 카테고리', fields: [
-      ['견적요청 버튼 찾기 (Q8)', r.estimateButtonFindability],
-      ['카테고리/사전질문 편의성 (Q9)', r.categoryPreQuestionEase],
-      ['불편했던 구간 (Q10)', r.estimatePainPoints],
-    ]},
-    { title: '전문가 / 채팅 / 계약', fields: [
-      ['전문가 신뢰도 (Q11)', r.expertTrust],
-      ['채팅/개인정보 (Q12)', r.chatPrivacyEase],
-      ['계약/결제 이해도 (Q13)', r.contractPaymentUnderstanding],
-    ]},
-    { title: '오류 / 개선 의견 (Q14)', fields: [
-      ['의견 내용', r.urgentFeedback],
-    ]},
-    { title: '개인정보 (커피 기프티콘 지급용)', fields: [
-      ['이름', r.name, true],
-      ['연락처', r.phone, true],
-      ['개인정보 동의', r.privacyConsent],
-    ]},
-  ];
-
-  document.getElementById('modal-body').innerHTML = sections.map(s => `
-    <div class="detail-section">
-      <div class="detail-section-title">${s.title}</div>
-      ${s.fields.map(([label, val, priv]) => `
-        <div class="detail-row">
-          <div class="detail-label">${label}</div>
-          <div class="detail-value${priv ? ' private' : ''}" ${priv ? 'onclick="this.classList.toggle(\'revealed\')" title="클릭하여 보기"' : ''}>
-            ${esc(val) || '<span style="color:#94a3b8">-</span>'}
-            ${priv ? '<div class="reveal-hint">클릭하면 표시됩니다</div>' : ''}
-          </div>
-        </div>`).join('')}
-    </div>`).join('');
-
-  document.getElementById('detail-modal').classList.add('visible');
-}
-
-function closeModal() {
-  document.getElementById('detail-modal').classList.remove('visible');
-}
-
-document.getElementById('detail-modal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-});
-
-// ────────────────────────────────
-// CSV 다운로드
-// ────────────────────────────────
-function downloadCSV(type) {
-  let data = allResponses;
-  let filename = 'manneungman_survey_all.csv';
-
-  if (type === 'opinions') {
-    filename = 'manneungman_survey_opinions.csv';
-    const headers = ['제출일시', '응답ID', '참여자유형', '연령대', '테스트기기', '오류/개선의견(Q14)'];
-    const rows = data.filter(r => r.urgentFeedback && r.urgentFeedback.trim()).map(r => [
-      r.submittedAt, r.responseId, r.participantType, r.ageGroup, r.testDevice, r.urgentFeedback
-    ]);
-    exportCsv(filename, [headers, ...rows]);
-    return;
-  }
-
-  const privateFields = ['name', 'phone'];
-  const allKeys = data.length > 0 ? Object.keys(data[0]).filter(k => !privateFields.includes(k)) : [];
-  const rows = data.map(r => allKeys.map(k => r[k] || ''));
-  exportCsv(filename, [allKeys, ...rows]);
-}
-
-function exportCsv(filename, rows) {
-  const csvContent = rows
-    .map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
-    .join('\n');
-  const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = filename; a.click();
-  URL.revokeObjectURL(url);
-}
-
-// ────────────────────────────────
+// ════════════════════════════════════════════════════════
 // 유틸
-// ────────────────────────────────
-function avg(arr) {
-  const filtered = arr.filter(v => v > 0);
-  if (filtered.length === 0) return 0;
-  return filtered.reduce((a, b) => a + b, 0) / filtered.length;
-}
-
+// ════════════════════════════════════════════════════════
 function esc(str) {
   if (!str) return '';
   return String(str)

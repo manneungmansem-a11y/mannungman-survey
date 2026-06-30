@@ -1,150 +1,111 @@
 // ════════════════════════════════════════════════════════════
-// 만능맨 베타테스트 피드백 설문 — Google Apps Script 백엔드
+// 만능맨 베타테스트 피드백 설문 — Google Apps Script 백엔드 v2
 // ════════════════════════════════════════════════════════════
 //
 // 설정 방법:
-//   1. Google Sheets를 새로 만들고 URL에서 스프레드시트 ID를 복사한다.
-//      예) https://docs.google.com/spreadsheets/d/[여기가 SHEET_ID]/edit
-//   2. SHEET_ID 값을 아래에 붙여넣는다.
-//   3. 관리자 비밀번호를 ADMIN_PASSWORD에 설정한다.
-//   4. 이 코드를 Apps Script에 붙여넣고 저장한다.
-//   5. 배포 → 새 배포 → 웹 앱 → "나로 실행", "모든 사용자" 선택 후 배포한다.
-//   6. 발급된 URL을 survey.html과 admin.html의 SCRIPT_URL에 붙여넣는다.
+//   1. SHEET_ID를 구글시트 URL에서 복사해 붙여넣는다.
+//   2. 이 코드를 Apps Script에 붙여넣고 저장한다.
+//   3. 배포 → 새 배포 → 웹 앱 → "나로 실행", "모든 사용자" 선택 후 배포한다.
+//   4. 발급된 URL을 survey.html / admin.html의 SCRIPT_URL에 붙여넣는다.
+//   5. Apps Script 편집기에서 setupSheets() 를 한 번 실행한다.
+//   6. 기존 데이터가 있다면 migrateToNewStructure() 를 실행해 백업 후 초기화한다.
 //
 // ════════════════════════════════════════════════════════════
 
 // ── 변경 필요 상수 ──────────────────────────────────────────
-const SHEET_ID       = '11QGLJdAHbc5qU4Xo8UAKfh867AM0y_R6I3bY5JHDwB4';  // ★ 필수 변경
-const ADMIN_PASSWORD = '9923';                         // ★ 필요시 변경
+var SHEET_ID       = '11QGLJdAHbc5qU4Xo8UAKfh867AM0y_R6I3bY5JHDwB4'; // ★ 필수 변경
+var ADMIN_PASSWORD = '9923';                                            // ★ 필요시 변경
 // ────────────────────────────────────────────────────────────
 
-const SHEET_RESPONSES      = 'responses';
-const SHEET_CONTACTS       = 'contacts';
-const SHEET_SETTINGS       = 'settings';
-const SHEET_LOGS           = 'logs';
-const SHEET_RESPONSES_VIEW = 'responses_view';
+var SHEET_RESPONSES = 'responses';
+var SHEET_SETTINGS  = 'settings';
+var SHEET_LOGS      = 'logs';
 
-// responses 시트 컬럼 순서 (15문항 기준) — 절대 변경 금지
-const RESPONSE_HEADERS = [
-  'submittedAt', 'responseId',
-  'participantType', 'testRole',
-  'gender', 'ageGroup',
-  'testDevice', 'phoneType', 'pcType',
-  'serviceUnderstanding', 'nextActionEase',
-  'estimateButtonFindability', 'categoryPreQuestionEase', 'estimatePainPoints',
-  'expertTrust', 'chatPrivacyEase', 'contractPaymentUnderstanding',
-  'urgentFeedback'
-];
+// 기본 비밀코드 초기값 (settings 시트에 없을 때 폴백)
+var DEFAULT_CODE_EMPLOYEE = 'samyang';
+var DEFAULT_CODE_PARTNER  = '10000';
 
-const CONTACT_HEADERS = ['submittedAt', 'responseId', 'name', 'phone', 'privacyConsent'];
+// ── responses 시트 컬럼 (통합형) ──────────────────────────
+// 공통 5 + 일반 15 + 임직원 25 + 파트너 20 + 관리 2 = 67컬럼
+function buildGeneralCols() {
+  var cols = [];
+  for (var i = 1; i <= 15; i++) cols.push('일반_Q' + i);
+  return cols;
+}
+function buildEmployeeCols() {
+  var cols = [];
+  for (var i = 1; i <= 25; i++) cols.push('임직원_Q' + i);
+  return cols;
+}
+function buildPartnerCols() {
+  var cols = [];
+  for (var i = 1; i <= 20; i++) cols.push('파트너_Q' + i);
+  return cols;
+}
 
-const LOG_HEADERS = ['loggedAt', 'type', 'message', 'detail'];
+var COMMON_COLS   = ['submittedAt', 'participantType', 'responseId', 'name', 'phone'];
+var GENERAL_COLS  = buildGeneralCols();
+var EMPLOYEE_COLS = buildEmployeeCols();
+var PARTNER_COLS  = buildPartnerCols();
+var ADMIN_COLS    = ['처리상태', '관리자메모'];
 
-// ── responses_view A열 라벨 (survey.html 실제 질문 문구 기준) ──
-const VIEW_LABELS = {
-  responseId:                   '응답번호',
-  submittedAt:                  '제출일시',
-  participantType:              'Q1. 테스트 참여자 유형을 선택해주세요.',
-  testRole:                     'Q2. 이번 테스트는 어떤 입장에서 확인하셨나요?',
-  gender:                       'Q3. 성별을 선택해주세요.',
-  ageGroup:                     'Q4. 연령대를 선택해주세요.',
-  testDevice:                   'Q5. 테스트한 기기를 선택해주세요.',
-  phoneType:                    '↳ 어떤 휴대폰을 사용하셨나요?',
-  pcType:                       '↳ 어떤 PC 환경을 사용하셨나요?',
-  serviceUnderstanding:         'Q6. 첫 화면을 보고 만능맨이 어떤 서비스인지 이해되었나요?',
-  nextActionEase:               'Q7. 만능맨에서 무엇을 해야 하는지, 다음 행동을 찾기 쉬웠나요?',
-  estimateButtonFindability:    'Q8. 견적요청을 시작하는 버튼이나 위치를 쉽게 찾을 수 있었나요?',
-  categoryPreQuestionEase:      'Q9. 내가 겪는 문제에 맞는 카테고리와 사전질문을 선택하기 쉬웠나요?',
-  estimatePainPoints:           'Q10. 견적요청 과정에서 가장 불편했던 부분은 무엇인가요?',
-  expertTrust:                  'Q11. 전문가 프로필을 보고 신뢰감이 들었나요?',
-  chatPrivacyEase:              'Q12. 채팅/상담 기능은 사용하기 편하고 개인정보가 안전하게 느껴졌나요?',
-  contractPaymentUnderstanding: 'Q13. 여러 전문가 중 선택하거나 계약/결제/에스크로로 이어지는 흐름이 이해되었나요?',
-  urgentFeedback:               'Q14. 사용 중 오류, 불편했던 점, 또는 정식 오픈 전 가장 먼저 고쳐야 할 점을 적어주세요.',
-  name:                         '이름',
-  phone:                        '연락처',
-  privacyConsent:               '개인정보 수집·이용 동의 여부'
-};
+var RESPONSE_HEADERS = COMMON_COLS.concat(GENERAL_COLS).concat(EMPLOYEE_COLS).concat(PARTNER_COLS).concat(ADMIN_COLS);
+var LOG_HEADERS      = ['loggedAt', 'type', 'message', 'detail'];
+var SETTINGS_HEADERS = ['key', 'value'];
 
-// responses_view 세로형 블록에 표시할 필드 순서 (header에서 responseId를 보여주므로 data 행에서 제외)
-const VIEW_ORDER = [
-  'submittedAt',
-  'participantType', 'testRole',
-  'gender', 'ageGroup',
-  'testDevice', 'phoneType', 'pcType',
-  'serviceUnderstanding', 'nextActionEase',
-  'estimateButtonFindability', 'categoryPreQuestionEase', 'estimatePainPoints',
-  'expertTrust', 'chatPrivacyEase', 'contractPaymentUnderstanding',
-  'urgentFeedback',
-  'name', 'phone', 'privacyConsent'
-];
+// 처리상태 기본값
+var DEFAULT_STATUS = '접수';
 
 // ════════════════════════════════════════════════════════════
-// doPost — 설문 응답 저장
+// doPost — 설문 응답 저장 / 관리자 액션
 // ════════════════════════════════════════════════════════════
 function doPost(e) {
-  const lock = LockService.getScriptLock();
+  var lock = LockService.getScriptLock();
   lock.tryLock(15000);
 
   try {
-    let data;
-    const rawBody = (e.postData && e.postData.contents) ? e.postData.contents : '';
-    try {
-      data = JSON.parse(rawBody);
-    } catch (_) {
-      // URL-encoded form data 직접 파싱 (application/x-www-form-urlencoded)
-      data = {};
-      if (rawBody) {
-        rawBody.split('&').forEach(pair => {
-          if (!pair) return;
-          const eq = pair.indexOf('=');
-          if (eq < 0) return;
-          const k = decodeURIComponent(pair.slice(0, eq).replace(/\+/g, ' '));
-          const v = decodeURIComponent(pair.slice(eq + 1).replace(/\+/g, ' '));
-          if (k) data[k] = v;
-        });
-      }
-      if (!Object.keys(data).length) data = e.parameter || {};
+    var data = parseBody(e);
+
+    var action = (data.action || '').toLowerCase();
+
+    // ── 관리자 액션 ──
+    if (action === 'setsecretcode') {
+      return handleSetSecretCode(data);
+    }
+    if (action === 'updateresponse') {
+      return handleUpdateResponse(data);
     }
 
-    const consentValue = String(data.privacyConsent || '').toLowerCase().trim();
-    if (!['true', 'on', '1', 'yes'].includes(consentValue)) {
-      writeLog('WARN', '동의 없는 제출 시도', JSON.stringify(data));
-      return makeResponse({ success: false, error: 'CONSENT_REQUIRED' });
+    // ── 설문 응답 저장 ──
+    var participantType = String(data.participantType || '').trim();
+    var validTypes = ['일반사용자', '임직원', '파트너'];
+    if (!validTypes.includes(participantType)) {
+      writeLog('WARN', '유효하지 않은 참여자유형', participantType);
+      return makeResponse({ success: false, error: 'INVALID_TYPE' });
     }
 
-    const ss = SpreadsheetApp.openById(SHEET_ID);
-    const now = new Date();
-    const submittedAt = Utilities.formatDate(now, 'Asia/Seoul', 'yyyy-MM-dd HH:mm:ss');
-    const responseId = 'R' + now.getTime().toString().slice(-8) +
+    var ss           = SpreadsheetApp.openById(SHEET_ID);
+    var now          = new Date();
+    var submittedAt  = Utilities.formatDate(now, 'Asia/Seoul', 'yyyy-MM-dd HH:mm:ss');
+    var responseId   = 'R' + now.getTime().toString().slice(-8) +
                        Math.random().toString(36).slice(2, 5).toUpperCase();
 
-    // responses 시트에 저장 (원본 — 구조 변경 금지)
-    const respSheet = getOrCreateSheet(ss, SHEET_RESPONSES, RESPONSE_HEADERS);
-    const respRow = RESPONSE_HEADERS.map(key => {
-      if (key === 'submittedAt') return submittedAt;
-      if (key === 'responseId')  return responseId;
+    var respSheet = getOrCreateSheet(ss, SHEET_RESPONSES, RESPONSE_HEADERS);
+    var row = RESPONSE_HEADERS.map(function(key) {
+      if (key === 'submittedAt')    return submittedAt;
+      if (key === 'responseId')     return responseId;
+      if (key === 'participantType') return participantType;
+      if (key === '처리상태')        return DEFAULT_STATUS;
+      if (key === '관리자메모')      return '';
       return data[key] !== undefined ? String(data[key]) : '';
     });
-    respSheet.appendRow(respRow);
+    respSheet.appendRow(row);
 
-    // contacts 시트에 저장
-    const contactSheet = getOrCreateSheet(ss, SHEET_CONTACTS, CONTACT_HEADERS);
-    contactSheet.appendRow([
-      submittedAt, responseId,
-      data.name  || '',
-      data.phone || '',
-      'true'
-    ]);
-
-    writeLog('INFO', '응답 저장 완료', responseId);
-
-    // responses_view 보기용 저장 (실패해도 원본 응답에 영향 없음)
-    appendReadableResponse(ss, submittedAt, responseId, data);
-
-    return makeResponse({ success: true, responseId });
+    writeLog('INFO', '응답 저장 완료', responseId + ' / ' + participantType);
+    return makeResponse({ success: true, responseId: responseId });
 
   } catch (err) {
-    const errDetail = err.stack || err.message || JSON.stringify(err);
+    var errDetail = err.stack || err.message || JSON.stringify(err);
     writeLog('ERROR', 'doPost 실패', errDetail);
     return makeResponse({ success: false, error: err.message });
   } finally {
@@ -152,13 +113,81 @@ function doPost(e) {
   }
 }
 
+// ── 비밀코드 변경 ──
+function handleSetSecretCode(data) {
+  if (!isValidPassword(data.password || '')) {
+    return makeResponse({ success: false, error: 'UNAUTHORIZED' });
+  }
+  var type = (data.codeType || '').toLowerCase();
+  var code = (data.code || '').trim();
+  if (!code) return makeResponse({ success: false, error: 'EMPTY_CODE' });
+  if (type !== 'employee' && type !== 'partner') {
+    return makeResponse({ success: false, error: 'INVALID_TYPE' });
+  }
+
+  var ss       = SpreadsheetApp.openById(SHEET_ID);
+  var sheet    = getOrCreateSheet(ss, SHEET_SETTINGS, SETTINGS_HEADERS);
+  var key      = type === 'employee' ? 'secretCode_employee' : 'secretCode_partner';
+  var rows     = sheet.getDataRange().getValues();
+  var found    = false;
+
+  for (var i = 1; i < rows.length; i++) {
+    if (rows[i][0] === key) {
+      sheet.getRange(i + 1, 2).setValue(code);
+      found = true;
+      break;
+    }
+  }
+  if (!found) sheet.appendRow([key, code]);
+
+  writeLog('INFO', '비밀코드 변경', key + ' → ' + code);
+  return makeResponse({ success: true });
+}
+
+// ── 처리상태/메모 변경 ──
+function handleUpdateResponse(data) {
+  if (!isValidPassword(data.password || '')) {
+    return makeResponse({ success: false, error: 'UNAUTHORIZED' });
+  }
+  var responseId = data.responseId || '';
+  if (!responseId) return makeResponse({ success: false, error: 'NO_ID' });
+
+  var ss    = SpreadsheetApp.openById(SHEET_ID);
+  var sheet = ss.getSheetByName(SHEET_RESPONSES);
+  if (!sheet) return makeResponse({ success: false, error: 'NO_SHEET' });
+
+  var values = sheet.getDataRange().getValues();
+  var headers = values[0];
+  var idCol   = headers.indexOf('responseId');
+  var statCol = headers.indexOf('처리상태');
+  var memoCol = headers.indexOf('관리자메모');
+
+  for (var i = 1; i < values.length; i++) {
+    if (String(values[i][idCol]) === responseId) {
+      if (data.status !== undefined && statCol >= 0) {
+        sheet.getRange(i + 1, statCol + 1).setValue(data.status);
+      }
+      if (data.memo !== undefined && memoCol >= 0) {
+        sheet.getRange(i + 1, memoCol + 1).setValue(data.memo);
+      }
+      return makeResponse({ success: true });
+    }
+  }
+  return makeResponse({ success: false, error: 'NOT_FOUND' });
+}
+
 // ════════════════════════════════════════════════════════════
-// doGet — 관리자 데이터 조회
+// doGet — 관리자 데이터 조회 / 코드 검증
 // ════════════════════════════════════════════════════════════
 function doGet(e) {
   try {
-    const action   = e.parameter.action   || '';
-    const password = e.parameter.password || '';
+    var action   = e.parameter.action   || '';
+    var password = e.parameter.password || '';
+
+    // 코드 검증은 비밀번호 불필요
+    if (action === 'validateCode') {
+      return handleValidateCode(e.parameter);
+    }
 
     if (!isValidPassword(password)) {
       writeLog('WARN', '비밀번호 오류', action);
@@ -166,11 +195,9 @@ function doGet(e) {
     }
 
     switch (action) {
-      case 'list':     return handleList(e.parameter);
-      case 'detail':   return handleDetail(e.parameter.responseId);
-      case 'summary':  return handleSummary();
-      case 'opinions': return handleOpinions();
-      case 'csv':      return handleCsv();
+      case 'list':            return handleList();
+      case 'detail':          return handleDetail(e.parameter.responseId);
+      case 'getSecretCodes':  return handleGetSecretCodes();
       default:
         return makeResponse({ success: false, error: 'UNKNOWN_ACTION' });
     }
@@ -180,314 +207,176 @@ function doGet(e) {
   }
 }
 
-// ────────────────────────────────
-// action=list
-// ────────────────────────────────
-function handleList(params) {
-  const ss   = SpreadsheetApp.openById(SHEET_ID);
-  const data = sheetToObjects(ss, SHEET_RESPONSES);
-  const safe = data.map(r => omitPrivate(r));
-  return makeResponse({ success: true, data: safe });
+// ── 코드 검증 (공개) ──
+function handleValidateCode(params) {
+  var type = (params.type || '').toLowerCase();
+  var code = (params.code || '').trim();
+  if (!type || !code) return makeResponse({ success: true, valid: false });
+
+  var correctCode = '';
+  if (type === 'employee') correctCode = getSecretCode('secretCode_employee', DEFAULT_CODE_EMPLOYEE);
+  else if (type === 'partner') correctCode = getSecretCode('secretCode_partner', DEFAULT_CODE_PARTNER);
+  else return makeResponse({ success: true, valid: false });
+
+  return makeResponse({ success: true, valid: (code === correctCode) });
 }
 
-// ────────────────────────────────
-// action=detail
-// ────────────────────────────────
+// ── 목록 조회 ──
+function handleList() {
+  var ss   = SpreadsheetApp.openById(SHEET_ID);
+  var data = sheetToObjects(ss, SHEET_RESPONSES);
+  return makeResponse({ success: true, data: data });
+}
+
+// ── 상세 조회 ──
 function handleDetail(responseId) {
   if (!responseId) return makeResponse({ success: false, error: 'NO_ID' });
-  const ss   = SpreadsheetApp.openById(SHEET_ID);
-  const rows = sheetToObjects(ss, SHEET_RESPONSES);
-  const row  = rows.find(r => r.responseId === responseId);
+  var ss   = SpreadsheetApp.openById(SHEET_ID);
+  var rows = sheetToObjects(ss, SHEET_RESPONSES);
+  var row  = rows.find(function(r) { return r.responseId === responseId; });
   if (!row) return makeResponse({ success: false, error: 'NOT_FOUND' });
-
-  const contacts = sheetToObjects(ss, SHEET_CONTACTS);
-  const contact  = contacts.find(c => c.responseId === responseId) || {};
-  return makeResponse({ success: true, data: { ...row, ...contact } });
+  return makeResponse({ success: true, data: row });
 }
 
-// ────────────────────────────────
-// action=summary
-// ────────────────────────────────
-function handleSummary() {
-  const ss   = SpreadsheetApp.openById(SHEET_ID);
-  const data = sheetToObjects(ss, SHEET_RESPONSES);
-  const n    = data.length;
-  const today = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd');
-
-  const summary = {
-    totalCount:   n,
-    todayCount:   data.filter(r => r.submittedAt && r.submittedAt.startsWith(today)).length,
-    feedbackCount: data.filter(r => r.urgentFeedback && r.urgentFeedback.trim()).length,
-  };
-  return makeResponse({ success: true, data: summary });
-}
-
-// ────────────────────────────────
-// action=opinions (Q14 urgentFeedback 중심)
-// ────────────────────────────────
-function handleOpinions() {
-  const ss   = SpreadsheetApp.openById(SHEET_ID);
-  const data = sheetToObjects(ss, SHEET_RESPONSES);
-  const result = {
-    urgentFeedback: data
-      .filter(r => r.urgentFeedback && r.urgentFeedback.trim())
-      .map(r => ({ responseId: r.responseId, submittedAt: r.submittedAt, participantType: r.participantType, ageGroup: r.ageGroup, value: r.urgentFeedback }))
-  };
-  return makeResponse({ success: true, data: result });
-}
-
-// ────────────────────────────────
-// action=csv
-// ────────────────────────────────
-function handleCsv() {
-  const ss   = SpreadsheetApp.openById(SHEET_ID);
-  const data = sheetToObjects(ss, SHEET_RESPONSES).map(r => omitPrivate(r));
-  return makeResponse({ success: true, data });
-}
-
-// ════════════════════════════════════════════════════════════
-// responses_view 보기용 시트 — 세로형 블록 저장
-// ════════════════════════════════════════════════════════════
-
-function getOrCreateViewSheet(ss) {
-  let sheet = ss.getSheetByName(SHEET_RESPONSES_VIEW);
-  if (!sheet) {
-    sheet = ss.insertSheet(SHEET_RESPONSES_VIEW);
-    sheet.setColumnWidth(1, 220);
-    sheet.setColumnWidth(2, 700);
-  }
-  return sheet;
-}
-
-// responses_view에 응답 1건을 세로형 블록으로 추가한다.
-// 실패해도 원본 responses 저장에 영향 없도록 내부에서 try/catch 처리.
-function appendReadableResponse(ss, submittedAt, responseId, data) {
-  try {
-    const sheet = getOrCreateViewSheet(ss);
-
-    // 기존 블록 수 카운트 → 응답 번호 산출
-    const lastRow = sheet.getLastRow();
-    let responseNum = 1;
-    if (lastRow > 0) {
-      const colA = sheet.getRange(1, 1, lastRow, 1).getValues();
-      responseNum = colA.filter(function(r) {
-        return String(r[0]).match(/^응답\s+\d+/);
-      }).length + 1;
+// ── 비밀코드 조회 (관리자) ──
+function handleGetSecretCodes() {
+  return makeResponse({
+    success: true,
+    data: {
+      employee: getSecretCode('secretCode_employee', DEFAULT_CODE_EMPLOYEE),
+      partner:  getSecretCode('secretCode_partner',  DEFAULT_CODE_PARTNER)
     }
-
-    const startRow = lastRow + 1;
-
-    // 블록 행 구성
-    const rows = [];
-
-    // 첫 행: 응답 N / responseId
-    rows.push(['응답 ' + responseNum, responseId]);
-
-    // 나머지 필드 (VIEW_ORDER 순서)
-    VIEW_ORDER.forEach(function(key) {
-      const label = VIEW_LABELS[key] || key;
-      const raw   = data[key];
-      const val   = (raw !== undefined && raw !== null && String(raw).trim() !== '')
-                    ? String(raw) : '-';
-      rows.push([label, val]);
-    });
-
-    // 구분용 빈 줄 2행
-    rows.push(['', '']);
-    rows.push(['', '']);
-
-    // 일괄 기록
-    const range = sheet.getRange(startRow, 1, rows.length, 2);
-    range.setValues(rows);
-
-    // ── 첫 행 스타일 (응답 번호 헤더) ──
-    const headerRange = sheet.getRange(startRow, 1, 1, 2);
-    headerRange.setBackground('#1a56db');
-    headerRange.setFontColor('#ffffff');
-    headerRange.setFontWeight('bold');
-    headerRange.setFontSize(12);
-
-    // ── A열 (라벨) 굵게 ──
-    const dataRowCount = rows.length - 3; // 첫 행(헤더) + 빈 줄 2행 제외
-    if (dataRowCount > 0) {
-      sheet.getRange(startRow + 1, 1, dataRowCount, 1).setFontWeight('bold');
-    }
-
-    // ── B열 (응답값) 줄바꿈 ──
-    sheet.getRange(startRow, 2, rows.length, 1).setWrap(true);
-
-    writeLog('INFO', '보기용 응답 저장 완료', responseId);
-  } catch (err) {
-    writeLog('ERROR', '보기용 응답 저장 실패', (err.stack || err.message || String(err)));
-  }
-}
-
-// ════════════════════════════════════════════════════════════
-// 기존 데이터 재정리 — Apps Script 편집기에서 직접 실행
-// rebuildReadableResponses()
-// ════════════════════════════════════════════════════════════
-function rebuildReadableResponses() {
-  const ss = SpreadsheetApp.openById(SHEET_ID);
-
-  // responses_view 초기화 (기존 원본 responses 시트는 건드리지 않음)
-  let viewSheet = ss.getSheetByName(SHEET_RESPONSES_VIEW);
-  if (viewSheet) {
-    viewSheet.clearContents();
-    viewSheet.clearFormats();
-    viewSheet.setColumnWidth(1, 220);
-    viewSheet.setColumnWidth(2, 700);
-  } else {
-    viewSheet = getOrCreateViewSheet(ss);
-  }
-
-  const responses = sheetToObjects(ss, SHEET_RESPONSES);
-  const contacts  = sheetToObjects(ss, SHEET_CONTACTS);
-
-  if (responses.length === 0) {
-    Logger.log('rebuildReadableResponses: responses 시트에 데이터가 없습니다.');
-    return;
-  }
-
-  responses.forEach(function(resp) {
-    const contact = contacts.find(function(c) { return c.responseId === resp.responseId; }) || {};
-    const merged  = Object.assign({}, resp, {
-      name:           contact.name           || '',
-      phone:          contact.phone          || '',
-      privacyConsent: contact.privacyConsent || 'true'
-    });
-    appendReadableResponse(ss, merged.submittedAt, merged.responseId, merged);
   });
-
-  Logger.log('rebuildReadableResponses 완료: ' + responses.length + '건 재정리');
 }
 
 // ════════════════════════════════════════════════════════════
-// 백엔드 단독 테스트 (Apps Script 편집기에서 직접 실행)
-// testDoPost() 실행 후 responses / contacts / responses_view 시트에 테스트 행 확인
-// ════════════════════════════════════════════════════════════
-function testDoPost() {
-  const testData = {
-    participantType: '임직원',
-    testRole: '사용자와 파트너스 양쪽 모두 확인',
-    gender: '남성',
-    ageGroup: '30대',
-    testDevice: 'PC',
-    phoneType: '',
-    pcType: '윈도우 PC',
-    serviceUnderstanding: '매우 잘 이해됐다',
-    nextActionEase: '매우 쉬웠다',
-    estimateButtonFindability: '매우 쉽게 찾았다',
-    categoryPreQuestionEase: '매우 쉬웠다',
-    estimatePainPoints: '특별히 불편한 점 없음',
-    expertTrust: '매우 신뢰가 갔다',
-    chatPrivacyEase: '편하고 안전하게 느껴졌다',
-    contractPaymentUnderstanding: '쉽게 이해됐다',
-    urgentFeedback: '[testDoPost 테스트 데이터 — 확인 후 삭제하세요]',
-    name: '테스트',
-    phone: '010-0000-0000',
-    privacyConsent: 'true'
-  };
-
-  const mockEvent = {
-    postData: { contents: JSON.stringify(testData) },
-    parameter: testData
-  };
-
-  const result = doPost(mockEvent);
-  Logger.log('testDoPost 결과: ' + result.getContent());
-}
-
-// ════════════════════════════════════════════════════════════
-// 시트 헤더 자동 복구 — 헤더 행이 없는 시트를 자동으로 수정합니다.
-// Apps Script 편집기에서 직접 실행: fixSheets()
-// ════════════════════════════════════════════════════════════
-function fixSheets() {
-  const ss = SpreadsheetApp.openById(SHEET_ID);
-
-  const targets = [
-    { name: SHEET_RESPONSES, headers: RESPONSE_HEADERS },
-    { name: SHEET_CONTACTS,  headers: CONTACT_HEADERS },
-    { name: SHEET_LOGS,      headers: LOG_HEADERS }
-  ];
-
-  targets.forEach(function(target) {
-    const sheet = ss.getSheetByName(target.name);
-    if (!sheet) {
-      Logger.log('[fixSheets] ' + target.name + ': 시트 없음 → 새로 생성');
-      getOrCreateSheet(ss, target.name, target.headers);
-      return;
-    }
-
-    const lastRow = sheet.getLastRow();
-    if (lastRow === 0) {
-      Logger.log('[fixSheets] ' + target.name + ': 비어있음 → 헤더 추가');
-      sheet.appendRow(target.headers);
-      applyHeaderStyle(sheet, target.headers.length);
-      return;
-    }
-
-    const firstCellValue = String(sheet.getRange(1, 1).getValue());
-    if (firstCellValue === target.headers[0]) {
-      Logger.log('[fixSheets] ' + target.name + ': 헤더 정상 (건너뜀)');
-      return;
-    }
-
-    Logger.log('[fixSheets] ' + target.name + ': 헤더 없음 → 1행에 삽입');
-    sheet.insertRowBefore(1);
-    sheet.getRange(1, 1, 1, target.headers.length).setValues([target.headers]);
-    applyHeaderStyle(sheet, target.headers.length);
-  });
-
-  Logger.log('[fixSheets] 완료 — 관리자 페이지에서 데이터를 확인하세요.');
-}
-
-function applyHeaderStyle(sheet, colCount) {
-  const range = sheet.getRange(1, 1, 1, colCount);
-  range.setFontWeight('bold');
-  range.setBackground('#1a56db');
-  range.setFontColor('#ffffff');
-  sheet.setFrozenRows(1);
-}
-
-// ════════════════════════════════════════════════════════════
-// 초기 시트 세팅 (최초 1회 실행 권장)
-// Apps Script 편집기에서 직접 실행: setupSheets()
+// 초기 시트 세팅 — 최초 1회 실행: setupSheets()
 // ════════════════════════════════════════════════════════════
 function setupSheets() {
-  const ss = SpreadsheetApp.openById(SHEET_ID);
+  var ss = SpreadsheetApp.openById(SHEET_ID);
 
   getOrCreateSheet(ss, SHEET_RESPONSES, RESPONSE_HEADERS);
-  getOrCreateSheet(ss, SHEET_CONTACTS,  CONTACT_HEADERS);
 
-  const settingsSheet = getOrCreateSheet(ss, SHEET_SETTINGS, ['key', 'value']);
-  if (settingsSheet.getLastRow() < 2) {
-    settingsSheet.appendRow(['surveyActive',   'TRUE']);
-    settingsSheet.appendRow(['adminPassword',  ADMIN_PASSWORD]);
-  }
+  var settingsSheet = getOrCreateSheet(ss, SHEET_SETTINGS, SETTINGS_HEADERS);
+  var rows = sheetToObjects(ss, SHEET_SETTINGS);
+  var keys = rows.map(function(r) { return r.key; });
+
+  if (!keys.includes('adminPassword'))       settingsSheet.appendRow(['adminPassword',       ADMIN_PASSWORD]);
+  if (!keys.includes('secretCode_employee')) settingsSheet.appendRow(['secretCode_employee', DEFAULT_CODE_EMPLOYEE]);
+  if (!keys.includes('secretCode_partner'))  settingsSheet.appendRow(['secretCode_partner',  DEFAULT_CODE_PARTNER]);
 
   getOrCreateSheet(ss, SHEET_LOGS, LOG_HEADERS);
 
-  // responses_view 생성 (기존 데이터 있으면 보존)
-  getOrCreateViewSheet(ss);
+  Logger.log('setupSheets 완료 — 컬럼 수: ' + RESPONSE_HEADERS.length);
+  Logger.log('responses 헤더: ' + RESPONSE_HEADERS.join(', '));
+}
 
-  Logger.log('시트 초기 세팅 완료');
+// ════════════════════════════════════════════════════════════
+// 기존 데이터 백업 후 새 구조로 초기화
+// Apps Script 편집기에서 직접 실행: migrateToNewStructure()
+// ════════════════════════════════════════════════════════════
+function migrateToNewStructure() {
+  var ss  = SpreadsheetApp.openById(SHEET_ID);
+  var now = new Date();
+  var timestamp = Utilities.formatDate(now, 'Asia/Seoul', 'yyyy-MM-dd_HHmm');
+  var backupName = 'backup_' + timestamp;
+
+  // 기존 responses 시트 백업
+  var oldSheet = ss.getSheetByName(SHEET_RESPONSES);
+  if (oldSheet) {
+    oldSheet.copyTo(ss).setName(backupName);
+    ss.deleteSheet(oldSheet);
+    Logger.log('백업 완료: ' + backupName);
+  }
+
+  // 새 responses 시트 생성
+  getOrCreateSheet(ss, SHEET_RESPONSES, RESPONSE_HEADERS);
+
+  // settings 초기화
+  setupSheets();
+
+  Logger.log('migrateToNewStructure 완료');
+  Logger.log('백업 시트: ' + backupName);
+  Logger.log('새 responses 헤더 수: ' + RESPONSE_HEADERS.length);
+}
+
+// ════════════════════════════════════════════════════════════
+// 테스트 함수 — Apps Script 편집기에서 실행
+// ════════════════════════════════════════════════════════════
+function testDoPost_general() {
+  var testData = {
+    participantType: '일반사용자',
+    name: '테스트 일반',
+    phone: '010-1111-2222',
+    일반_Q1: '테스트 일반',
+    일반_Q2: '010-1111-2222',
+    일반_Q3: '집수리/설비 전문가를 연결해주는 서비스',
+    일반_Q4: '4',
+    일반_Q5: '누수,수도/배관',
+    일반_Q6: '전혀 없었음',
+    일반_Q7: '4',
+    일반_Q8: '전혀 부담 없음',
+    일반_Q9: '없음',
+    일반_Q10: '4',
+    일반_Q11: '바로 이해됨',
+    일반_Q12: '필요할 때 이용할 것 같음',
+    일반_Q13: '특별히 없음',
+    일반_Q14: '전체적으로 잘 만들어진 것 같습니다.',
+    일반_Q15: '4'
+  };
+  var result = doPost({ postData: { contents: JSON.stringify(testData) }, parameter: testData });
+  Logger.log('testDoPost_general 결과: ' + result.getContent());
+}
+
+function testDoPost_employee() {
+  var testData = { participantType: '임직원', name: '테스트 임직원', phone: '010-3333-4444' };
+  for (var i = 1; i <= 25; i++) testData['임직원_Q' + i] = '테스트 응답 ' + i;
+  var result = doPost({ postData: { contents: JSON.stringify(testData) }, parameter: testData });
+  Logger.log('testDoPost_employee 결과: ' + result.getContent());
+}
+
+function testDoPost_partner() {
+  var testData = { participantType: '파트너', name: '테스트 파트너', phone: '010-5555-6666' };
+  for (var i = 1; i <= 20; i++) testData['파트너_Q' + i] = '테스트 응답 ' + i;
+  var result = doPost({ postData: { contents: JSON.stringify(testData) }, parameter: testData });
+  Logger.log('testDoPost_partner 결과: ' + result.getContent());
 }
 
 // ════════════════════════════════════════════════════════════
 // 헬퍼 함수
 // ════════════════════════════════════════════════════════════
 
+function parseBody(e) {
+  var rawBody = (e.postData && e.postData.contents) ? e.postData.contents : '';
+  try {
+    return JSON.parse(rawBody);
+  } catch (_) {
+    var data = {};
+    if (rawBody) {
+      rawBody.split('&').forEach(function(pair) {
+        if (!pair) return;
+        var eq = pair.indexOf('=');
+        if (eq < 0) return;
+        var k = decodeURIComponent(pair.slice(0, eq).replace(/\+/g, ' '));
+        var v = decodeURIComponent(pair.slice(eq + 1).replace(/\+/g, ' '));
+        if (k) data[k] = v;
+      });
+    }
+    if (!Object.keys(data).length) data = e.parameter || {};
+    return data;
+  }
+}
+
 function sheetToObjects(ss, sheetName) {
-  const sheet = ss.getSheetByName(sheetName);
+  var sheet = ss.getSheetByName(sheetName);
   if (!sheet) return [];
-  const values = sheet.getDataRange().getValues();
+  var values = sheet.getDataRange().getValues();
   if (values.length < 2) return [];
-  const headers = values[0];
-  return values.slice(1).map(row => {
-    const obj = {};
-    headers.forEach((h, i) => {
-      let val = row[i];
-      // Google Sheets가 날짜 문자열을 Date 객체로 자동 변환하는 것을 원래 형식으로 복원
+  var headers = values[0];
+  return values.slice(1).map(function(row) {
+    var obj = {};
+    headers.forEach(function(h, i) {
+      var val = row[i];
       if (val instanceof Date) {
         val = Utilities.formatDate(val, 'Asia/Seoul', 'yyyy-MM-dd HH:mm:ss');
       }
@@ -498,49 +387,53 @@ function sheetToObjects(ss, sheetName) {
 }
 
 function getOrCreateSheet(ss, name, headers) {
-  let sheet = ss.getSheetByName(name);
+  var sheet = ss.getSheetByName(name);
   if (!sheet) {
     sheet = ss.insertSheet(name);
     sheet.appendRow(headers);
-    const headerRange = sheet.getRange(1, 1, 1, headers.length);
-    headerRange.setFontWeight('bold');
-    headerRange.setBackground('#1a56db');
-    headerRange.setFontColor('#ffffff');
+    var range = sheet.getRange(1, 1, 1, headers.length);
+    range.setFontWeight('bold');
+    range.setBackground('#1a56db');
+    range.setFontColor('#ffffff');
     sheet.setFrozenRows(1);
   }
   return sheet;
 }
 
-function omitPrivate(r) {
-  const obj = Object.assign({}, r);
-  delete obj.name;
-  delete obj.phone;
-  return obj;
-}
-
 function isValidPassword(pw) {
   try {
-    const ss = SpreadsheetApp.openById(SHEET_ID);
-    const settings = sheetToObjects(ss, SHEET_SETTINGS);
-    const row = settings.find(s => s.key === 'adminPassword');
-    const stored = row ? row.value : ADMIN_PASSWORD;
+    var ss       = SpreadsheetApp.openById(SHEET_ID);
+    var settings = sheetToObjects(ss, SHEET_SETTINGS);
+    var row      = settings.find(function(s) { return s.key === 'adminPassword'; });
+    var stored   = row ? row.value : ADMIN_PASSWORD;
     return pw === stored;
   } catch (_) {
     return pw === ADMIN_PASSWORD;
   }
 }
 
+function getSecretCode(key, defaultVal) {
+  try {
+    var ss       = SpreadsheetApp.openById(SHEET_ID);
+    var settings = sheetToObjects(ss, SHEET_SETTINGS);
+    var row      = settings.find(function(s) { return s.key === key; });
+    return (row && row.value) ? row.value : defaultVal;
+  } catch (_) {
+    return defaultVal;
+  }
+}
+
 function makeResponse(obj) {
-  const output = ContentService.createTextOutput(JSON.stringify(obj));
+  var output = ContentService.createTextOutput(JSON.stringify(obj));
   output.setMimeType(ContentService.MimeType.JSON);
   return output;
 }
 
 function writeLog(type, message, detail) {
   try {
-    const ss    = SpreadsheetApp.openById(SHEET_ID);
-    const sheet = getOrCreateSheet(ss, SHEET_LOGS, LOG_HEADERS);
-    const now   = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd HH:mm:ss');
+    var ss    = SpreadsheetApp.openById(SHEET_ID);
+    var sheet = getOrCreateSheet(ss, SHEET_LOGS, LOG_HEADERS);
+    var now   = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd HH:mm:ss');
     sheet.appendRow([now, type, message, detail]);
   } catch (_) {
     Logger.log('[LOG FAIL] ' + type + ': ' + message);
