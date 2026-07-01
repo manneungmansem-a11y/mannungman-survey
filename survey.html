@@ -21,7 +21,7 @@
       line-height: 1.65;
     }
 
-    /* ── 진행률 바 ── */
+    /* ══ 헤더 (단일 행) ══ */
     #progress-bar-wrap {
       position: fixed;
       top: 0; left: 0; right: 0;
@@ -31,28 +31,32 @@
       -webkit-backdrop-filter: blur(6px);
       box-shadow: 0 1px 4px rgba(0,0,0,.08);
     }
-    #progress-bar-inner {
-      display: flex;
-      align-items: center;
+    #header-inner {
       max-width: 720px;
       margin: 0 auto;
       padding: 10px 16px;
-      gap: 12px;
-    }
-    #header-info-bar {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 6px 16px 8px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      border-top: 1px solid rgba(0,0,0,.06);
+    }
+    .logo-img {
+      height: 44px;
+      width: auto;
+      max-width: 150px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
     }
     .header-phone {
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       font-size: 14px;
       font-weight: 700;
       color: #1a56db;
@@ -65,7 +69,7 @@
       display: inline-flex;
       align-items: center;
       gap: 5px;
-      padding: 5px 13px;
+      padding: 6px 14px;
       background: #1a56db;
       color: #fff;
       font-size: 13px;
@@ -76,74 +80,118 @@
       transition: background .2s;
     }
     .partners-btn:hover { background: #1240a8; }
-    .logo-img {
-      height: 48px;
-      width: auto;
-      max-width: 160px;
-      object-fit: contain;
-      flex-shrink: 0;
+
+    /* ══ 배너 팝업 ══ */
+    #banner-popup-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.55);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
     }
-    #progress-track {
-      flex: 1;
-      height: 8px;
-      background: #e2e8f0;
-      border-radius: 99px;
+    #banner-popup-overlay.visible { display: flex; }
+    .banner-popup-box {
+      position: relative;
+      background: #fff;
+      border-radius: 18px;
+      width: 100%;
+      max-width: 600px;
+      box-shadow: 0 8px 48px rgba(0,0,0,.28);
       overflow: hidden;
     }
-    #progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #1a56db, #3b82f6);
-      border-radius: 99px;
-      width: 0%;
-      transition: width .4s ease;
-    }
-    #progress-label {
-      font-size: 13px;
-      color: #64748b;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
-    /* ── 배너 섹션 ── */
-    #banner-section {
-      background: #fff;
-      width: 100%;
-      padding-top: 104px;
-      position: relative;
-    }
-    #banner-section::after {
-      content: '';
+    .banner-popup-close {
       position: absolute;
-      bottom: -30px;
-      left: 0; right: 0;
-      height: 30px;
-      background: linear-gradient(to bottom, #fff 0%, transparent 100%);
-      pointer-events: none;
-      z-index: 3;
+      top: 10px; right: 10px;
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      background: rgba(0,0,0,.45);
+      color: #fff;
+      border: none;
+      font-size: 16px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      z-index: 10;
+      transition: background .2s;
+      line-height: 1;
     }
-    .banner-inner {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 16px 16px 18px;
-    }
-    .banner-wrap { position: relative; margin-bottom: 0; line-height: 0; }
-    .banner-img {
+    .banner-popup-close:hover { background: rgba(0,0,0,.65); }
+    .banner-popup-img {
       width: 100%;
       height: auto;
       display: block;
-      object-fit: cover;
-      border-radius: 14px;
-      box-shadow: 0 4px 16px rgba(0,0,0,.12);
+      object-fit: contain;
     }
+    .banner-popup-footer {
+      padding: 14px 20px;
+      text-align: center;
+      background: #fff;
+    }
+    .btn-banner-confirm {
+      display: inline-block;
+      padding: 11px 40px;
+      background: #1a56db;
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-banner-confirm:hover { background: #1e40af; }
 
-    /* ════════════════════════════════
-       참여 유형 선택 화면
-    ════════════════════════════════ */
+    /* ══ 설문 필수 입력 안내 팝업 ══ */
+    #survey-notice-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.45); z-index: 450;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    #survey-notice-overlay.visible { display: flex; }
+    .survey-notice-box {
+      background: #fff; border-radius: 18px; padding: 32px 28px 28px;
+      width: 100%; max-width: 340px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.22); text-align: center;
+    }
+    .survey-notice-icon { font-size: 34px; margin-bottom: 14px; }
+    .survey-notice-box h3 { font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 10px; }
+    .survey-notice-box p { font-size: 15px; color: #475569; line-height: 1.65; margin-bottom: 22px; }
+    .btn-survey-notice-ok {
+      width: 100%; padding: 13px;
+      background: #1a56db; color: #fff;
+      border: none; border-radius: 10px;
+      font-size: 15px; font-weight: 700; cursor: pointer;
+      transition: background .15s;
+    }
+    .btn-survey-notice-ok:hover { background: #1e40af; }
+
+    /* ══ 다시 유형 선택 확인 팝업 ══ */
+    #back-confirm-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.45); z-index: 450;
+      align-items: center; justify-content: center; padding: 20px;
+    }
+    #back-confirm-overlay.visible { display: flex; }
+    .back-confirm-box {
+      background: #fff; border-radius: 18px; padding: 30px 26px 24px;
+      width: 100%; max-width: 340px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.22); text-align: center;
+    }
+    .back-confirm-box h3 { font-size: 17px; font-weight: 800; color: #1e293b; margin-bottom: 10px; }
+    .back-confirm-box p { font-size: 14px; color: #64748b; line-height: 1.65; margin-bottom: 22px; }
+    .back-confirm-btns { display: flex; gap: 10px; }
+    .btn-back-cancel { flex: 1; padding: 12px; background: #f1f5f9; color: #64748b; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background .15s; }
+    .btn-back-cancel:hover { background: #e2e8f0; }
+    .btn-back-confirm-entry { flex: 2; padding: 12px; background: #1a56db; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background .15s; }
+    .btn-back-confirm-entry:hover { background: #1e40af; }
+
+    /* ══ 참여 유형 선택 화면 ══ */
     #entry-screen {
       display: none;
       max-width: 720px;
       margin: 0 auto;
-      padding: 30px 16px 60px;
+      padding: 80px 16px 60px;
       position: relative;
       z-index: 2;
     }
@@ -178,7 +226,7 @@
     .entry-card-icon.green  { background: #f0fdf4; }
     .entry-card-icon.purple { background: #faf5ff; }
     .entry-card-body { flex: 1; min-width: 0; }
-    .entry-card-title { font-size: 17px; font-weight: 800; color: #1e293b; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+    .entry-card-title { font-size: 17px; font-weight: 800; color: #1e293b; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .entry-lock-badge {
       display: inline-flex; align-items: center; gap: 3px;
       font-size: 11px; font-weight: 600; padding: 2px 7px;
@@ -188,9 +236,7 @@
     .entry-card-arrow { font-size: 20px; color: #cbd5e1; flex-shrink: 0; transition: color .2s; }
     .entry-card:hover .entry-card-arrow { color: #1a56db; }
 
-    /* ════════════════════════════════
-       비밀코드 모달
-    ════════════════════════════════ */
+    /* ══ 비밀코드 모달 ══ */
     #code-modal-overlay {
       display: none; position: fixed; inset: 0;
       background: rgba(0,0,0,.5); z-index: 300;
@@ -215,11 +261,80 @@
     .btn-code-confirm:hover { background: #1e40af; }
     .btn-code-confirm:disabled { background: #94a3b8; cursor: not-allowed; }
 
-    /* ── 메인 래퍼 ── */
-    #survey-page { display: none; max-width: 720px; margin: 0 auto; padding: 30px 16px 60px; position: relative; z-index: 2; }
+    /* ══ 설문 페이지 ══ */
+    #survey-page {
+      display: none;
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 80px 16px 60px;
+      position: relative;
+      z-index: 2;
+    }
     #complete-page { display: none; max-width: 720px; margin: 0 auto; padding: 80px 16px 60px; }
 
-    /* ── 카드 ── */
+    /* ══ 설문 상단바 ══ */
+    #survey-top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    #survey-type-badge { line-height: 1; }
+    .btn-back-to-entry {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 6px 14px;
+      background: #fff;
+      color: #1a56db;
+      border: 1.5px solid #bfdbfe;
+      border-radius: 99px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .15s, border-color .15s;
+      flex-shrink: 0;
+    }
+    .btn-back-to-entry:hover { background: #eff6ff; border-color: #1a56db; }
+
+    /* ══ 진행률 바 (설문 페이지 내부) ══ */
+    #survey-progress-section {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 18px;
+      background: rgba(255,255,255,.85);
+      border-radius: 10px;
+      padding: 10px 14px;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      box-shadow: 0 1px 6px rgba(0,0,0,.06);
+    }
+    #progress-track {
+      flex: 1;
+      height: 8px;
+      background: #e2e8f0;
+      border-radius: 99px;
+      overflow: hidden;
+    }
+    #progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #1a56db, #3b82f6);
+      border-radius: 99px;
+      width: 0%;
+      transition: width .4s ease;
+    }
+    #progress-label {
+      font-size: 13px;
+      color: #64748b;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* ══ 카드 ══ */
     .card {
       background: rgba(255,255,255,.88);
       border-radius: 14px;
@@ -230,9 +345,7 @@
       -webkit-backdrop-filter: blur(4px);
     }
 
-    /* ════════════════════════════════
-       기본정보 섹션
-    ════════════════════════════════ */
+    /* ══ 기본정보 섹션 ══ */
     .basic-info-card {
       background: rgba(255,255,255,.95);
       border-radius: 14px;
@@ -270,7 +383,7 @@
     .basic-field.error-field .basic-field-label { color: #dc2626; }
     .basic-field.error-field .text-input { outline: 2px solid #f87171; border-color: #f87171; }
 
-    /* ── 섹션 카드 ── */
+    /* ══ 섹션 카드 ══ */
     .section-card .section-header {
       background: #1a56db;
       padding: 14px 24px;
@@ -280,24 +393,27 @@
     .section-card .section-title { color: #fff; font-size: 16px; font-weight: 700; }
     .section-card .section-body { padding: 8px 24px 24px; }
 
-    /* ── 유형 배지 ── */
+    /* ══ 유형 배지 ══ */
     .type-badge {
       display: inline-flex; align-items: center; gap: 6px;
       padding: 4px 12px; border-radius: 99px;
-      font-size: 13px; font-weight: 700; margin-bottom: 4px;
+      font-size: 13px; font-weight: 700;
     }
     .type-badge.general  { background: #eff6ff; color: #1a56db; border: 1px solid #bfdbfe; }
     .type-badge.employee { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
     .type-badge.partner  { background: #faf5ff; color: #7c3aed; border: 1px solid #ddd6fe; }
 
-    /* ── 질문 블록 ── */
+    /* ══ 질문 블록 ══ */
     .q-block { margin-top: 22px; padding-top: 22px; border-top: 1px solid #f1f5f9; }
     .q-block:first-child { border-top: none; }
     .q-label { font-size: 15.5px; font-weight: 600; color: #1e293b; margin-bottom: 12px; line-height: 1.5; }
-    .req { display: inline-block; background: #dc2626; color: #fff; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 99px; margin-left: 6px; vertical-align: middle; }
+
+    /* 필수 뱃지 숨김 — 검증 로직은 유지 */
+    .req { display: none !important; }
+
     .multi-hint { font-size: 13px; color: #64748b; font-weight: 400; margin-left: 6px; }
 
-    /* ── 토스트 팝업 ── */
+    /* ══ 토스트 팝업 ══ */
     #validation-toast {
       position: fixed; bottom: 24px; right: 16px; z-index: 200;
       background: #fff; border: 1.5px solid #fca5a5; border-radius: 14px;
@@ -315,7 +431,7 @@
     .toast-item { background: #fef2f2; border: 1.5px solid #fca5a5; color: #b91c1c; font-size: 12.5px; font-weight: 700; padding: 4px 10px; border-radius: 99px; cursor: pointer; transition: background .15s; }
     .toast-item:hover { background: #fee2e2; }
 
-    /* ── 라디오 선택지 ── */
+    /* ══ 라디오 선택지 ══ */
     .radio-group { display: flex; flex-direction: column; gap: 8px; }
     .radio-option { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 11px 14px; border-radius: 8px; border: 1.5px solid #e2e8f0; transition: border-color .15s, background .15s; user-select: none; }
     .radio-option:hover { border-color: #93c5fd; background: #f0f9ff; }
@@ -326,7 +442,7 @@
     .radio-option.selected .radio-dot::after { display: block; }
     .radio-option .option-text { font-size: 15px; color: #374151; }
 
-    /* ── 체크박스 선택지 ── */
+    /* ══ 체크박스 선택지 ══ */
     .checkbox-group { display: flex; flex-direction: column; gap: 8px; }
     .checkbox-option { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 11px 14px; border-radius: 8px; border: 1.5px solid #e2e8f0; transition: border-color .15s, background .15s; user-select: none; }
     .checkbox-option:hover { border-color: #93c5fd; background: #f0f9ff; }
@@ -337,7 +453,7 @@
     .checkbox-option.checked .checkbox-box::after { display: block; }
     .checkbox-option .option-text { font-size: 15px; color: #374151; }
 
-    /* ── 척도형 ── */
+    /* ══ 척도형 ══ */
     .scale-group { display: flex; flex-direction: column; gap: 8px; }
     .scale-labels { display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; padding: 0 2px; }
     .scale-options { display: flex; gap: 8px; flex: 1; }
@@ -349,7 +465,7 @@
     .scale-option.selected .scale-num { color: #1a56db; }
     .scale-option.selected .scale-dot { border-color: #1a56db; background: #1a56db; }
 
-    /* ── 텍스트 입력 ── */
+    /* ══ 텍스트 입력 ══ */
     .text-input, .textarea-input {
       width: 100%; border: 1.5px solid #e2e8f0; border-radius: 8px;
       padding: 11px 14px; font-size: 15px; font-family: inherit;
@@ -359,14 +475,14 @@
     .text-input:focus, .textarea-input:focus { border-color: #1a56db; }
     .textarea-input { min-height: 120px; }
 
-    /* ── 제출 버튼 ── */
+    /* ══ 제출 버튼 ══ */
     .submit-area { margin-top: 10px; }
     .btn-submit { width: 100%; padding: 16px; background: #1a56db; color: #fff; border: none; border-radius: 10px; font-size: 17px; font-weight: 700; cursor: pointer; transition: background .2s, transform .1s; letter-spacing: .3px; }
     .btn-submit:hover { background: #1e40af; }
     .btn-submit:active { transform: scale(.98); }
     .btn-submit:disabled { background: #94a3b8; cursor: not-allowed; }
 
-    /* ── 오류 안내 ── */
+    /* ══ 오류 안내 ══ */
     .error-msg { background: #fef2f2; border: 1.5px solid #fca5a5; color: #b91c1c; border-radius: 8px; padding: 12px 14px; font-size: 14px; margin-top: 12px; display: none; }
     .error-msg.visible { display: block; }
     .q-block.error-field .q-label { color: #dc2626; }
@@ -376,33 +492,23 @@
     .q-block.error-field .text-input,
     .q-block.error-field .textarea-input { outline: 2px solid #f87171; border-radius: 8px; }
 
-    /* ── 완료 화면 ── */
+    /* ══ 완료 화면 ══ */
     .complete-card { border-top: 5px solid #16a34a; padding: 48px 28px 40px; text-align: center; }
     .complete-icon { width: 64px; height: 64px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; }
     .complete-card h2 { font-size: 22px; font-weight: 800; color: #1e293b; margin-bottom: 12px; }
     .complete-card p { font-size: 16px; color: #64748b; line-height: 1.8; }
 
-    /* ── 로딩 오버레이 ── */
+    /* ══ 로딩 오버레이 ══ */
     #loading-overlay { display: none; position: fixed; inset: 0; background: rgba(255,255,255,.85); z-index: 999; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
     #loading-overlay.visible { display: flex; }
     .spinner { width: 44px; height: 44px; border: 4px solid #e2e8f0; border-top-color: #1a56db; border-radius: 50%; animation: spin .8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
     #loading-overlay span { font-size: 15px; color: #64748b; }
 
-    /* ── 개인정보 동의 ── */
-    .privacy-box { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 16px; margin-bottom: 14px; font-size: 14px; color: #475569; line-height: 1.7; }
-    .consent-label { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: #1e293b; padding: 12px 14px; border-radius: 8px; border: 1.5px solid #e2e8f0; transition: border-color .15s, background .15s; user-select: none; }
-    .consent-label:hover { border-color: #93c5fd; background: #f0f9ff; }
-    .consent-label.checked { border-color: #1a56db; background: #eff6ff; }
-    .consent-cb { width: 18px; height: 18px; border-radius: 4px; border: 2px solid #cbd5e1; background: #fff; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: border-color .15s, background .15s; }
-    .consent-cb::after { content: ''; width: 10px; height: 7px; border-left: 2.5px solid #fff; border-bottom: 2.5px solid #fff; transform: rotate(-45deg) translate(1px, -1px); display: none; }
-    .consent-label.checked .consent-cb { border-color: #1a56db; background: #1a56db; }
-    .consent-label.checked .consent-cb::after { display: block; }
-
-    /* ── 질문 설명 ── */
+    /* ══ 개인정보 동의 ══ */
     .q-desc { font-size: 13.5px; color: #64748b; margin-top: -4px; margin-bottom: 12px; line-height: 1.6; }
 
-    /* ── 개인정보 동의 모달 ── */
+    /* ══ 개인정보 동의 모달 ══ */
     #privacy-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 400; align-items: center; justify-content: center; padding: 16px; }
     #privacy-modal-overlay.visible { display: flex; }
     .privacy-modal { background: #fff; border-radius: 18px; width: 100%; max-width: 520px; max-height: 92vh; box-shadow: 0 8px 40px rgba(0,0,0,.25); display: flex; flex-direction: column; overflow: hidden; }
@@ -435,17 +541,22 @@
     .btn-privacy-start:hover:not(:disabled) { background: #1e40af; }
     .btn-privacy-start:disabled { background: #94a3b8; cursor: not-allowed; }
 
-    /* ── 반응형 ── */
+    /* ══ 반응형 ══ */
+    @media (max-width: 600px) {
+      .header-right { gap: 8px; }
+      .header-phone { font-size: 13px; }
+      .partners-btn { font-size: 12px; padding: 5px 10px; }
+      .logo-img { height: 38px; }
+    }
     @media (max-width: 480px) {
       body { font-size: 15px; background-attachment: scroll; }
       .section-card .section-body { padding: 20px 18px; }
       .section-card .section-header { padding: 12px 18px; }
       .basic-info-body { padding: 16px 18px 20px; }
       .q-label { font-size: 15px; }
-      .logo-img { height: 38px; }
-      #banner-section { padding-top: 94px; }
-      .header-phone { font-size: 13px; }
-      .partners-btn { font-size: 12px; padding: 4px 10px; }
+      #entry-screen { padding-top: 72px; }
+      #survey-page { padding-top: 72px; }
+      #complete-page { padding-top: 72px; }
       .entry-card { padding: 16px 18px; gap: 12px; }
       .entry-card-icon { width: 46px; height: 46px; font-size: 22px; border-radius: 10px; }
       .entry-card-title { font-size: 15px; }
@@ -453,30 +564,30 @@
       .scale-options { gap: 5px; }
       .scale-option { padding: 8px 3px; }
       .scale-option .scale-num { font-size: 14px; }
+      #survey-top-bar { flex-direction: column; align-items: flex-start; gap: 8px; }
+      .btn-back-to-entry { font-size: 12px; padding: 5px 12px; }
     }
     @media (max-width: 360px) {
       .logo-img { height: 32px; max-width: 120px; }
-      #banner-section { padding-top: 88px; }
+      .partners-btn { font-size: 11px; padding: 4px 8px; }
     }
   </style>
 </head>
 <body>
 
-<!-- 진행률 바 -->
+<!-- 헤더 -->
 <div id="progress-bar-wrap">
-  <div id="progress-bar-inner">
+  <div id="header-inner">
     <img src="LOGO/만능맨logo_partners.png" alt="만능맨" class="logo-img">
-    <div id="progress-track"><div id="progress-fill"></div></div>
-    <span id="progress-label">0%</span>
-  </div>
-  <div id="header-info-bar">
-    <a href="tel:18998827" class="header-phone">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 11.5a19.79 19.79 0 01-3.07-8.67A2 2 0 012 .82h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-      1899-8827
-    </a>
-    <a href="https://partners.10000man.co.kr/" target="_blank" rel="noopener noreferrer" class="partners-btn">
-      파트너스 신청하러가기 →
-    </a>
+    <div class="header-right">
+      <a href="tel:18998827" class="header-phone">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 11.5a19.79 19.79 0 01-3.07-8.67A2 2 0 012 .82h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+        1899-8827
+      </a>
+      <a href="https://partners.10000man.co.kr/" target="_blank" rel="noopener noreferrer" class="partners-btn">
+        파트너스 신청하러가기 →
+      </a>
+    </div>
   </div>
 </div>
 
@@ -493,6 +604,17 @@
     <button class="toast-close-btn" id="toast-close-btn" aria-label="닫기">✕</button>
   </div>
   <div class="toast-list" id="toast-list"></div>
+</div>
+
+<!-- 배너 팝업 (메인 진입 시 1회만 표시) -->
+<div id="banner-popup-overlay">
+  <div class="banner-popup-box">
+    <button class="banner-popup-close" onclick="closeBannerPopup()" aria-label="닫기">✕</button>
+    <img src="배너/준비.png" alt="만능맨 베타테스트 피드백 설문" class="banner-popup-img">
+    <div class="banner-popup-footer">
+      <button class="btn-banner-confirm" onclick="closeBannerPopup()">확인했습니다</button>
+    </div>
+  </div>
 </div>
 
 <!-- 비밀코드 모달 -->
@@ -569,11 +691,24 @@
   </div>
 </div>
 
-<!-- 배너 섹션 -->
-<div id="banner-section">
-  <div class="banner-inner">
-    <div class="banner-wrap">
-      <img src="배너/준비.png" alt="만능맨 베타테스트 피드백 설문" class="banner-img">
+<!-- 설문 필수 입력 안내 팝업 -->
+<div id="survey-notice-overlay">
+  <div class="survey-notice-box">
+    <div class="survey-notice-icon">📋</div>
+    <h3>안내</h3>
+    <p>모든 질문은 필수로 입력해주세요.</p>
+    <button class="btn-survey-notice-ok" onclick="closeSurveyNotice()">확인</button>
+  </div>
+</div>
+
+<!-- 다시 유형 선택 확인 팝업 -->
+<div id="back-confirm-overlay">
+  <div class="back-confirm-box">
+    <h3>유형을 다시 선택하시겠습니까?</h3>
+    <p>현재 작성 중인 내용은 초기화됩니다.</p>
+    <div class="back-confirm-btns">
+      <button class="btn-back-cancel" onclick="closeBackConfirm()">취소</button>
+      <button class="btn-back-confirm-entry" onclick="confirmBackToEntry()">다시 선택하기</button>
     </div>
   </div>
 </div>
@@ -616,7 +751,14 @@
 
 <!-- 설문 페이지 -->
 <div id="survey-page">
-  <div id="survey-type-badge" style="text-align:center;margin-bottom:14px;"></div>
+  <div id="survey-top-bar">
+    <div id="survey-type-badge"></div>
+    <button class="btn-back-to-entry" onclick="goBackToEntry()">← 다시 유형 선택하기</button>
+  </div>
+  <div id="survey-progress-section">
+    <div id="progress-track"><div id="progress-fill"></div></div>
+    <span id="progress-label">0 / 0 문항</span>
+  </div>
   <form id="survey-form" novalidate>
     <div id="survey-questions"></div>
     <div class="error-msg" id="error-msg"></div>
@@ -963,18 +1105,25 @@ let consentTimestamp = null;
 // 화면 초기화
 // ════════════════════════════════════════════════════════
 function init() {
-  document.getElementById('progress-track').style.display = 'none';
-  document.getElementById('progress-label').textContent = '';
   showEntry();
+  // 같은 세션에서 최초 1회만 배너 팝업 표시
+  if (!sessionStorage.getItem('bannerSeen')) {
+    document.getElementById('banner-popup-overlay').classList.add('visible');
+  }
 }
 
 function showEntry() {
   document.getElementById('entry-screen').style.display = 'block';
   document.getElementById('survey-page').style.display = 'none';
   document.getElementById('complete-page').style.display = 'none';
-  document.getElementById('banner-section').style.display = 'block';
-  document.getElementById('progress-track').style.display = 'none';
-  document.getElementById('progress-label').textContent = '';
+}
+
+// ════════════════════════════════════════════════════════
+// 배너 팝업
+// ════════════════════════════════════════════════════════
+function closeBannerPopup() {
+  document.getElementById('banner-popup-overlay').classList.remove('visible');
+  sessionStorage.setItem('bannerSeen', '1');
 }
 
 // ════════════════════════════════════════════════════════
@@ -1092,8 +1241,9 @@ function enterSurvey(type) {
   renderSurveyByType(type);
   document.getElementById('entry-screen').style.display = 'none';
   document.getElementById('survey-page').style.display = 'block';
-  document.getElementById('progress-track').style.display = 'block';
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  // 필수 입력 안내 팝업 표시
+  showSurveyNotice();
 }
 
 function renderSurveyByType(type) {
@@ -1156,9 +1306,7 @@ function buildBasicInfoCard() {
       </div>
 
       <div class="basic-field" id="basic-name-field">
-        <div class="basic-field-label">
-          이름 <span class="req">필수</span>
-        </div>
+        <div class="basic-field-label">이름</div>
         <input
           type="text"
           id="basic-name"
@@ -1172,9 +1320,7 @@ function buildBasicInfoCard() {
       </div>
 
       <div class="basic-field" id="basic-phone-field">
-        <div class="basic-field-label">
-          연락처 <span class="req">필수</span>
-        </div>
+        <div class="basic-field-label">연락처</div>
         <input
           type="tel"
           id="basic-phone"
@@ -1203,6 +1349,7 @@ function buildQuestionBlock(q, idx) {
 
   const isMulti = q.type === 'checkbox';
   const multiHint = isMulti ? '<span class="multi-hint">(복수 선택 가능)</span>' : '';
+  // req 스팬은 CSS로 숨겨지므로 검증 로직에는 영향 없음
   label.innerHTML = `Q${idx + 1}. ${esc(q.title)}${q.required !== false ? '<span class="req">필수</span>' : ''}${multiHint}`;
   block.appendChild(label);
 
@@ -1286,6 +1433,61 @@ function buildQuestionBlock(q, idx) {
 }
 
 // ════════════════════════════════════════════════════════
+// 필수 입력 안내 팝업
+// ════════════════════════════════════════════════════════
+function showSurveyNotice() {
+  document.getElementById('survey-notice-overlay').classList.add('visible');
+}
+
+function closeSurveyNotice() {
+  document.getElementById('survey-notice-overlay').classList.remove('visible');
+}
+
+// ════════════════════════════════════════════════════════
+// 다시 유형 선택하기
+// ════════════════════════════════════════════════════════
+function hasAnyInput() {
+  const name  = (document.getElementById('basic-name')?.value  || '').trim();
+  const phone = (document.getElementById('basic-phone')?.value || '').trim();
+  if (name || phone) return true;
+  const questions = QUESTION_CONFIG[currentType] || [];
+  for (const q of questions) {
+    const val = getAnswerValue(q);
+    if (val && val.trim()) return true;
+  }
+  return false;
+}
+
+function goBackToEntry() {
+  if (hasAnyInput()) {
+    document.getElementById('back-confirm-overlay').classList.add('visible');
+  } else {
+    resetAndShowEntry();
+  }
+}
+
+function closeBackConfirm() {
+  document.getElementById('back-confirm-overlay').classList.remove('visible');
+}
+
+function confirmBackToEntry() {
+  document.getElementById('back-confirm-overlay').classList.remove('visible');
+  resetAndShowEntry();
+}
+
+function resetAndShowEntry() {
+  currentType = null;
+  pendingType = null;
+  pendingPrivacyType = null;
+  privacyConsented = false;
+  consentTimestamp = null;
+  document.getElementById('survey-page').style.display = 'none';
+  document.getElementById('complete-page').style.display = 'none';
+  document.getElementById('entry-screen').style.display = 'block';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ════════════════════════════════════════════════════════
 // UI 이벤트 초기화
 // ════════════════════════════════════════════════════════
 function initChoiceUI() {
@@ -1333,7 +1535,6 @@ function initBasicInputs() {
   if (!nameEl) return;
 
   // iOS Safari IME 조합 입력을 방해하지 않도록 단순하게 처리
-  // 문자 필터링 없음 — 한글/영문/공백 모두 자유롭게 입력 가능
   nameEl.addEventListener('input', function() {
     if (this.value.trim()) {
       document.getElementById('basic-name-field').classList.remove('error-field');
@@ -1378,7 +1579,7 @@ function updateProgress() {
   const questions   = QUESTION_CONFIG[currentType] || [];
   const requiredQs  = questions.filter(q => q.required !== false);
 
-  const nameVal  = (document.getElementById('basic-name')?.value || '').trim();
+  const nameVal  = (document.getElementById('basic-name')?.value  || '').trim();
   const phoneVal = (document.getElementById('basic-phone')?.value || '').trim();
 
   const total    = requiredQs.length + 2;
@@ -1432,7 +1633,7 @@ function collectFormData() {
 
   const data = {
     participantType:  typeLabels[currentType] || currentType,
-    respondentName:   (document.getElementById('basic-name')?.value || '').trim(),
+    respondentName:   (document.getElementById('basic-name')?.value  || '').trim(),
     respondentPhone:  (document.getElementById('basic-phone')?.value || '').trim(),
     개인정보동의:       '동의',
     개인정보동의일시:    consentTimestamp || ''
@@ -1452,11 +1653,9 @@ function collectFormData() {
 function validateRequiredAnswers() {
   const errors = [];
 
-  // 기존 오류 클래스 초기화
   document.querySelectorAll('.q-block.error-field').forEach(el => el.classList.remove('error-field'));
   document.querySelectorAll('.basic-field.error-field').forEach(el => el.classList.remove('error-field'));
 
-  // 기본정보 검사
   const nameEl  = document.getElementById('basic-name');
   const phoneEl = document.getElementById('basic-phone');
 
@@ -1474,7 +1673,6 @@ function validateRequiredAnswers() {
     errors.push({ id: 'basic-phone-field', label: '연락처 (형식 오류)' });
   }
 
-  // 질문 검사
   const questions = QUESTION_CONFIG[currentType] || [];
   questions.forEach((q, idx) => {
     if (q.required === false) return;
@@ -1555,10 +1753,8 @@ document.getElementById('survey-form').addEventListener('submit', async function
 function showComplete() {
   document.getElementById('loading-overlay').classList.remove('visible');
   document.getElementById('validation-toast').classList.remove('visible');
-  document.getElementById('banner-section').style.display = 'none';
   document.getElementById('survey-page').style.display = 'none';
   document.getElementById('complete-page').style.display = 'block';
-  document.getElementById('progress-bar-wrap').style.display = 'none';
   document.getElementById('complete-msg').textContent = completeMessages[currentType] || '';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
