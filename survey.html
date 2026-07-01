@@ -189,11 +189,17 @@
     /* ══ 참여 유형 선택 화면 ══ */
     #entry-screen {
       display: none;
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 80px 16px 60px;
+      min-height: 100vh;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 16px 40px;
       position: relative;
       z-index: 2;
+    }
+    #entry-screen > .card {
+      width: 100%;
+      max-width: 720px;
     }
     .entry-intro { text-align: center; margin-bottom: 28px; }
     .entry-intro h2 { font-size: 22px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
@@ -1113,7 +1119,7 @@ function init() {
 }
 
 function showEntry() {
-  document.getElementById('entry-screen').style.display = 'block';
+  document.getElementById('entry-screen').style.display = 'flex';
   document.getElementById('survey-page').style.display = 'none';
   document.getElementById('complete-page').style.display = 'none';
 }
@@ -1483,7 +1489,7 @@ function resetAndShowEntry() {
   consentTimestamp = null;
   document.getElementById('survey-page').style.display = 'none';
   document.getElementById('complete-page').style.display = 'none';
-  document.getElementById('entry-screen').style.display = 'block';
+  document.getElementById('entry-screen').style.display = 'flex';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
