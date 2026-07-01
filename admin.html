@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>만능맨 관리자 — 베타테스트 응답 분석</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -393,6 +394,9 @@
         <div class="sidebar-item" data-view="codes" onclick="switchView(this,'codes')">
           <span class="icon">🔐</span> 설문 진입 코드 관리
         </div>
+        <div class="sidebar-item" style="color:#f87171;" onclick="openResetModal()">
+          <span class="icon">🗑️</span> 데이터 초기화
+        </div>
       </div>
       <div class="sidebar-footer">
         <button class="btn-logout" onclick="doLogout()">로그아웃</button>
@@ -470,32 +474,19 @@
         <!-- ── 엑셀 다운로드 ── -->
         <div class="view-panel" id="view-download">
           <div class="table-card">
-            <h4>엑셀(CSV) 다운로드</h4>
-            <p style="font-size:13px;color:#64748b;margin-bottom:4px;">응답 데이터를 CSV 파일로 다운로드합니다. 엑셀에서 바로 열 수 있습니다.</p>
-            <p style="font-size:12px;color:#94a3b8;margin-bottom:4px;">• BOM 처리로 한글 깨짐 없음 &nbsp;|&nbsp; • 현재 필터 적용 상태로 다운로드</p>
-            <div style="margin-bottom:12px;margin-top:16px;">
-              <select id="dl-type-filter" style="padding:7px 10px;border:1px solid #e2e8f0;border-radius:7px;font-size:13px;">
-                <option value="">유형 전체</option>
-                <option value="일반사용자">일반 사용자만</option>
-                <option value="임직원">임직원만</option>
-                <option value="파트너">파트너만</option>
-              </select>
-            </div>
+            <h4>엑셀 다운로드 (멀티시트)</h4>
+            <p style="font-size:13px;color:#64748b;margin-bottom:4px;">SheetJS를 이용한 멀티시트 엑셀 파일을 다운로드합니다.</p>
+            <p style="font-size:12px;color:#94a3b8;margin-bottom:16px;">• 전체응답 / 일반사용자 / 임직원 / 파트너 / 질문별통계 / 주관식의견 / 리워드후보 — 총 7개 시트</p>
             <div class="csv-group">
               <div class="csv-btn-card" onclick="downloadExcel('all')">
-                <div class="csv-icon">📄</div>
-                <h5>전체 응답 다운로드</h5>
-                <p>공통 + 유형별 응답 컬럼 포함 (이름/연락처 제외)</p>
-              </div>
-              <div class="csv-btn-card" onclick="downloadExcel('with_contact')">
-                <div class="csv-icon">📞</div>
-                <h5>이름/연락처 포함 다운로드</h5>
-                <p>이름, 연락처 컬럼 포함 (내부 관리용)</p>
+                <div class="csv-icon">📊</div>
+                <h5>전체 멀티시트 다운로드</h5>
+                <p>7개 시트 포함 — 이름/연락처 포함 (내부 관리용)</p>
               </div>
               <div class="csv-btn-card" onclick="downloadExcel('opinions')">
                 <div class="csv-icon">💬</div>
                 <h5>주관식 의견만 다운로드</h5>
-                <p>유형별 마지막 주관식 답변 항목만 포함</p>
+                <p>유형별 주관식 답변 항목만 단일 시트로 다운로드</p>
               </div>
             </div>
           </div>
@@ -552,6 +543,33 @@
   </div>
 </div>
 
+<!-- 데이터 초기화 모달 -->
+<div id="reset-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;width:100%;max-width:420px;margin:24px;box-shadow:0 8px 40px rgba(0,0,0,.25);overflow:hidden;">
+    <div style="background:#fef2f2;padding:18px 24px;border-bottom:1px solid #fecaca;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:20px;">&#9888;&#65039;</span>
+      <h3 style="font-size:15px;font-weight:700;color:#b91c1c;">응답 데이터 초기화</h3>
+    </div>
+    <div style="padding:22px 24px;">
+      <p style="font-size:14px;color:#374151;line-height:1.7;margin-bottom:16px;">
+        모든 응답 데이터가 <strong>영구적으로 삭제</strong>됩니다.<br>
+        삭제 전 자동으로 구글시트에 백업이 생성됩니다.
+      </p>
+      <p style="font-size:13px;color:#64748b;margin-bottom:14px;">확인을 위해 아래 입력창에 <code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-weight:700;color:#dc2626;">초기화</code> 를 입력하세요.</p>
+      <input type="text" id="reset-confirm-input" placeholder="초기화" autocomplete="off"
+        style="width:100%;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:15px;outline:none;transition:border-color .2s;"
+        oninput="document.getElementById('reset-confirm-btn').disabled=this.value!=='초기화';document.getElementById('reset-confirm-btn').style.opacity=this.value==='초기화'?'1':'.4';this.style.borderColor=this.value==='초기화'?'#16a34a':'#e2e8f0'">
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button onclick="closeResetModal()" style="flex:1;padding:11px;background:#f1f5f9;color:#374151;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">취소</button>
+        <button id="reset-confirm-btn" onclick="confirmReset()"
+          style="flex:1;padding:11px;background:#dc2626;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;opacity:.4;transition:opacity .2s;"
+          disabled>초기화 실행</button>
+      </div>
+      <div id="reset-status" style="margin-top:10px;font-size:13px;min-height:18px;"></div>
+    </div>
+  </div>
+</div>
+
 <script>
 // ════════════════════════════════════════════════════════
 // 설정값
@@ -587,63 +605,77 @@ const STATUS_COLORS = {
 };
 
 // 유형별 컬럼 키 & 질문 제목 매핑
+// colKey는 시트 컬럼과 일치, label의 Q번호는 화면 표시 번호
 const TYPE_QUESTIONS = {
   '일반사용자': [
-    {key:'일반_Q1',  label:'Q1. 이름'},
-    {key:'일반_Q2',  label:'Q2. 연락처'},
-    {key:'일반_Q3',  label:'Q3. 서비스 이해'},
-    {key:'일반_Q4',  label:'Q4. 문제 찾기 편의성'},
-    {key:'일반_Q5',  label:'Q5. 테스트 문제 유형'},
-    {key:'일반_Q6',  label:'Q6. 카테고리 헷갈림'},
-    {key:'일반_Q7',  label:'Q7. 견적 요청서 이해도'},
-    {key:'일반_Q8',  label:'Q8. 사진/설명 부담'},
-    {key:'일반_Q9',  label:'Q9. 막힌 부분'},
-    {key:'일반_Q10', label:'Q10. 전문가 신뢰도'},
-    {key:'일반_Q11', label:'Q11. 견적 구조 이해'},
-    {key:'일반_Q12', label:'Q12. 이용 의향'},
-    {key:'일반_Q13', label:'Q13. 이용 망설임 요소'},
-    {key:'일반_Q14', label:'Q14. 개선 필요 부분'},
-    {key:'일반_Q15', label:'Q15. 전체 만족도'}
+    {key:'일반_Q3',  label:'Q1. 서비스 이해'},
+    {key:'일반_Q4',  label:'Q2. 문제 찾기 편의성'},
+    {key:'일반_Q5',  label:'Q3. 테스트 문제 유형'},
+    {key:'일반_Q6',  label:'Q4. 카테고리 헷갈림'},
+    {key:'일반_Q7',  label:'Q5. 견적 요청서 이해도'},
+    {key:'일반_Q8',  label:'Q6. 사진/설명 부담'},
+    {key:'일반_Q9',  label:'Q7. 막힌 부분'},
+    {key:'일반_Q10', label:'Q8. 전문가 신뢰도'},
+    {key:'일반_Q11', label:'Q9. 견적 구조 이해'},
+    {key:'일반_Q12', label:'Q10. 이용 의향'},
+    {key:'일반_Q13', label:'Q11. 이용 망설임 요소'},
+    {key:'일반_Q14', label:'Q12. 개선 필요 부분'},
+    {key:'일반_Q15', label:'Q13. 전체 만족도'}
   ],
   '임직원': [
-    {key:'임직원_Q1',  label:'Q1. 이름'},
-    {key:'임직원_Q2',  label:'Q2. 소속 부서/직무'},
-    {key:'임직원_Q3',  label:'Q3. 테스트 기기'},
-    {key:'임직원_Q4',  label:'Q4. 테스트 화면'},
-    {key:'임직원_Q5',  label:'Q5. 서비스 직관성'},
-    {key:'임직원_Q6',  label:'Q6. 서비스 전달 명확성'},
-    {key:'임직원_Q7',  label:'Q7. 카테고리 구조 적절성'},
-    {key:'임직원_Q8',  label:'Q8. 카테고리 개선 필요 부분'},
-    {key:'임직원_Q9',  label:'Q9. 이탈 가능성 높은 지점'},
-    {key:'임직원_Q10', label:'Q10. 용어 이해 용이성'},
-    {key:'임직원_Q11', label:'Q11. 수정 필요 용어'},
-    {key:'임직원_Q12', label:'Q12. 전문가 프로필 신뢰도'},
-    {key:'임직원_Q13', label:'Q13. 인증/배지 가시성'},
-    {key:'임직원_Q14', label:'Q14. 견적 비교 구조 명확성'},
-    {key:'임직원_Q15', label:'Q15. 결제/수수료 오해 가능성'},
-    {key:'임직원_Q16', label:'Q16. 운영 리스크 요소'},
-    {key:'임직원_Q17', label:'Q17. 오픈베타 전 보완 기능'},
-    {key:'임직원_Q18', label:'Q18. 신뢰 부족 지점'},
-    {key:'임직원_Q19', label:'Q19. 운영 구조 충분도'},
-    // Q20(기능추가 관련) 삭제 — 기존 데이터의 임직원_Q20 컬럼은 시트에 보존됨
-    {key:'임직원_Q21', label:'Q20. 경쟁사 대비 강점'},
-    {key:'임직원_Q22', label:'Q21. 핵심 메시지'},
-    {key:'임직원_Q23', label:'Q22. 오픈베타 진행 가능성'},
-    {key:'임직원_Q24', label:'Q23. 우선 수정 3가지'},
-    {key:'임직원_Q25', label:'Q24. 종합 의견'}
+    {key:'임직원_Q2',  label:'Q1. 소속 부서/직무'},
+    {key:'임직원_Q3',  label:'Q2. 테스트 기기'},
+    {key:'임직원_Q4',  label:'Q3. 테스트 화면'},
+    {key:'임직원_Q5',  label:'Q4. 서비스 직관성'},
+    {key:'임직원_Q6',  label:'Q5. 서비스 전달 명확성'},
+    {key:'임직원_Q7',  label:'Q6. 카테고리 구조 적절성'},
+    {key:'임직원_Q8',  label:'Q7. 카테고리 개선 필요 부분'},
+    {key:'임직원_Q9',  label:'Q8. 이탈 가능성 높은 지점'},
+    {key:'임직원_Q10', label:'Q9. 용어 이해 용이성'},
+    {key:'임직원_Q11', label:'Q10. 수정 필요 용어'},
+    {key:'임직원_Q12', label:'Q11. 전문가 프로필 신뢰도'},
+    {key:'임직원_Q13', label:'Q12. 인증/배지 가시성'},
+    {key:'임직원_Q14', label:'Q13. 견적 비교 구조 명확성'},
+    {key:'임직원_Q15', label:'Q14. 결제/수수료 오해 가능성'},
+    {key:'임직원_Q16', label:'Q15. 운영 리스크 요소'},
+    {key:'임직원_Q17', label:'Q16. 오픈베타 전 보완 기능'},
+    {key:'임직원_Q18', label:'Q17. 신뢰 부족 지점'},
+    {key:'임직원_Q19', label:'Q18. 운영 구조 충분도'},
+    {key:'임직원_Q21', label:'Q19. 경쟁사 대비 강점'},
+    {key:'임직원_Q22', label:'Q20. 핵심 메시지'},
+    {key:'임직원_Q23', label:'Q21. 오픈베타 진행 가능성'},
+    {key:'임직원_Q24', label:'Q22. 우선 수정 3가지'},
+    {key:'임직원_Q25', label:'Q23. 종합 의견'}
   ],
-  '파트너': (() => {
-    const q = [];
-    for(let i=1;i<=22;i++) q.push({key:`파트너_Q${i}`, label:`Q${i}`});
-    return q;
-  })()
+  '파트너': [
+    {key:'파트너_Q3',  label:'Q1. 업체명/상호명'},
+    {key:'파트너_Q4',  label:'Q2. 활동 지역'},
+    {key:'파트너_Q5',  label:'Q3. 주요 작업 분야'},
+    {key:'파트너_Q6',  label:'Q4. 서비스 구조 이해도'},
+    {key:'파트너_Q7',  label:'Q5. 고객 의뢰 흐름 적합성'},
+    {key:'파트너_Q8',  label:'Q6. 견적 정보 충분도'},
+    {key:'파트너_Q9',  label:'Q7. 견적 시 추가 필요 정보'},
+    {key:'파트너_Q10', label:'Q8. 채팅/상담 편의성'},
+    {key:'파트너_Q11', label:'Q9. 견적 비교 구조 의견'},
+    {key:'파트너_Q12', label:'Q10. 수수료 구조 수용도'},
+    {key:'파트너_Q13', label:'Q11. 걱정되는 부분'},
+    {key:'파트너_Q14', label:'Q12. 파트너 프로필 필요 정보'},
+    {key:'파트너_Q15', label:'Q13. 배지 신뢰 효과'},
+    {key:'파트너_Q16', label:'Q14. 중요 혜택'},
+    {key:'파트너_Q17', label:'Q15. 파트너 참여 의향'},
+    {key:'파트너_Q18', label:'Q16. 가입 불편 부분'},
+    {key:'파트너_Q19', label:'Q17. 개선 필요 기능'},
+    {key:'파트너_Q20', label:'Q18. 종합 의견'},
+    {key:'파트너_Q21', label:'Q19. 적정 수수료 수준'},
+    {key:'파트너_Q22', label:'Q20. 수수료 추가 의견'}
+  ]
 };
 
-// 주관식 의견 컬럼 (유형별 마지막 주관식)
+// 주관식 의견 컬럼 (유형별 주관식)
 const OPINION_KEYS = {
-  '일반사용자': [{key:'일반_Q14', label:'Q14. 가장 개선이 필요한 부분'}],
-  '임직원':    [{key:'임직원_Q24', label:'Q24. 우선 수정 3가지'}, {key:'임직원_Q25', label:'Q25. 종합 의견'}],
-  '파트너':    [{key:'파트너_Q18', label:'Q18. 가입 불편 부분'}, {key:'파트너_Q19', label:'Q19. 개선 필요 기능'}, {key:'파트너_Q20', label:'Q20. 종합 의견'}, {key:'파트너_Q22', label:'Q22. 수수료 관련 추가 의견'}]
+  '일반사용자': [{key:'일반_Q14', label:'Q12. 개선 필요 부분'}],
+  '임직원':    [{key:'임직원_Q24', label:'Q22. 우선 수정 3가지'}, {key:'임직원_Q25', label:'Q23. 종합 의견'}],
+  '파트너':    [{key:'파트너_Q18', label:'Q16. 가입 불편 부분'}, {key:'파트너_Q19', label:'Q17. 개선 필요 기능'}, {key:'파트너_Q20', label:'Q18. 종합 의견'}, {key:'파트너_Q22', label:'Q20. 수수료 추가 의견'}]
 };
 
 // ════════════════════════════════════════════════════════
@@ -830,8 +862,8 @@ function renderResponseTable(data) {
         <td style="white-space:nowrap;font-size:12px">${fmt(r.submittedAt)}</td>
         <td><code style="font-size:11px;color:#6366f1">${r.responseId || '-'}</code></td>
         <td>${typeBadge(r.participantType)}</td>
-        <td style="font-size:13px">${esc(r.name) || '<span style="color:#94a3b8">-</span>'}</td>
-        <td style="font-size:12px;color:#64748b">${esc(r.phone) || '-'}</td>
+        <td style="font-size:13px">${esc(r.respondentName) || '<span style="color:#94a3b8">-</span>'}</td>
+        <td style="font-size:12px;color:#64748b">${esc(r.respondentPhone) || '-'}</td>
         <td>
           <select class="status-select" onchange="updateStatus('${r.responseId}', this.value)">
             ${['접수','확인중','반영예정','반영완료','보류'].map(s =>
@@ -892,9 +924,11 @@ async function updateMemo(responseId, memo) {
 // ════════════════════════════════════════════════════════
 // 통계 분석
 // ════════════════════════════════════════════════════════
+let statsTypeFilter = '';
+
 function renderStats() {
-  const data = allResponses;
-  if (data.length === 0) {
+  const allData = allResponses;
+  if (allData.length === 0) {
     document.getElementById('stats-content').innerHTML = '<div class="empty-state">응답 데이터가 없습니다.</div>';
     return;
   }
@@ -902,28 +936,51 @@ function renderStats() {
   Object.values(chartInstances).forEach(c => c.destroy());
   chartInstances = {};
 
-  const genData  = data.filter(r => r.participantType === '일반사용자');
-  const empData  = data.filter(r => r.participantType === '임직원');
-  const partData = data.filter(r => r.participantType === '파트너');
+  const genCount  = allData.filter(r => r.participantType === '일반사용자').length;
+  const empCount  = allData.filter(r => r.participantType === '임직원').length;
+  const partCount = allData.filter(r => r.participantType === '파트너').length;
 
-  document.getElementById('stats-content').innerHTML = `
+  const tabsHtml = `
+    <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;">
+      ${[
+        {val:'', label:'전체', count: allData.length, cls:'badge-blue'},
+        {val:'일반사용자', label:'일반사용자', count: genCount, cls:'badge-blue'},
+        {val:'임직원', label:'임직원', count: empCount, cls:'badge-green'},
+        {val:'파트너', label:'파트너', count: partCount, cls:'badge-purple'}
+      ].map(t => `
+        <button onclick="setStatsType('${t.val}')"
+          style="padding:7px 14px;border-radius:20px;border:1.5px solid ${statsTypeFilter===t.val?'#1a56db':'#e2e8f0'};
+                 background:${statsTypeFilter===t.val?'#1a56db':'#fff'};
+                 color:${statsTypeFilter===t.val?'#fff':'#374151'};
+                 font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;">
+          ${t.label} <span style="font-size:11px;opacity:.8;">(${t.count})</span>
+        </button>`).join('')}
+    </div>`;
+
+  let data = statsTypeFilter ? allData.filter(r => r.participantType === statsTypeFilter) : allData;
+  const genData  = allData.filter(r => r.participantType === '일반사용자');
+  const empData  = allData.filter(r => r.participantType === '임직원');
+  const partData = allData.filter(r => r.participantType === '파트너');
+
+  document.getElementById('stats-content').innerHTML = tabsHtml + `
+    <div class="summary-grid" style="margin-bottom:20px;">
+      <div class="stat-card blue"><div class="sc-label">총 응답</div><div class="sc-value">${allData.length}</div></div>
+      <div class="stat-card"><div class="sc-label">일반사용자</div><div class="sc-value">${genCount}</div></div>
+      <div class="stat-card green"><div class="sc-label">임직원</div><div class="sc-value">${empCount}</div></div>
+      <div class="stat-card purple"><div class="sc-label">파트너</div><div class="sc-value">${partCount}</div></div>
+    </div>
     <div class="chart-grid">
       <div class="chart-card"><h4>참여자 유형 비율</h4><canvas id="chart-type"></canvas></div>
-      <div class="chart-card"><h4>일반사용자 — 서비스 이해도 (Q3)</h4><canvas id="chart-gen-q3"></canvas></div>
-      <div class="chart-card"><h4>일반사용자 — 이용 의향 (Q12)</h4><canvas id="chart-gen-q12"></canvas></div>
-      <div class="chart-card"><h4>일반사용자 — 전체 만족도 (Q15)</h4><canvas id="chart-gen-q15"></canvas></div>
-      <div class="chart-card"><h4>임직원 — 오픈베타 가능성 (Q22)</h4><canvas id="chart-emp-q23"></canvas></div>
-      <div class="chart-card"><h4>파트너 — 참여 의향 (Q17)</h4><canvas id="chart-part-q17"></canvas></div>
-      <div class="chart-card"><h4>파트너 — 적정 수수료 부담 수준 (Q21)</h4><canvas id="chart-part-q21"></canvas></div>
-    </div>
-    <div class="summary-grid" style="margin-bottom:24px;">
-      <div class="stat-card"><div class="sc-label">일반사용자 응답</div><div class="sc-value">${genData.length}</div></div>
-      <div class="stat-card green"><div class="sc-label">임직원 응답</div><div class="sc-value">${empData.length}</div></div>
-      <div class="stat-card purple"><div class="sc-label">파트너 응답</div><div class="sc-value">${partData.length}</div></div>
+      <div class="chart-card"><h4>일반사용자 — 서비스 이해도 (Q1)</h4><canvas id="chart-gen-q3"></canvas></div>
+      <div class="chart-card"><h4>일반사용자 — 이용 의향 (Q10)</h4><canvas id="chart-gen-q12"></canvas></div>
+      <div class="chart-card"><h4>일반사용자 — 전체 만족도 (Q13)</h4><canvas id="chart-gen-q15"></canvas></div>
+      <div class="chart-card"><h4>임직원 — 오픈베타 진행 가능성 (Q21)</h4><canvas id="chart-emp-q23"></canvas></div>
+      <div class="chart-card"><h4>파트너 — 참여 의향 (Q15)</h4><canvas id="chart-part-q17"></canvas></div>
+      <div class="chart-card"><h4>파트너 — 적정 수수료 수준 (Q19)</h4><canvas id="chart-part-q21"></canvas></div>
     </div>`;
 
   setTimeout(() => {
-    makeDonut('chart-type', countBy(data, 'participantType'));
+    makeDonut('chart-type', countBy(allData, 'participantType'));
     makeBar('chart-gen-q3', countBy(genData, '일반_Q3'), [
       '집수리/설비 전문가를 연결해주는 서비스','견적 비교 서비스','채팅 상담 서비스','정확히 이해하기 어려웠음','기타'
     ]);
@@ -941,6 +998,11 @@ function renderStats() {
       '1% 이하','2%','3%','4%','5%','6% 이상','고정 수수료 방식이 더 적절하다고 생각함','아직 판단하기 어려움'
     ]);
   }, 100);
+}
+
+function setStatsType(val) {
+  statsTypeFilter = val;
+  renderStats();
 }
 
 // ════════════════════════════════════════════════════════
@@ -979,7 +1041,7 @@ function renderOpinions() {
           <span class="badge badge-gray" style="font-size:11px">${fmt(r.submittedAt)}</span>
           <span class="badge ${r.participantType==='일반사용자'?'badge-blue':r.participantType==='임직원'?'badge-green':'badge-purple'}" style="font-size:11px">${r.participantType}</span>
           <span class="badge badge-gray" style="font-size:11px">${label}</span>
-          <span style="font-size:11px;color:#94a3b8">${esc(r.name)||''}</span>
+          <span style="font-size:11px;color:#94a3b8">${esc(r.respondentName)||''}</span>
         </div>
         <div class="op-text">${esc(val)}</div>
       </div>`).join('')}
@@ -1034,8 +1096,8 @@ function openDetail(responseId) {
       ['제출일시', r.submittedAt],
       ['응답ID',   r.responseId],
       ['참여자유형', r.participantType],
-      ['이름',     r.name, true],
-      ['연락처',   r.phone, true],
+      ['이름',     r.respondentName, true],
+      ['연락처',   r.respondentPhone, true],
       ['개인정보동의', r['개인정보동의'] || '-'],
       ['동의일시',   r['개인정보동의일시'] || '-'],
       ['처리상태', r['처리상태']],
@@ -1071,69 +1133,123 @@ document.getElementById('detail-modal').addEventListener('click', function(e) {
 });
 
 // ════════════════════════════════════════════════════════
-// 엑셀(CSV) 다운로드
+// 엑셀 다운로드 (SheetJS 멀티시트)
 // ════════════════════════════════════════════════════════
 function downloadExcel(mode) {
-  const typeFilter = document.getElementById('dl-type-filter').value;
-  let data = typeFilter ? allResponses.filter(r => r.participantType === typeFilter) : [...allResponses];
-
   const now = new Date();
   const ts  = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+  const data = [...allResponses];
 
   if (mode === 'opinions') {
     const headers = ['제출일시','응답ID','참여자유형','이름','질문','의견내용'];
-    const rows = [];
+    const rows = [headers];
     data.forEach(r => {
-      const keys = OPINION_KEYS[r.participantType] || [];
-      keys.forEach(({key, label}) => {
+      (OPINION_KEYS[r.participantType] || []).forEach(({key, label}) => {
         const val = r[key];
         if (val && val.trim() && val !== '-') {
-          rows.push([r.submittedAt, r.responseId, r.participantType, r.name || '', label, val]);
+          rows.push([r.submittedAt, r.responseId, r.participantType, r.respondentName || '', label, val]);
         }
       });
     });
-    exportCsv(`만능맨_주관식의견_${ts}.csv`, [headers, ...rows]);
+    exportXlsxSingle(`만능맨_주관식의견_${ts}.xlsx`, '주관식의견', rows);
     return;
   }
 
-  const includeContact = (mode === 'with_contact');
-  const privateFields  = includeContact ? [] : ['name', 'phone'];
-
-  // 공통 컬럼 + 선택 유형 컬럼만 포함
-  const commonCols = ['submittedAt', 'participantType', 'responseId'];
-  if (includeContact) { commonCols.push('name'); commonCols.push('phone'); }
-
-  let typeCols = [];
-  if (!typeFilter) {
-    // 전체 — 유형별 컬럼 모두 포함
-    for (let i=1;i<=15;i++) typeCols.push('일반_Q'+i);
-    for (let i=1;i<=25;i++) typeCols.push('임직원_Q'+i);
-    for (let i=1;i<=22;i++) typeCols.push('파트너_Q'+i);
-  } else {
-    const typeMap = {'일반사용자':'일반', '임직원':'임직원', '파트너':'파트너'};
-    const counts  = {'일반사용자':15, '임직원':25, '파트너':22};
-    const prefix  = typeMap[typeFilter];
-    const cnt     = counts[typeFilter] || 0;
-    for (let i=1;i<=cnt;i++) typeCols.push(`${prefix}_Q${i}`);
+  if (typeof XLSX === 'undefined') {
+    alert('SheetJS 라이브러리가 로드되지 않았습니다. 페이지를 새로고침해주세요.');
+    return;
   }
 
-  const adminCols   = ['처리상태','관리자메모'];
-  const consentCols = ['개인정보동의', '개인정보동의일시'];
-  const allCols     = [...commonCols, ...typeCols, ...adminCols, ...consentCols];
-  const rows      = data.map(r => allCols.map(k => r[k] || ''));
+  const wb = XLSX.utils.book_new();
+  const commonBase = ['submittedAt','participantType','responseId','respondentName','respondentPhone'];
+  const adminCols  = ['처리상태','관리자메모','개인정보동의','개인정보동의일시'];
 
-  exportCsv(`만능맨_설문응답_${typeFilter||'전체'}_${ts}.csv`, [allCols, ...rows]);
+  function makeTypeSheet(typeData, prefix, maxQ, skipQs = []) {
+    const qCols = [];
+    for (let i = 1; i <= maxQ; i++) {
+      if (!skipQs.includes(i)) qCols.push(`${prefix}_Q${i}`);
+    }
+    const headers = [...commonBase, ...qCols, ...adminCols];
+    const rows = [headers, ...typeData.map(r => headers.map(k => r[k] || ''))];
+    return XLSX.utils.aoa_to_sheet(rows);
+  }
+
+  const genData  = data.filter(r => r.participantType === '일반사용자');
+  const empData  = data.filter(r => r.participantType === '임직원');
+  const partData = data.filter(r => r.participantType === '파트너');
+
+  // 시트1: 전체응답 (respondentName/Phone 포함)
+  const allHeaders = [...commonBase,
+    ...Array.from({length:15},(_,i)=>`일반_Q${i+1}`),
+    ...Array.from({length:25},(_,i)=>`임직원_Q${i+1}`),
+    ...Array.from({length:22},(_,i)=>`파트너_Q${i+1}`),
+    ...adminCols];
+  XLSX.utils.book_append_sheet(wb,
+    XLSX.utils.aoa_to_sheet([allHeaders, ...data.map(r => allHeaders.map(k => r[k] || ''))]),
+    '전체응답');
+
+  // 시트2~4: 유형별
+  XLSX.utils.book_append_sheet(wb, makeTypeSheet(genData,  '일반',  15),       '일반사용자');
+  XLSX.utils.book_append_sheet(wb, makeTypeSheet(empData,  '임직원', 25, [20]), '임직원');
+  XLSX.utils.book_append_sheet(wb, makeTypeSheet(partData, '파트너', 22),       '파트너');
+
+  // 시트5: 질문별 통계 (선택형 질문 응답 분포)
+  const statRows = [['유형','질문colKey','질문','선택지','응답수','비율(%)']];
+  const statTargets = [
+    {type:'일반사용자', data:genData,  key:'일반_Q3',  label:'Q1. 서비스 이해'},
+    {type:'일반사용자', data:genData,  key:'일반_Q10', label:'Q8. 전문가 신뢰도'},
+    {type:'일반사용자', data:genData,  key:'일반_Q12', label:'Q10. 이용 의향'},
+    {type:'일반사용자', data:genData,  key:'일반_Q15', label:'Q13. 전체 만족도'},
+    {type:'임직원',    data:empData,  key:'임직원_Q23',label:'Q21. 오픈베타 진행 가능성'},
+    {type:'파트너',    data:partData, key:'파트너_Q17',label:'Q15. 파트너 참여 의향'},
+    {type:'파트너',    data:partData, key:'파트너_Q21',label:'Q19. 적정 수수료 수준'},
+  ];
+  statTargets.forEach(({type, data: d, key, label}) => {
+    const counts = countBy(d, key);
+    const total  = d.length || 1;
+    Object.entries(counts).sort((a,b)=>b[1]-a[1]).forEach(([opt, cnt]) => {
+      statRows.push([type, key, label, opt, cnt, ((cnt/total)*100).toFixed(1)+'%']);
+    });
+  });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(statRows), '질문별통계');
+
+  // 시트6: 주관식
+  const opRows = [['제출일시','응답ID','참여자유형','이름','질문','의견내용']];
+  data.forEach(r => {
+    (OPINION_KEYS[r.participantType] || []).forEach(({key, label}) => {
+      const val = r[key];
+      if (val && val.trim() && val !== '-') {
+        opRows.push([r.submittedAt, r.responseId, r.participantType, r.respondentName || '', label, val]);
+      }
+    });
+  });
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(opRows), '주관식의견');
+
+  // 시트7: 리워드 후보 (상태가 '접수'이면서 이름/연락처 있는 응답)
+  const rewardHeaders = ['제출일시','응답ID','참여자유형','이름','연락처','처리상태'];
+  const rewardRows = [rewardHeaders,
+    ...data.filter(r => r.respondentName && r.respondentPhone)
+           .map(r => [r.submittedAt, r.responseId, r.participantType, r.respondentName, r.respondentPhone, r['처리상태']])];
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rewardRows), '리워드후보');
+
+  XLSX.writeFile(wb, `만능맨_베타피드백_${ts}.xlsx`);
 }
 
-function exportCsv(filename, rows) {
-  const csvContent = rows
-    .map(row => row.map(cell => `"${String(cell).replace(/"/g,'""').replace(/\n/g,' ')}"`).join(','))
-    .join('\r\n');
-  const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url; a.download = filename; a.click();
-  URL.revokeObjectURL(url);
+function exportXlsxSingle(filename, sheetName, rows) {
+  if (typeof XLSX === 'undefined') {
+    const csvContent = rows
+      .map(row => row.map(cell => `"${String(cell).replace(/"/g,'""').replace(/\n/g,' ')}"`).join(','))
+      .join('\r\n');
+    const blob = new Blob(['﻿' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename.replace('.xlsx', '.csv');
+    a.click();
+    return;
+  }
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), sheetName);
+  XLSX.writeFile(wb, filename);
 }
 
 // ════════════════════════════════════════════════════════
@@ -1249,6 +1365,68 @@ function esc(str) {
     .replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;');
 }
+
+// ════════════════════════════════════════════════════════
+// 데이터 초기화
+// ════════════════════════════════════════════════════════
+function openResetModal() {
+  const modal = document.getElementById('reset-modal');
+  modal.style.display = 'flex';
+  document.getElementById('reset-confirm-input').value = '';
+  document.getElementById('reset-confirm-btn').disabled = true;
+  document.getElementById('reset-confirm-btn').style.opacity = '.4';
+  document.getElementById('reset-confirm-input').style.borderColor = '#e2e8f0';
+  document.getElementById('reset-status').textContent = '';
+  setTimeout(() => document.getElementById('reset-confirm-input').focus(), 100);
+}
+
+function closeResetModal() {
+  document.getElementById('reset-modal').style.display = 'none';
+}
+
+async function confirmReset() {
+  const btn = document.getElementById('reset-confirm-btn');
+  const statusEl = document.getElementById('reset-status');
+  btn.disabled = true;
+  btn.textContent = '초기화 중...';
+  statusEl.style.color = '#64748b';
+  statusEl.textContent = '백업 생성 후 데이터를 삭제하는 중입니다...';
+
+  try {
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action: 'resetData', password: adminPassword })
+    });
+    const json = await res.json();
+    if (json.success) {
+      statusEl.style.color = '#16a34a';
+      statusEl.textContent = `완료! 백업: ${json.backupName} (${json.deletedCount}건 삭제)`;
+      allResponses = [];
+      filteredResponses = [];
+      setTimeout(() => {
+        closeResetModal();
+        renderCurrentView();
+      }, 2000);
+    } else {
+      statusEl.style.color = '#dc2626';
+      statusEl.textContent = '오류: ' + (json.error || '알 수 없는 오류');
+      btn.disabled = false;
+      btn.textContent = '초기화 실행';
+      btn.style.opacity = '1';
+    }
+  } catch(e) {
+    statusEl.style.color = '#dc2626';
+    statusEl.textContent = '서버 연결 오류. 다시 시도해주세요.';
+    btn.disabled = false;
+    btn.textContent = '초기화 실행';
+    btn.style.opacity = '1';
+  }
+}
+
+document.getElementById('reset-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeResetModal();
+});
 </script>
 </body>
 </html>

@@ -147,26 +147,10 @@
       position: relative;
       z-index: 2;
     }
-    .entry-intro {
-      text-align: center;
-      margin-bottom: 28px;
-    }
-    .entry-intro h2 {
-      font-size: 22px;
-      font-weight: 800;
-      color: #1e293b;
-      margin-bottom: 8px;
-    }
-    .entry-intro p {
-      font-size: 15px;
-      color: #64748b;
-      line-height: 1.7;
-    }
-    .entry-cards {
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
+    .entry-intro { text-align: center; margin-bottom: 28px; }
+    .entry-intro h2 { font-size: 22px; font-weight: 800; color: #1e293b; margin-bottom: 8px; }
+    .entry-intro p { font-size: 15px; color: #64748b; line-height: 1.7; }
+    .entry-cards { display: flex; flex-direction: column; gap: 14px; }
     .entry-card {
       background: rgba(255,255,255,.93);
       border: 2px solid #e2e8f0;
@@ -181,19 +165,12 @@
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
     }
-    .entry-card:hover {
-      border-color: #1a56db;
-      box-shadow: 0 4px 20px rgba(26,86,219,.16);
-      transform: translateY(-2px);
-    }
+    .entry-card:hover { border-color: #1a56db; box-shadow: 0 4px 20px rgba(26,86,219,.16); transform: translateY(-2px); }
     .entry-card:active { transform: translateY(0); }
     .entry-card-icon {
-      width: 56px;
-      height: 56px;
+      width: 56px; height: 56px;
       border-radius: 14px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       font-size: 26px;
       flex-shrink: 0;
     }
@@ -201,151 +178,46 @@
     .entry-card-icon.green  { background: #f0fdf4; }
     .entry-card-icon.purple { background: #faf5ff; }
     .entry-card-body { flex: 1; min-width: 0; }
-    .entry-card-title {
-      font-size: 17px;
-      font-weight: 800;
-      color: #1e293b;
-      margin-bottom: 4px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    .entry-card-title { font-size: 17px; font-weight: 800; color: #1e293b; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
     .entry-lock-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 3px;
-      font-size: 11px;
-      font-weight: 600;
-      padding: 2px 7px;
-      border-radius: 99px;
-      background: #fef9c3;
-      color: #92400e;
-      border: 1px solid #fde68a;
+      display: inline-flex; align-items: center; gap: 3px;
+      font-size: 11px; font-weight: 600; padding: 2px 7px;
+      border-radius: 99px; background: #fef9c3; color: #92400e; border: 1px solid #fde68a;
     }
-    .entry-card-desc {
-      font-size: 14px;
-      color: #64748b;
-      line-height: 1.55;
-    }
-    .entry-card-arrow {
-      font-size: 20px;
-      color: #cbd5e1;
-      flex-shrink: 0;
-      transition: color .2s;
-    }
+    .entry-card-desc { font-size: 14px; color: #64748b; line-height: 1.55; }
+    .entry-card-arrow { font-size: 20px; color: #cbd5e1; flex-shrink: 0; transition: color .2s; }
     .entry-card:hover .entry-card-arrow { color: #1a56db; }
 
     /* ════════════════════════════════
        비밀코드 모달
     ════════════════════════════════ */
     #code-modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.5);
-      z-index: 300;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.5); z-index: 300;
+      align-items: center; justify-content: center; padding: 20px;
     }
     #code-modal-overlay.visible { display: flex; }
     .code-modal {
-      background: #fff;
-      border-radius: 18px;
-      padding: 32px 28px 28px;
-      width: 100%;
-      max-width: 380px;
-      box-shadow: 0 8px 40px rgba(0,0,0,.22);
-      text-align: center;
-      position: relative;
+      background: #fff; border-radius: 18px; padding: 32px 28px 28px;
+      width: 100%; max-width: 380px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.22); text-align: center; position: relative;
     }
-    .code-modal-icon {
-      width: 56px; height: 56px;
-      background: #eff6ff;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 16px;
-      font-size: 26px;
-    }
-    .code-modal h3 {
-      font-size: 18px;
-      font-weight: 800;
-      color: #1e293b;
-      margin-bottom: 6px;
-    }
-    .code-modal-desc {
-      font-size: 14px;
-      color: #64748b;
-      margin-bottom: 20px;
-      line-height: 1.6;
-    }
-    .code-input {
-      width: 100%;
-      padding: 13px 16px;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 10px;
-      font-size: 17px;
-      text-align: center;
-      letter-spacing: 4px;
-      outline: none;
-      transition: border-color .2s;
-      font-family: inherit;
-    }
+    .code-modal-icon { width: 56px; height: 56px; background: #eff6ff; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 26px; }
+    .code-modal h3 { font-size: 18px; font-weight: 800; color: #1e293b; margin-bottom: 6px; }
+    .code-modal-desc { font-size: 14px; color: #64748b; margin-bottom: 20px; line-height: 1.6; }
+    .code-input { width: 100%; padding: 13px 16px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 17px; text-align: center; letter-spacing: 4px; outline: none; transition: border-color .2s; font-family: inherit; }
     .code-input:focus { border-color: #1a56db; }
-    .code-modal-error {
-      margin-top: 8px;
-      font-size: 13px;
-      color: #dc2626;
-      min-height: 20px;
-    }
-    .code-modal-btns {
-      display: flex;
-      gap: 10px;
-      margin-top: 16px;
-    }
-    .btn-code-cancel {
-      flex: 1;
-      padding: 12px;
-      background: #f1f5f9;
-      color: #64748b;
-      border: none;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background .15s;
-    }
+    .code-modal-error { margin-top: 8px; font-size: 13px; color: #dc2626; min-height: 20px; }
+    .code-modal-btns { display: flex; gap: 10px; margin-top: 16px; }
+    .btn-code-cancel { flex: 1; padding: 12px; background: #f1f5f9; color: #64748b; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background .15s; }
     .btn-code-cancel:hover { background: #e2e8f0; }
-    .btn-code-confirm {
-      flex: 2;
-      padding: 12px;
-      background: #1a56db;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background .15s;
-    }
+    .btn-code-confirm { flex: 2; padding: 12px; background: #1a56db; color: #fff; border: none; border-radius: 8px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background .15s; }
     .btn-code-confirm:hover { background: #1e40af; }
     .btn-code-confirm:disabled { background: #94a3b8; cursor: not-allowed; }
 
     /* ── 메인 래퍼 ── */
-    #survey-page {
-      display: none;
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 30px 16px 60px;
-      position: relative;
-      z-index: 2;
-    }
-    #complete-page {
-      display: none;
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 80px 16px 60px;
-    }
+    #survey-page { display: none; max-width: 720px; margin: 0 auto; padding: 30px 16px 60px; position: relative; z-index: 2; }
+    #complete-page { display: none; max-width: 720px; margin: 0 auto; padding: 80px 16px 60px; }
 
     /* ── 카드 ── */
     .card {
@@ -358,153 +230,97 @@
       -webkit-backdrop-filter: blur(4px);
     }
 
+    /* ════════════════════════════════
+       기본정보 섹션
+    ════════════════════════════════ */
+    .basic-info-card {
+      background: rgba(255,255,255,.95);
+      border-radius: 14px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.10);
+      margin-bottom: 18px;
+      overflow: hidden;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border: 2px solid #bfdbfe;
+    }
+    .basic-info-header {
+      background: linear-gradient(135deg, #1e40af, #1a56db);
+      padding: 14px 24px;
+    }
+    .basic-info-header-row { display: flex; align-items: center; gap: 8px; }
+    .basic-info-header-icon { font-size: 18px; }
+    .basic-info-header-title { color: #fff; font-size: 16px; font-weight: 700; }
+    .basic-info-body { padding: 20px 24px 24px; }
+    .basic-info-notice {
+      font-size: 13px; color: #1e40af;
+      background: #eff6ff;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 20px;
+      border-left: 3px solid #1a56db;
+      line-height: 1.6;
+    }
+    .basic-field { margin-bottom: 18px; }
+    .basic-field:last-child { margin-bottom: 0; }
+    .basic-field-label {
+      font-size: 14.5px; font-weight: 700; color: #1e293b;
+      margin-bottom: 8px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .basic-field.error-field .basic-field-label { color: #dc2626; }
+    .basic-field.error-field .text-input { outline: 2px solid #f87171; border-color: #f87171; }
+
     /* ── 섹션 카드 ── */
     .section-card .section-header {
       background: #1a56db;
       padding: 14px 24px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      display: flex; align-items: center; gap: 10px;
     }
-    .section-card .section-num {
-      background: rgba(255,255,255,.2);
-      color: #fff;
-      font-size: 12px;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 99px;
-    }
-    .section-card .section-title {
-      color: #fff;
-      font-size: 16px;
-      font-weight: 700;
-    }
+    .section-card .section-num { background: rgba(255,255,255,.2); color: #fff; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 99px; }
+    .section-card .section-title { color: #fff; font-size: 16px; font-weight: 700; }
     .section-card .section-body { padding: 8px 24px 24px; }
 
     /* ── 유형 배지 ── */
     .type-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 12px;
-      border-radius: 99px;
-      font-size: 13px;
-      font-weight: 700;
-      margin-bottom: 4px;
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 12px; border-radius: 99px;
+      font-size: 13px; font-weight: 700; margin-bottom: 4px;
     }
     .type-badge.general  { background: #eff6ff; color: #1a56db; border: 1px solid #bfdbfe; }
     .type-badge.employee { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
     .type-badge.partner  { background: #faf5ff; color: #7c3aed; border: 1px solid #ddd6fe; }
 
     /* ── 질문 블록 ── */
-    .q-block {
-      margin-top: 22px;
-      padding-top: 22px;
-      border-top: 1px solid #f1f5f9;
-    }
+    .q-block { margin-top: 22px; padding-top: 22px; border-top: 1px solid #f1f5f9; }
     .q-block:first-child { border-top: none; }
-    .q-label {
-      font-size: 15.5px;
-      font-weight: 600;
-      color: #1e293b;
-      margin-bottom: 12px;
-      line-height: 1.5;
-    }
-    .req {
-      display: inline-block;
-      background: #dc2626;
-      color: #fff;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 2px 7px;
-      border-radius: 99px;
-      margin-left: 6px;
-      vertical-align: middle;
-    }
-    .multi-hint {
-      font-size: 13px;
-      color: #64748b;
-      font-weight: 400;
-      margin-left: 6px;
-    }
+    .q-label { font-size: 15.5px; font-weight: 600; color: #1e293b; margin-bottom: 12px; line-height: 1.5; }
+    .req { display: inline-block; background: #dc2626; color: #fff; font-size: 11px; font-weight: 700; padding: 2px 7px; border-radius: 99px; margin-left: 6px; vertical-align: middle; }
+    .multi-hint { font-size: 13px; color: #64748b; font-weight: 400; margin-left: 6px; }
 
     /* ── 토스트 팝업 ── */
     #validation-toast {
-      position: fixed;
-      bottom: 24px;
-      right: 16px;
-      z-index: 200;
-      background: #fff;
-      border: 1.5px solid #fca5a5;
-      border-radius: 14px;
-      box-shadow: 0 4px 24px rgba(0,0,0,.18);
-      padding: 14px 16px;
-      max-width: 260px;
-      width: calc(100% - 32px);
-      display: none;
+      position: fixed; bottom: 24px; right: 16px; z-index: 200;
+      background: #fff; border: 1.5px solid #fca5a5; border-radius: 14px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.18); padding: 14px 16px;
+      max-width: 260px; width: calc(100% - 32px); display: none;
       animation: toastIn .25s ease;
     }
     #validation-toast.visible { display: block; }
-    @keyframes toastIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .toast-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 10px;
-    }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .toast-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
     .toast-header-text { font-size: 13px; font-weight: 700; color: #b91c1c; }
-    .toast-close-btn {
-      cursor: pointer; font-size: 15px; color: #94a3b8;
-      line-height: 1; padding: 2px 4px; border: none; background: none;
-    }
+    .toast-close-btn { cursor: pointer; font-size: 15px; color: #94a3b8; line-height: 1; padding: 2px 4px; border: none; background: none; }
     .toast-close-btn:hover { color: #475569; }
     .toast-list { display: flex; flex-wrap: wrap; gap: 6px; }
-    .toast-item {
-      background: #fef2f2;
-      border: 1.5px solid #fca5a5;
-      color: #b91c1c;
-      font-size: 12.5px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 99px;
-      cursor: pointer;
-      transition: background .15s;
-    }
+    .toast-item { background: #fef2f2; border: 1.5px solid #fca5a5; color: #b91c1c; font-size: 12.5px; font-weight: 700; padding: 4px 10px; border-radius: 99px; cursor: pointer; transition: background .15s; }
     .toast-item:hover { background: #fee2e2; }
 
     /* ── 라디오 선택지 ── */
     .radio-group { display: flex; flex-direction: column; gap: 8px; }
-    .radio-option {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      padding: 11px 14px;
-      border-radius: 8px;
-      border: 1.5px solid #e2e8f0;
-      transition: border-color .15s, background .15s;
-      user-select: none;
-    }
+    .radio-option { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 11px 14px; border-radius: 8px; border: 1.5px solid #e2e8f0; transition: border-color .15s, background .15s; user-select: none; }
     .radio-option:hover { border-color: #93c5fd; background: #f0f9ff; }
-    .radio-dot {
-      width: 18px; height: 18px;
-      border-radius: 50%;
-      border: 2px solid #cbd5e1;
-      background: #fff;
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      transition: border-color .15s, background .15s;
-    }
-    .radio-dot::after {
-      content: '';
-      width: 8px; height: 8px;
-      border-radius: 50%;
-      background: #fff;
-      display: none;
-    }
+    .radio-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #cbd5e1; background: #fff; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: border-color .15s, background .15s; }
+    .radio-dot::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #fff; display: none; }
     .radio-option.selected { border-color: #1a56db; background: #eff6ff; }
     .radio-option.selected .radio-dot { border-color: #1a56db; background: #1a56db; }
     .radio-option.selected .radio-dot::after { display: block; }
@@ -512,407 +328,110 @@
 
     /* ── 체크박스 선택지 ── */
     .checkbox-group { display: flex; flex-direction: column; gap: 8px; }
-    .checkbox-option {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      padding: 11px 14px;
-      border-radius: 8px;
-      border: 1.5px solid #e2e8f0;
-      transition: border-color .15s, background .15s;
-      user-select: none;
-    }
+    .checkbox-option { display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 11px 14px; border-radius: 8px; border: 1.5px solid #e2e8f0; transition: border-color .15s, background .15s; user-select: none; }
     .checkbox-option:hover { border-color: #93c5fd; background: #f0f9ff; }
-    .checkbox-box {
-      width: 18px; height: 18px;
-      border-radius: 4px;
-      border: 2px solid #cbd5e1;
-      background: #fff;
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      transition: border-color .15s, background .15s;
-    }
-    .checkbox-box::after {
-      content: '';
-      width: 10px; height: 7px;
-      border-left: 2.5px solid #fff;
-      border-bottom: 2.5px solid #fff;
-      transform: rotate(-45deg) translate(1px, -1px);
-      display: none;
-    }
+    .checkbox-box { width: 18px; height: 18px; border-radius: 4px; border: 2px solid #cbd5e1; background: #fff; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: border-color .15s, background .15s; }
+    .checkbox-box::after { content: ''; width: 10px; height: 7px; border-left: 2.5px solid #fff; border-bottom: 2.5px solid #fff; transform: rotate(-45deg) translate(1px, -1px); display: none; }
     .checkbox-option.checked { border-color: #1a56db; background: #eff6ff; }
     .checkbox-option.checked .checkbox-box { border-color: #1a56db; background: #1a56db; }
     .checkbox-option.checked .checkbox-box::after { display: block; }
     .checkbox-option .option-text { font-size: 15px; color: #374151; }
 
     /* ── 척도형 ── */
-    .scale-group {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-    .scale-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .scale-labels {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      color: #94a3b8;
-      padding: 0 2px;
-    }
-    .scale-options {
-      display: flex;
-      gap: 8px;
-      flex: 1;
-    }
-    .scale-option {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 5px;
-      cursor: pointer;
-      padding: 10px 4px;
-      border-radius: 8px;
-      border: 1.5px solid #e2e8f0;
-      transition: border-color .15s, background .15s;
-      user-select: none;
-      min-width: 0;
-    }
+    .scale-group { display: flex; flex-direction: column; gap: 8px; }
+    .scale-labels { display: flex; justify-content: space-between; font-size: 12px; color: #94a3b8; padding: 0 2px; }
+    .scale-options { display: flex; gap: 8px; flex: 1; }
+    .scale-option { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; cursor: pointer; padding: 10px 4px; border-radius: 8px; border: 1.5px solid #e2e8f0; transition: border-color .15s, background .15s; user-select: none; min-width: 0; }
     .scale-option:hover { border-color: #93c5fd; background: #f0f9ff; }
-    .scale-option .scale-num {
-      font-size: 15px;
-      font-weight: 700;
-      color: #64748b;
-    }
-    .scale-dot {
-      width: 14px; height: 14px;
-      border-radius: 50%;
-      border: 2px solid #cbd5e1;
-      background: #fff;
-      transition: border-color .15s, background .15s;
-    }
+    .scale-option .scale-num { font-size: 15px; font-weight: 700; color: #64748b; }
+    .scale-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid #cbd5e1; background: #fff; transition: border-color .15s, background .15s; }
     .scale-option.selected { border-color: #1a56db; background: #eff6ff; }
     .scale-option.selected .scale-num { color: #1a56db; }
     .scale-option.selected .scale-dot { border-color: #1a56db; background: #1a56db; }
 
     /* ── 텍스트 입력 ── */
     .text-input, .textarea-input {
-      width: 100%;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 11px 14px;
-      font-size: 15px;
-      font-family: inherit;
-      color: #1e293b;
-      background: #fff;
-      transition: border-color .2s;
-      outline: none;
-      resize: vertical;
+      width: 100%; border: 1.5px solid #e2e8f0; border-radius: 8px;
+      padding: 11px 14px; font-size: 15px; font-family: inherit;
+      color: #1e293b; background: #fff; transition: border-color .2s;
+      outline: none; resize: vertical;
     }
     .text-input:focus, .textarea-input:focus { border-color: #1a56db; }
     .textarea-input { min-height: 120px; }
 
     /* ── 제출 버튼 ── */
     .submit-area { margin-top: 10px; }
-    .btn-submit {
-      width: 100%;
-      padding: 16px;
-      background: #1a56db;
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-size: 17px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background .2s, transform .1s;
-      letter-spacing: .3px;
-    }
+    .btn-submit { width: 100%; padding: 16px; background: #1a56db; color: #fff; border: none; border-radius: 10px; font-size: 17px; font-weight: 700; cursor: pointer; transition: background .2s, transform .1s; letter-spacing: .3px; }
     .btn-submit:hover { background: #1e40af; }
     .btn-submit:active { transform: scale(.98); }
     .btn-submit:disabled { background: #94a3b8; cursor: not-allowed; }
 
     /* ── 오류 안내 ── */
-    .error-msg {
-      background: #fef2f2;
-      border: 1.5px solid #fca5a5;
-      color: #b91c1c;
-      border-radius: 8px;
-      padding: 12px 14px;
-      font-size: 14px;
-      margin-top: 12px;
-      display: none;
-    }
+    .error-msg { background: #fef2f2; border: 1.5px solid #fca5a5; color: #b91c1c; border-radius: 8px; padding: 12px 14px; font-size: 14px; margin-top: 12px; display: none; }
     .error-msg.visible { display: block; }
     .q-block.error-field .q-label { color: #dc2626; }
     .q-block.error-field .radio-group,
     .q-block.error-field .checkbox-group,
     .q-block.error-field .scale-options,
     .q-block.error-field .text-input,
-    .q-block.error-field .textarea-input {
-      outline: 2px solid #f87171;
-      border-radius: 8px;
-    }
+    .q-block.error-field .textarea-input { outline: 2px solid #f87171; border-radius: 8px; }
 
     /* ── 완료 화면 ── */
-    .complete-card {
-      border-top: 5px solid #16a34a;
-      padding: 48px 28px 40px;
-      text-align: center;
-    }
-    .complete-icon {
-      width: 64px; height: 64px;
-      background: #dcfce7;
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 20px;
-      font-size: 32px;
-    }
+    .complete-card { border-top: 5px solid #16a34a; padding: 48px 28px 40px; text-align: center; }
+    .complete-icon { width: 64px; height: 64px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px; font-size: 32px; }
     .complete-card h2 { font-size: 22px; font-weight: 800; color: #1e293b; margin-bottom: 12px; }
     .complete-card p { font-size: 16px; color: #64748b; line-height: 1.8; }
 
     /* ── 로딩 오버레이 ── */
-    #loading-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(255,255,255,.85);
-      z-index: 999;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 16px;
-    }
+    #loading-overlay { display: none; position: fixed; inset: 0; background: rgba(255,255,255,.85); z-index: 999; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
     #loading-overlay.visible { display: flex; }
-    .spinner {
-      width: 44px; height: 44px;
-      border: 4px solid #e2e8f0;
-      border-top-color: #1a56db;
-      border-radius: 50%;
-      animation: spin .8s linear infinite;
-    }
+    .spinner { width: 44px; height: 44px; border: 4px solid #e2e8f0; border-top-color: #1a56db; border-radius: 50%; animation: spin .8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
     #loading-overlay span { font-size: 15px; color: #64748b; }
 
     /* ── 개인정보 동의 ── */
-    .privacy-box {
-      background: #f8fafc;
-      border: 1.5px solid #e2e8f0;
-      border-radius: 10px;
-      padding: 16px;
-      margin-bottom: 14px;
-      font-size: 14px;
-      color: #475569;
-      line-height: 1.7;
-    }
-    .consent-label {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      font-size: 15px;
-      font-weight: 600;
-      color: #1e293b;
-      padding: 12px 14px;
-      border-radius: 8px;
-      border: 1.5px solid #e2e8f0;
-      transition: border-color .15s, background .15s;
-      user-select: none;
-    }
+    .privacy-box { background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 16px; margin-bottom: 14px; font-size: 14px; color: #475569; line-height: 1.7; }
+    .consent-label { display: flex; align-items: center; gap: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: #1e293b; padding: 12px 14px; border-radius: 8px; border: 1.5px solid #e2e8f0; transition: border-color .15s, background .15s; user-select: none; }
     .consent-label:hover { border-color: #93c5fd; background: #f0f9ff; }
     .consent-label.checked { border-color: #1a56db; background: #eff6ff; }
-    .consent-cb {
-      width: 18px; height: 18px;
-      border-radius: 4px;
-      border: 2px solid #cbd5e1;
-      background: #fff;
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      transition: border-color .15s, background .15s;
-    }
-    .consent-cb::after {
-      content: '';
-      width: 10px; height: 7px;
-      border-left: 2.5px solid #fff;
-      border-bottom: 2.5px solid #fff;
-      transform: rotate(-45deg) translate(1px, -1px);
-      display: none;
-    }
+    .consent-cb { width: 18px; height: 18px; border-radius: 4px; border: 2px solid #cbd5e1; background: #fff; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: border-color .15s, background .15s; }
+    .consent-cb::after { content: ''; width: 10px; height: 7px; border-left: 2.5px solid #fff; border-bottom: 2.5px solid #fff; transform: rotate(-45deg) translate(1px, -1px); display: none; }
     .consent-label.checked .consent-cb { border-color: #1a56db; background: #1a56db; }
     .consent-label.checked .consent-cb::after { display: block; }
 
     /* ── 질문 설명 ── */
-    .q-desc {
-      font-size: 13.5px;
-      color: #64748b;
-      margin-top: -4px;
-      margin-bottom: 12px;
-      line-height: 1.6;
-    }
+    .q-desc { font-size: 13.5px; color: #64748b; margin-top: -4px; margin-bottom: 12px; line-height: 1.6; }
 
     /* ── 개인정보 동의 모달 ── */
-    #privacy-modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,.55);
-      z-index: 400;
-      align-items: center;
-      justify-content: center;
-      padding: 16px;
-    }
+    #privacy-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.55); z-index: 400; align-items: center; justify-content: center; padding: 16px; }
     #privacy-modal-overlay.visible { display: flex; }
-    .privacy-modal {
-      background: #fff;
-      border-radius: 18px;
-      width: 100%;
-      max-width: 520px;
-      max-height: 92vh;
-      box-shadow: 0 8px 40px rgba(0,0,0,.25);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-    .privacy-modal-header {
-      padding: 22px 24px 16px;
-      text-align: center;
-      border-bottom: 1px solid #f1f5f9;
-      flex-shrink: 0;
-    }
+    .privacy-modal { background: #fff; border-radius: 18px; width: 100%; max-width: 520px; max-height: 92vh; box-shadow: 0 8px 40px rgba(0,0,0,.25); display: flex; flex-direction: column; overflow: hidden; }
+    .privacy-modal-header { padding: 22px 24px 16px; text-align: center; border-bottom: 1px solid #f1f5f9; flex-shrink: 0; }
     .privacy-modal-header-icon { font-size: 30px; margin-bottom: 8px; }
     .privacy-modal-header h3 { font-size: 18px; font-weight: 800; color: #1e293b; }
-    .privacy-modal-body {
-      padding: 20px 24px;
-      overflow-y: auto;
-      flex: 1;
-      -webkit-overflow-scrolling: touch;
-    }
-    .privacy-modal-footer {
-      padding: 14px 24px 20px;
-      border-top: 1px solid #f1f5f9;
-      flex-shrink: 0;
-    }
-    .privacy-intro {
-      font-size: 14px;
-      color: #374151;
-      line-height: 1.75;
-      margin-bottom: 18px;
-      background: #eff6ff;
-      padding: 13px 15px;
-      border-radius: 10px;
-      border-left: 3px solid #1a56db;
-    }
+    .privacy-modal-body { padding: 20px 24px; overflow-y: auto; flex: 1; -webkit-overflow-scrolling: touch; }
+    .privacy-modal-footer { padding: 14px 24px 20px; border-top: 1px solid #f1f5f9; flex-shrink: 0; }
+    .privacy-intro { font-size: 14px; color: #374151; line-height: 1.75; margin-bottom: 18px; background: #eff6ff; padding: 13px 15px; border-radius: 10px; border-left: 3px solid #1a56db; }
     .privacy-section { margin-bottom: 16px; }
-    .privacy-section-title {
-      font-size: 13px;
-      font-weight: 700;
-      color: #1e293b;
-      margin-bottom: 7px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .privacy-section-title::before {
-      content: '';
-      width: 3px;
-      height: 13px;
-      background: #1a56db;
-      border-radius: 2px;
-      flex-shrink: 0;
-    }
+    .privacy-section-title { font-size: 13px; font-weight: 700; color: #1e293b; margin-bottom: 7px; display: flex; align-items: center; gap: 6px; }
+    .privacy-section-title::before { content: ''; width: 3px; height: 13px; background: #1a56db; border-radius: 2px; flex-shrink: 0; }
     .privacy-list { list-style: none; padding: 0; margin: 0; }
-    .privacy-list li {
-      font-size: 13.5px;
-      color: #374151;
-      padding: 3px 0 3px 15px;
-      position: relative;
-      line-height: 1.6;
-    }
-    .privacy-list li::before {
-      content: '·';
-      position: absolute;
-      left: 4px;
-      color: #1a56db;
-      font-weight: 700;
-    }
+    .privacy-list li { font-size: 13.5px; color: #374151; padding: 3px 0 3px 15px; position: relative; line-height: 1.6; }
+    .privacy-list li::before { content: '·'; position: absolute; left: 4px; color: #1a56db; font-weight: 700; }
     .privacy-text { font-size: 13.5px; color: #374151; line-height: 1.7; }
-    .privacy-notice {
-      font-size: 13px;
-      color: #64748b;
-      line-height: 1.65;
-      padding: 11px 13px;
-      background: #f8fafc;
-      border-radius: 8px;
-      border: 1px solid #e2e8f0;
-    }
+    .privacy-notice { font-size: 13px; color: #64748b; line-height: 1.65; padding: 11px 13px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; }
     .privacy-consent-row { margin-bottom: 12px; }
-    .privacy-consent-label {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      cursor: pointer;
-      font-size: 14.5px;
-      font-weight: 600;
-      color: #1e293b;
-      padding: 12px 14px;
-      border-radius: 10px;
-      border: 1.5px solid #e2e8f0;
-      transition: border-color .15s, background .15s;
-      user-select: none;
-      line-height: 1.5;
-    }
+    .privacy-consent-label { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; font-size: 14.5px; font-weight: 600; color: #1e293b; padding: 12px 14px; border-radius: 10px; border: 1.5px solid #e2e8f0; transition: border-color .15s, background .15s; user-select: none; line-height: 1.5; }
     .privacy-consent-label:hover { border-color: #93c5fd; background: #f0f9ff; }
     .privacy-consent-label.checked { border-color: #1a56db; background: #eff6ff; }
-    .privacy-cb {
-      width: 20px; height: 20px;
-      border-radius: 5px;
-      border: 2px solid #cbd5e1;
-      background: #fff;
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      transition: border-color .15s, background .15s;
-      margin-top: 1px;
-    }
-    .privacy-cb::after {
-      content: '';
-      width: 11px; height: 8px;
-      border-left: 2.5px solid #fff;
-      border-bottom: 2.5px solid #fff;
-      transform: rotate(-45deg) translate(1px, -1px);
-      display: none;
-    }
+    .privacy-cb { width: 20px; height: 20px; border-radius: 5px; border: 2px solid #cbd5e1; background: #fff; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: border-color .15s, background .15s; margin-top: 1px; }
+    .privacy-cb::after { content: ''; width: 11px; height: 8px; border-left: 2.5px solid #fff; border-bottom: 2.5px solid #fff; transform: rotate(-45deg) translate(1px, -1px); display: none; }
     .privacy-consent-label.checked .privacy-cb { border-color: #1a56db; background: #1a56db; }
     .privacy-consent-label.checked .privacy-cb::after { display: block; }
     .privacy-modal-btns { display: flex; gap: 10px; }
-    .btn-privacy-cancel {
-      flex: 1;
-      padding: 13px;
-      background: #f1f5f9;
-      color: #64748b;
-      border: none;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: background .15s;
-    }
+    .btn-privacy-cancel { flex: 1; padding: 13px; background: #f1f5f9; color: #64748b; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; transition: background .15s; }
     .btn-privacy-cancel:hover { background: #e2e8f0; }
-    .btn-privacy-start {
-      flex: 2;
-      padding: 13px;
-      background: #1a56db;
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      font-size: 15px;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background .15s;
-    }
+    .btn-privacy-start { flex: 2; padding: 13px; background: #1a56db; color: #fff; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; transition: background .15s; }
     .btn-privacy-start:hover:not(:disabled) { background: #1e40af; }
     .btn-privacy-start:disabled { background: #94a3b8; cursor: not-allowed; }
 
@@ -921,6 +440,7 @@
       body { font-size: 15px; background-attachment: scroll; }
       .section-card .section-body { padding: 20px 18px; }
       .section-card .section-header { padding: 12px 18px; }
+      .basic-info-body { padding: 16px 18px 20px; }
       .q-label { font-size: 15px; }
       .logo-img { height: 38px; }
       #banner-section { padding-top: 94px; }
@@ -991,7 +511,6 @@
 </div>
 
 <!-- 개인정보 수집 안내 모달 -->
-<!-- 최종 문구는 법무 검토 후 확정 필요 -->
 <div id="privacy-modal-overlay">
   <div class="privacy-modal">
     <div class="privacy-modal-header">
@@ -1025,22 +544,14 @@
       </div>
       <div class="privacy-section">
         <div class="privacy-section-title">보유 및 이용 기간</div>
-        <p class="privacy-text">
-          수집된 개인정보는 베타테스트 운영 및 리워드 지급 완료 후 내부 정산·분쟁 대응을 위해 필요한 기간 동안 보관한 뒤 파기합니다.<br>
-          단, 관련 법령에 따라 보관이 필요한 경우에는 해당 법령에서 정한 기간 동안 보관합니다.
-        </p>
+        <p class="privacy-text">수집된 개인정보는 베타테스트 운영 및 리워드 지급 완료 후 내부 정산·분쟁 대응을 위해 필요한 기간 동안 보관한 뒤 파기합니다.</p>
       </div>
       <div class="privacy-section">
         <div class="privacy-section-title">제3자 제공 안내</div>
-        <p class="privacy-text">
-          수집된 개인정보는 원칙적으로 외부에 제공하지 않습니다.<br>
-          다만, 리워드·상품 지급을 위해 기프티콘 발송 대행사 등 외부 업체를 이용하는 경우, 지급에 필요한 최소한의 정보(이름·연락처)가 해당 업체에 제공될 수 있습니다. 이 경우 사전에 별도 고지합니다.
-        </p>
+        <p class="privacy-text">수집된 개인정보는 원칙적으로 외부에 제공하지 않습니다. 다만, 리워드·상품 지급을 위해 기프티콘 발송 대행사 등 외부 업체를 이용하는 경우, 지급에 필요한 최소한의 정보(이름·연락처)가 해당 업체에 제공될 수 있습니다.</p>
       </div>
       <div class="privacy-section">
-        <div class="privacy-notice">
-          📌 개인정보 수집 및 이용에 동의하지 않으실 수 있습니다. 다만, 동의하지 않으실 경우 베타테스트 설문 참여 및 리워드 지급 대상 선정이 제한될 수 있습니다.
-        </div>
+        <div class="privacy-notice">📌 개인정보 수집 및 이용에 동의하지 않으실 수 있습니다. 다만, 동의하지 않으실 경우 베타테스트 설문 참여 및 리워드 지급 대상 선정이 제한될 수 있습니다.</div>
       </div>
     </div>
     <div class="privacy-modal-footer">
@@ -1067,7 +578,7 @@
   </div>
 </div>
 
-<!-- ══════════════ 참여 유형 선택 화면 ══════════════ -->
+<!-- 참여 유형 선택 화면 -->
 <div id="entry-screen">
   <div class="card" style="padding: 28px 24px 24px; margin-bottom: 18px;">
     <div class="entry-intro">
@@ -1086,10 +597,7 @@
       <div class="entry-card" onclick="selectType('employee')">
         <div class="entry-card-icon green">🏢</div>
         <div class="entry-card-body">
-          <div class="entry-card-title">
-            임직원
-            <span class="entry-lock-badge">🔒 코드 필요</span>
-          </div>
+          <div class="entry-card-title">임직원 <span class="entry-lock-badge">🔒 코드 필요</span></div>
           <div class="entry-card-desc">내부 직원 관점에서 서비스 흐름과 운영 문제를 점검합니다.</div>
         </div>
         <div class="entry-card-arrow">›</div>
@@ -1097,10 +605,7 @@
       <div class="entry-card" onclick="selectType('partner')">
         <div class="entry-card-icon purple">🔧</div>
         <div class="entry-card-body">
-          <div class="entry-card-title">
-            파트너
-            <span class="entry-lock-badge">🔒 코드 필요</span>
-          </div>
+          <div class="entry-card-title">파트너 <span class="entry-lock-badge">🔒 코드 필요</span></div>
           <div class="entry-card-desc">설비업체/전문가 관점에서 견적, 매칭, 이용 흐름을 테스트합니다.</div>
         </div>
         <div class="entry-card-arrow">›</div>
@@ -1109,7 +614,7 @@
   </div>
 </div>
 
-<!-- ══════════════ 설문 페이지 ══════════════ -->
+<!-- 설문 페이지 -->
 <div id="survey-page">
   <div id="survey-type-badge" style="text-align:center;margin-bottom:14px;"></div>
   <form id="survey-form" novalidate>
@@ -1121,7 +626,7 @@
   </form>
 </div>
 
-<!-- ══════════════ 완료 화면 ══════════════ -->
+<!-- 완료 화면 -->
 <div id="complete-page">
   <div class="card complete-card">
     <div class="complete-icon">✓</div>
@@ -1137,394 +642,299 @@
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzyCSchoqbY1f-FlgwVWj6Y1mZpNvZ8fzDWnmfCi-VbidQ09gW7qVQ1zKNbk21slF_N/exec';
 
 // ════════════════════════════════════════════════════════
-// 질문 정의 — 유형별
-// type: 'text' | 'radio' | 'checkbox' | 'scale' | 'textarea' | 'phone'
+// 질문 정의 — 이름/연락처는 기본정보 섹션으로 분리
+// colKey는 시트 컬럼 키 (변경 금지 — 통계 안정성 유지)
 // ════════════════════════════════════════════════════════
-const questionsByType = {
+const QUESTION_CONFIG = {
 
-  // ────────── 일반 사용자 15개 ──────────
+  // ────── 일반 사용자 (Q3~Q15 → 화면 Q1~Q13) ──────
   general: [
-    {
-      id: 'general_Q1', colKey: '일반_Q1',
-      title: 'Q1. 이름을 입력해주세요.',
-      type: 'name', required: true
-    },
-    {
-      id: 'general_Q2', colKey: '일반_Q2',
-      title: 'Q2. 연락처를 입력해주세요.',
-      type: 'phone', required: true
-    },
-    {
-      id: 'general_Q3', colKey: '일반_Q3',
-      title: 'Q3. 만능맨 서비스를 처음 봤을 때 어떤 서비스라고 이해되었나요?',
+    { id: 'general_Q3',  colKey: '일반_Q3',
+      title: '만능맨 서비스를 처음 봤을 때 어떤 서비스라고 이해되었나요?',
       type: 'radio', required: true,
       options: ['집수리/설비 전문가를 연결해주는 서비스','견적 비교 서비스','채팅 상담 서비스','정확히 이해하기 어려웠음','기타']
     },
-    {
-      id: 'general_Q4', colKey: '일반_Q4',
-      title: 'Q4. 메인 화면에서 원하는 문제를 찾는 과정은 쉬웠나요?',
-      type: 'scale', required: true,
-      scaleMin: 1, scaleMax: 5,
+    { id: 'general_Q4',  colKey: '일반_Q4',
+      title: '메인 화면에서 원하는 문제를 찾는 과정은 쉬웠나요?',
+      type: 'scale', required: true, scaleMin: 1, scaleMax: 5,
       scaleMinLabel: '매우 어려움', scaleMaxLabel: '매우 쉬움'
     },
-    {
-      id: 'general_Q5', colKey: '일반_Q5',
-      title: 'Q5. 어떤 문제로 서비스를 이용한다고 가정하고 테스트했나요?',
+    { id: 'general_Q5',  colKey: '일반_Q5',
+      title: '어떤 문제로 서비스를 이용한다고 가정하고 테스트했나요?',
       type: 'checkbox', required: true,
       options: ['누수','수도/배관','싱크대','욕실','보일러','도배/장판','전기','문/창문','청소/철거','기타']
     },
-    {
-      id: 'general_Q6', colKey: '일반_Q6',
-      title: 'Q6. 카테고리 선택 과정에서 헷갈리는 부분이 있었나요?',
+    { id: 'general_Q6',  colKey: '일반_Q6',
+      title: '카테고리 선택 과정에서 헷갈리는 부분이 있었나요?',
       type: 'radio', required: true,
       options: ['전혀 없었음','조금 있었음','많이 헷갈렸음','어떤 카테고리를 선택해야 할지 몰랐음']
     },
-    {
-      id: 'general_Q7', colKey: '일반_Q7',
-      title: 'Q7. 견적 요청서를 작성하는 과정은 이해하기 쉬웠나요?',
-      type: 'scale', required: true,
-      scaleMin: 1, scaleMax: 5,
+    { id: 'general_Q7',  colKey: '일반_Q7',
+      title: '견적 요청서를 작성하는 과정은 이해하기 쉬웠나요?',
+      type: 'scale', required: true, scaleMin: 1, scaleMax: 5,
       scaleMinLabel: '매우 어려움', scaleMaxLabel: '매우 쉬움'
     },
-    {
-      id: 'general_Q8', colKey: '일반_Q8',
-      title: 'Q8. 사진 첨부 또는 문제 설명 입력 과정은 부담스럽지 않았나요?',
+    { id: 'general_Q8',  colKey: '일반_Q8',
+      title: '사진 첨부 또는 문제 설명 입력 과정은 부담스럽지 않았나요?',
       type: 'radio', required: true,
       options: ['전혀 부담 없음','약간 부담 있음','많이 부담됨','사진 없이도 진행하고 싶음']
     },
-    {
-      id: 'general_Q9', colKey: '일반_Q9',
-      title: 'Q9. 의뢰를 완료하기 전까지 막히거나 멈춘 부분이 있었나요?',
+    { id: 'general_Q9',  colKey: '일반_Q9',
+      title: '의뢰를 완료하기 전까지 막히거나 멈춘 부분이 있었나요?',
       type: 'checkbox', required: true,
       options: ['없음','어떤 버튼을 눌러야 할지 헷갈림','용어가 어려움','카테고리 선택이 어려움','사진 첨부가 어려움','견적 방식이 이해되지 않음','로그인/회원가입이 불편함','기타']
     },
-    {
-      id: 'general_Q10', colKey: '일반_Q10',
-      title: 'Q10. 만능맨 프로필 또는 전문가 정보를 보고 신뢰가 갔나요?',
-      type: 'scale', required: true,
-      scaleMin: 1, scaleMax: 5,
+    { id: 'general_Q10', colKey: '일반_Q10',
+      title: '만능맨 프로필 또는 전문가 정보를 보고 신뢰가 갔나요?',
+      type: 'scale', required: true, scaleMin: 1, scaleMax: 5,
       scaleMinLabel: '전혀 신뢰 안 됨', scaleMaxLabel: '매우 신뢰됨'
     },
-    {
-      id: 'general_Q11', colKey: '일반_Q11',
-      title: 'Q11. 견적을 여러 명에게 받는 구조가 이해되었나요?',
+    { id: 'general_Q11', colKey: '일반_Q11',
+      title: '견적을 여러 명에게 받는 구조가 이해되었나요?',
       type: 'radio', required: true,
       options: ['바로 이해됨','설명을 보면 이해 가능','조금 헷갈림','이해하기 어려움']
     },
-    {
-      id: 'general_Q12', colKey: '일반_Q12',
-      title: 'Q12. 실제 상황이라면 만능맨을 통해 의뢰를 넣어볼 의향이 있나요?',
+    { id: 'general_Q12', colKey: '일반_Q12',
+      title: '실제 상황이라면 만능맨을 통해 의뢰를 넣어볼 의향이 있나요?',
       type: 'radio', required: true,
       options: ['바로 이용해볼 것 같음','필요할 때 이용할 것 같음','조금 더 신뢰가 생기면 이용할 것 같음','이용하지 않을 것 같음']
     },
-    {
-      id: 'general_Q13', colKey: '일반_Q13',
-      title: 'Q13. 이용을 망설이게 만드는 요소가 있다면 무엇인가요?',
+    { id: 'general_Q13', colKey: '일반_Q13',
+      title: '이용을 망설이게 만드는 요소가 있다면 무엇인가요?',
       type: 'checkbox', required: true,
       options: ['가격이 걱정됨','전문가 신뢰가 걱정됨','AS/책임 범위가 걱정됨','결제 방식이 걱정됨','개인정보가 걱정됨','사용 방법이 어려움','특별히 없음','기타']
     },
-    {
-      id: 'general_Q14', colKey: '일반_Q14',
-      title: 'Q14. 가장 개선이 필요하다고 느낀 부분은 무엇인가요?',
+    { id: 'general_Q14', colKey: '일반_Q14',
+      title: '가장 개선이 필요하다고 느낀 부분은 무엇인가요?',
       type: 'textarea', required: true,
       placeholder: '예: 카테고리 선택이 어려웠다, 견적 요청 버튼이 잘 안 보였다, 설명이 부족했다 등'
     },
-    {
-      id: 'general_Q15', colKey: '일반_Q15',
-      title: 'Q15. 전체적으로 만능맨 서비스에 대한 만족도를 선택해주세요.',
-      type: 'scale', required: true,
-      scaleMin: 1, scaleMax: 5,
+    { id: 'general_Q15', colKey: '일반_Q15',
+      title: '전체적으로 만능맨 서비스에 대한 만족도를 선택해주세요.',
+      type: 'scale', required: true, scaleMin: 1, scaleMax: 5,
       scaleMinLabel: '매우 불만족', scaleMaxLabel: '매우 만족'
     }
   ],
 
-  // ────────── 임직원 25개 ──────────
+  // ────── 임직원 (Q2~Q25, Q20 제외 → 화면 Q1~Q23) ──────
   employee: [
-    {
-      id: 'employee_Q1', colKey: '임직원_Q1',
-      title: 'Q1. 이름을 입력해주세요.',
-      type: 'name', required: true
-    },
-    {
-      id: 'employee_Q2', colKey: '임직원_Q2',
-      title: 'Q2. 소속 부서 또는 직무를 입력해주세요.',
+    { id: 'employee_Q2',  colKey: '임직원_Q2',
+      title: '소속 부서 또는 직무를 입력해주세요.',
       type: 'text', required: true,
       placeholder: '예: 기획팀, 운영팀, 개발팀 등'
     },
-    {
-      id: 'employee_Q3', colKey: '임직원_Q3',
-      title: 'Q3. 테스트한 기기를 선택해주세요.',
+    { id: 'employee_Q3',  colKey: '임직원_Q3',
+      title: '테스트한 기기를 선택해주세요.',
       type: 'radio', required: true,
       options: ['PC','모바일 Android','모바일 iPhone','태블릿','기타']
     },
-    {
-      id: 'employee_Q4', colKey: '임직원_Q4',
-      title: 'Q4. 테스트한 주요 화면을 선택해주세요.',
+    { id: 'employee_Q4',  colKey: '임직원_Q4',
+      title: '테스트한 주요 화면을 선택해주세요.',
       type: 'checkbox', required: true,
       options: ['메인 화면','카테고리 선택','견적 요청','전문가 목록','채팅/상담','결제 흐름','마이페이지','관리자/운영 관련 화면','기타']
     },
-    {
-      id: 'employee_Q5', colKey: '임직원_Q5',
-      title: 'Q5. 전체 서비스 흐름이 일반 사용자에게 직관적이라고 느꼈나요?',
-      type: 'scale', required: true,
-      scaleMin: 1, scaleMax: 5,
+    { id: 'employee_Q5',  colKey: '임직원_Q5',
+      title: '전체 서비스 흐름이 일반 사용자에게 직관적이라고 느꼈나요?',
+      type: 'scale', required: true, scaleMin: 1, scaleMax: 5,
       scaleMinLabel: '전혀 직관적이지 않음', scaleMaxLabel: '매우 직관적'
     },
-    {
-      id: 'employee_Q6', colKey: '임직원_Q6',
-      title: 'Q6. 첫 화면에서 만능맨이 어떤 서비스인지 명확하게 전달되나요?',
-      type: 'scale', required: true,
-      scaleMin: 1, scaleMax: 5,
+    { id: 'employee_Q6',  colKey: '임직원_Q6',
+      title: '첫 화면에서 만능맨이 어떤 서비스인지 명확하게 전달되나요?',
+      type: 'scale', required: true, scaleMin: 1, scaleMax: 5,
       scaleMinLabel: '전혀 전달 안 됨', scaleMaxLabel: '매우 명확하게 전달됨'
     },
-    {
-      id: 'employee_Q7', colKey: '임직원_Q7',
-      title: 'Q7. 카테고리 구조가 실제 고객 문제 상황과 잘 맞는다고 생각하나요?',
+    { id: 'employee_Q7',  colKey: '임직원_Q7',
+      title: '카테고리 구조가 실제 고객 문제 상황과 잘 맞는다고 생각하나요?',
       type: 'radio', required: true,
       options: ['매우 적절함','대체로 적절함','일부 수정 필요','전반적인 재정리 필요','판단 어려움']
     },
-    {
-      id: 'employee_Q8', colKey: '임직원_Q8',
-      title: 'Q8. 카테고리 선택에서 개선이 필요한 부분을 적어주세요.',
+    { id: 'employee_Q8',  colKey: '임직원_Q8',
+      title: '카테고리 선택에서 개선이 필요한 부분을 적어주세요.',
       type: 'textarea', required: true,
       placeholder: '예: 누수/도배/배관 구분이 어려움, 일반 사용자는 현상 기준으로 선택해야 함 등'
     },
-    {
-      id: 'employee_Q9', colKey: '임직원_Q9',
-      title: 'Q9. 견적 요청 과정에서 고객이 이탈할 가능성이 높은 지점은 어디라고 생각하나요?',
+    { id: 'employee_Q9',  colKey: '임직원_Q9',
+      title: '견적 요청 과정에서 고객이 이탈할 가능성이 높은 지점은 어디라고 생각하나요?',
       type: 'checkbox', required: true,
       options: ['회원가입/로그인','카테고리 선택','사진 첨부','문제 설명 입력','주소 입력','예산 입력','일정 선택','견적 방식 이해','결제 단계','특별히 없음','기타']
     },
-    {
-      id: 'employee_Q10', colKey: '임직원_Q10',
-      title: 'Q10. 서비스 내 용어가 일반 사용자에게 이해하기 쉽다고 생각하나요?',
-      type: 'scale', required: true,
-      scaleMin: 1, scaleMax: 5,
+    { id: 'employee_Q10', colKey: '임직원_Q10',
+      title: '서비스 내 용어가 일반 사용자에게 이해하기 쉽다고 생각하나요?',
+      type: 'scale', required: true, scaleMin: 1, scaleMax: 5,
       scaleMinLabel: '전혀 이해하기 어려움', scaleMaxLabel: '매우 이해하기 쉬움'
     },
-    {
-      id: 'employee_Q11', colKey: '임직원_Q11',
-      title: 'Q11. 어렵거나 수정이 필요하다고 느낀 용어가 있다면 적어주세요.',
+    { id: 'employee_Q11', colKey: '임직원_Q11',
+      title: '어렵거나 수정이 필요하다고 느낀 용어가 있다면 적어주세요.',
       type: 'textarea', required: true,
       placeholder: '용어명과 개선 방향을 함께 적어주시면 도움이 됩니다.'
     },
-    {
-      id: 'employee_Q12', colKey: '임직원_Q12',
-      title: 'Q12. 전문가 프로필 정보가 고객 신뢰를 주기에 충분하다고 생각하나요?',
-      type: 'scale', required: true,
-      scaleMin: 1, scaleMax: 5,
+    { id: 'employee_Q12', colKey: '임직원_Q12',
+      title: '전문가 프로필 정보가 고객 신뢰를 주기에 충분하다고 생각하나요?',
+      type: 'scale', required: true, scaleMin: 1, scaleMax: 5,
       scaleMinLabel: '전혀 충분하지 않음', scaleMaxLabel: '매우 충분함'
     },
-    {
-      id: 'employee_Q13', colKey: '임직원_Q13',
-      title: 'Q13. 공인만능맨 또는 인증/배지 요소가 잘 보인다고 생각하나요?',
+    { id: 'employee_Q13', colKey: '임직원_Q13',
+      title: '공인만능맨 또는 인증/배지 요소가 잘 보인다고 생각하나요?',
       type: 'radio', required: true,
       options: ['잘 보임','조금 더 강조 필요','거의 눈에 띄지 않음','의미 설명이 부족함','해당 요소를 확인하지 못함']
     },
-    {
-      id: 'employee_Q14', colKey: '임직원_Q14',
-      title: 'Q14. 견적 비교 및 파트너 선택 구조가 명확하다고 느꼈나요?',
-      type: 'scale', required: true,
-      scaleMin: 1, scaleMax: 5,
+    { id: 'employee_Q14', colKey: '임직원_Q14',
+      title: '견적 비교 및 파트너 선택 구조가 명확하다고 느꼈나요?',
+      type: 'scale', required: true, scaleMin: 1, scaleMax: 5,
       scaleMinLabel: '전혀 명확하지 않음', scaleMaxLabel: '매우 명확함'
     },
-    {
-      id: 'employee_Q15', colKey: '임직원_Q15',
-      title: 'Q15. 결제/수수료/정산 관련 흐름에서 사용자가 오해할 수 있는 부분이 있다고 생각하나요?',
+    { id: 'employee_Q15', colKey: '임직원_Q15',
+      title: '결제/수수료/정산 관련 흐름에서 사용자가 오해할 수 있는 부분이 있다고 생각하나요?',
       type: 'radio', required: true,
       options: ['없음','약간 있음','많음','별도 안내가 반드시 필요함','확인하지 못함']
     },
-    {
-      id: 'employee_Q16', colKey: '임직원_Q16',
-      title: 'Q16. 운영 리스크가 있다고 느낀 부분을 선택해주세요.',
+    { id: 'employee_Q16', colKey: '임직원_Q16',
+      title: '운영 리스크가 있다고 느낀 부분을 선택해주세요.',
       type: 'checkbox', required: true,
       options: ['고객 민원','파트너 책임 범위','견적 후 미응답','작업 품질 문제','결제/환불 분쟁','허위 견적','개인정보 노출','채팅 관리','후기/평점 악용','기타']
     },
-    {
-      id: 'employee_Q17', colKey: '임직원_Q17',
-      title: 'Q17. 실제 오픈베타 전에 반드시 보완해야 할 기능은 무엇인가요?',
+    { id: 'employee_Q17', colKey: '임직원_Q17',
+      title: '실제 오픈베타 전에 반드시 보완해야 할 기능은 무엇인가요?',
       type: 'checkbox', required: true,
       options: ['카테고리 개선','견적요청 UI 개선','전문가 정보 보강','결제 안정화','관리자 기능','알림 기능','채팅 기능','약관/정책 안내','파트너 검증','기타']
     },
-    {
-      id: 'employee_Q18', colKey: '임직원_Q18',
-      title: 'Q18. 사용자 입장에서 가장 신뢰가 부족해 보이는 지점은 무엇인가요?',
+    { id: 'employee_Q18', colKey: '임직원_Q18',
+      title: '사용자 입장에서 가장 신뢰가 부족해 보이는 지점은 무엇인가요?',
       type: 'textarea', required: true,
       placeholder: '구체적으로 어떤 화면 또는 흐름에서 신뢰가 부족하게 느껴지는지 적어주세요.'
     },
-    {
-      id: 'employee_Q19', colKey: '임직원_Q19',
-      title: 'Q19. 내부 운영자가 관리하기에 현재 구조가 충분하다고 생각하나요?',
-      type: 'scale', required: true,
-      scaleMin: 1, scaleMax: 5,
+    { id: 'employee_Q19', colKey: '임직원_Q19',
+      title: '내부 운영자가 관리하기에 현재 구조가 충분하다고 생각하나요?',
+      type: 'scale', required: true, scaleMin: 1, scaleMax: 5,
       scaleMinLabel: '전혀 충분하지 않음', scaleMaxLabel: '매우 충분함'
     },
-    // 기능추가 관련 Q20 삭제 (colKey 임직원_Q20은 기존 시트에 보존, 신규 응답에는 미저장)
-    {
-      id: 'employee_Q21', colKey: '임직원_Q21',
-      title: 'Q20. 경쟁 서비스와 비교했을 때 만능맨의 강점이 보인다고 느꼈나요?',
+    { id: 'employee_Q21', colKey: '임직원_Q21',
+      title: '경쟁 서비스와 비교했을 때 만능맨의 강점이 보인다고 느꼈나요?',
       type: 'radio', required: true,
       options: ['뚜렷하게 보임','어느 정도 보임','아직 부족함','강점이 잘 전달되지 않음','판단 어려움']
     },
-    {
-      id: 'employee_Q22', colKey: '임직원_Q22',
-      title: 'Q21. 만능맨이 가장 먼저 강조해야 할 핵심 메시지는 무엇이라고 생각하나요?',
+    { id: 'employee_Q22', colKey: '임직원_Q22',
+      title: '만능맨이 가장 먼저 강조해야 할 핵심 메시지는 무엇이라고 생각하나요?',
       type: 'radio', required: true,
       options: ['믿을 수 있는 전문가 연결','빠른 견적 비교','지역 기반 설비/수리 해결','본사 인증 파트너','간편한 의뢰 접수','합리적인 비용','기타']
     },
-    {
-      id: 'employee_Q23', colKey: '임직원_Q23',
-      title: 'Q22. 오픈베타 진행 가능성을 현재 기준으로 평가해주세요.',
+    { id: 'employee_Q23', colKey: '임직원_Q23',
+      title: '오픈베타 진행 가능성을 현재 기준으로 평가해주세요.',
       type: 'radio', required: true,
       options: ['바로 진행 가능','일부 수정 후 가능','핵심 기능 보완 후 가능','아직 위험함','판단 어려움']
     },
-    {
-      id: 'employee_Q24', colKey: '임직원_Q24',
-      title: 'Q23. 오픈베타 전 가장 우선적으로 수정해야 할 3가지를 적어주세요.',
+    { id: 'employee_Q24', colKey: '임직원_Q24',
+      title: '오픈베타 전 가장 우선적으로 수정해야 할 3가지를 적어주세요.',
       type: 'textarea', required: true,
       placeholder: '1. \n2. \n3. '
     },
-    {
-      id: 'employee_Q25', colKey: '임직원_Q25',
-      title: 'Q24. 종합 의견을 자유롭게 작성해주세요.',
+    { id: 'employee_Q25', colKey: '임직원_Q25',
+      title: '종합 의견을 자유롭게 작성해주세요.',
       type: 'textarea', required: true,
       placeholder: '서비스 전반에 대한 의견을 자유롭게 작성해주세요.'
     }
   ],
 
-  // ────────── 파트너 20개 ──────────
+  // ────── 파트너 (Q3~Q22 → 화면 Q1~Q20) ──────
   partner: [
-    {
-      id: 'partner_Q1', colKey: '파트너_Q1',
-      title: 'Q1. 이름을 입력해주세요.',
-      type: 'name', required: true
-    },
-    {
-      id: 'partner_Q2', colKey: '파트너_Q2',
-      title: 'Q2. 연락처를 입력해주세요.',
-      type: 'phone', required: true
-    },
-    {
-      id: 'partner_Q3', colKey: '파트너_Q3',
-      title: 'Q3. 업체명 또는 상호명을 입력해주세요.',
+    { id: 'partner_Q3',  colKey: '파트너_Q3',
+      title: '업체명 또는 상호명을 입력해주세요.',
       type: 'text', required: true,
       placeholder: '업체명 또는 상호명을 입력해주세요.'
     },
-    {
-      id: 'partner_Q4', colKey: '파트너_Q4',
-      title: 'Q4. 주로 활동하는 지역을 입력해주세요.',
+    { id: 'partner_Q4',  colKey: '파트너_Q4',
+      title: '주로 활동하는 지역을 입력해주세요.',
       type: 'text', required: true,
       placeholder: '예: 서울 강서구, 인천 부평구, 경기 시흥시 등'
     },
-    {
-      id: 'partner_Q5', colKey: '파트너_Q5',
-      title: 'Q5. 주요 작업 분야를 선택해주세요.',
+    { id: 'partner_Q5',  colKey: '파트너_Q5',
+      title: '주요 작업 분야를 선택해주세요.',
       type: 'checkbox', required: true,
       options: ['수도/배관','누수','욕실','싱크대','보일러','전기','도배/장판','문/창문','철거/청소','기타']
     },
-    {
-      id: 'partner_Q6', colKey: '파트너_Q6',
-      title: 'Q6. 만능맨 파트너 서비스 구조를 이해하기 쉬웠나요?',
-      type: 'scale', required: true,
-      scaleMin: 1, scaleMax: 5,
+    { id: 'partner_Q6',  colKey: '파트너_Q6',
+      title: '만능맨 파트너 서비스 구조를 이해하기 쉬웠나요?',
+      type: 'scale', required: true, scaleMin: 1, scaleMax: 5,
       scaleMinLabel: '매우 어려움', scaleMaxLabel: '매우 쉬움'
     },
-    {
-      id: 'partner_Q7', colKey: '파트너_Q7',
-      title: 'Q7. 고객 의뢰를 받고 견적을 보내는 흐름이 실제 업무에 적합하다고 느꼈나요?',
+    { id: 'partner_Q7',  colKey: '파트너_Q7',
+      title: '고객 의뢰를 받고 견적을 보내는 흐름이 실제 업무에 적합하다고 느꼈나요?',
       type: 'radio', required: true,
       options: ['매우 적합함','대체로 적합함','일부 불편할 것 같음','실제 업무와 맞지 않음','판단 어려움']
     },
-    {
-      id: 'partner_Q8', colKey: '파트너_Q8',
-      title: 'Q8. 견적을 보내기 위해 필요한 정보가 충분하다고 느꼈나요?',
-      type: 'scale', required: true,
-      scaleMin: 1, scaleMax: 5,
+    { id: 'partner_Q8',  colKey: '파트너_Q8',
+      title: '견적을 보내기 위해 필요한 정보가 충분하다고 느꼈나요?',
+      type: 'scale', required: true, scaleMin: 1, scaleMax: 5,
       scaleMinLabel: '전혀 충분하지 않음', scaleMaxLabel: '매우 충분함'
     },
-    {
-      id: 'partner_Q9', colKey: '파트너_Q9',
-      title: 'Q9. 견적 작성 시 추가로 꼭 필요하다고 생각하는 정보는 무엇인가요?',
+    { id: 'partner_Q9',  colKey: '파트너_Q9',
+      title: '견적 작성 시 추가로 꼭 필요하다고 생각하는 정보는 무엇인가요?',
       type: 'checkbox', required: true,
       options: ['현장 사진','주소/지역','건물 유형','작업 희망일','고객 예산','문제 발생 시점','상세 증상','전화 상담 가능 여부','기타']
     },
-    {
-      id: 'partner_Q10', colKey: '파트너_Q10',
-      title: 'Q10. 고객과 채팅 또는 상담하는 방식이 편리하다고 느꼈나요?',
-      type: 'scale', required: true,
-      scaleMin: 1, scaleMax: 5,
+    { id: 'partner_Q10', colKey: '파트너_Q10',
+      title: '고객과 채팅 또는 상담하는 방식이 편리하다고 느꼈나요?',
+      type: 'scale', required: true, scaleMin: 1, scaleMax: 5,
       scaleMinLabel: '매우 불편함', scaleMaxLabel: '매우 편리함'
     },
-    {
-      id: 'partner_Q11', colKey: '파트너_Q11',
-      title: 'Q11. 고객이 여러 전문가의 견적을 비교하는 구조에 대해 어떻게 생각하나요?',
+    { id: 'partner_Q11', colKey: '파트너_Q11',
+      title: '고객이 여러 전문가의 견적을 비교하는 구조에 대해 어떻게 생각하나요?',
       type: 'radio', required: true,
       options: ['자연스럽고 괜찮음','경쟁이 있지만 수용 가능','가격 경쟁이 심해질 것 같아 우려됨','방식 설명이 더 필요함','부정적으로 느껴짐']
     },
-    {
-      id: 'partner_Q12', colKey: '파트너_Q12',
-      title: 'Q12. 수수료가 발생하는 구조에 대해 어느 정도 수용 가능하다고 느끼나요?',
+    { id: 'partner_Q12', colKey: '파트너_Q12',
+      title: '수수료가 발생하는 구조에 대해 어느 정도 수용 가능하다고 느끼나요?',
       type: 'radio', required: true,
       options: ['충분히 수용 가능','조건이 좋으면 수용 가능','수수료가 낮아야 가능','무료가 아니면 부담됨','판단 어려움']
     },
-    {
-      id: 'partner_Q13', colKey: '파트너_Q13',
-      title: 'Q13. 파트너 입장에서 가장 걱정되는 부분은 무엇인가요?',
+    { id: 'partner_Q13', colKey: '파트너_Q13',
+      title: '파트너 입장에서 가장 걱정되는 부분은 무엇인가요?',
       type: 'checkbox', required: true,
       options: ['고객의 허위 의뢰','견적만 받고 연락 두절','과도한 가격 경쟁','수수료 부담','정산 지연','악성 리뷰','현장 정보 부족','고객과의 분쟁','기타']
     },
-    {
-      id: 'partner_Q14', colKey: '파트너_Q14',
-      title: 'Q14. 파트너 프로필에 반드시 보여야 한다고 생각하는 정보는 무엇인가요?',
+    { id: 'partner_Q14', colKey: '파트너_Q14',
+      title: '파트너 프로필에 반드시 보여야 한다고 생각하는 정보는 무엇인가요?',
       type: 'checkbox', required: true,
       options: ['경력','자격증','작업 가능 지역','작업 분야','실제 시공 사진','고객 후기','평점','사업자 정보','긴급출동 가능 여부','기타']
     },
-    {
-      id: 'partner_Q15', colKey: '파트너_Q15',
-      title: 'Q15. 공인만능맨, 인증 파트너 같은 배지가 있다면 신뢰도나 참여 의향에 도움이 될까요?',
+    { id: 'partner_Q15', colKey: '파트너_Q15',
+      title: '공인만능맨, 인증 파트너 같은 배지가 있다면 신뢰도나 참여 의향에 도움이 될까요?',
       type: 'radio', required: true,
       options: ['매우 도움됨','어느 정도 도움됨','큰 차이 없음','오히려 부담됨','설명을 더 봐야 판단 가능']
     },
-    {
-      id: 'partner_Q16', colKey: '파트너_Q16',
-      title: 'Q16. 파트너로 참여한다면 어떤 혜택이 가장 중요하다고 생각하나요?',
+    { id: 'partner_Q16', colKey: '파트너_Q16',
+      title: '파트너로 참여한다면 어떤 혜택이 가장 중요하다고 생각하나요?',
       type: 'checkbox', required: true,
       options: ['초기 수수료 무료','광고비 없음','입점비 없음','지역 고객 연결','정산 안정성','본사 인증 표시','프로필 홍보','우선 노출','기타']
     },
-    {
-      id: 'partner_Q17', colKey: '파트너_Q17',
-      title: 'Q17. 실제로 만능맨 파트너로 참여할 의향이 있나요?',
+    { id: 'partner_Q17', colKey: '파트너_Q17',
+      title: '실제로 만능맨 파트너로 참여할 의향이 있나요?',
       type: 'radio', required: true,
       options: ['바로 참여 의향 있음','조건 확인 후 참여 가능','조금 더 지켜보고 결정','참여 의향 낮음','참여하지 않음']
     },
-    {
-      id: 'partner_Q18', colKey: '파트너_Q18',
-      title: 'Q18. 파트너 가입 과정에서 어렵거나 불편할 것 같은 부분을 적어주세요.',
+    { id: 'partner_Q18', colKey: '파트너_Q18',
+      title: '파트너 가입 과정에서 어렵거나 불편할 것 같은 부분을 적어주세요.',
       type: 'textarea', required: true,
       placeholder: '어떤 부분이 불편하거나 복잡하게 느껴졌는지 자유롭게 적어주세요.'
     },
-    {
-      id: 'partner_Q19', colKey: '파트너_Q19',
-      title: 'Q19. 파트너 입장에서 반드시 개선되었으면 하는 기능을 적어주세요.',
+    { id: 'partner_Q19', colKey: '파트너_Q19',
+      title: '파트너 입장에서 반드시 개선되었으면 하는 기능을 적어주세요.',
       type: 'textarea', required: true,
       placeholder: '예: 의뢰 알림, 거리 기반 필터, 빠른 견적 전송 등'
     },
-    {
-      id: 'partner_Q20', colKey: '파트너_Q20',
-      title: 'Q20. 만능맨 파트너 서비스에 대한 종합 의견을 자유롭게 작성해주세요.',
+    { id: 'partner_Q20', colKey: '파트너_Q20',
+      title: '만능맨 파트너 서비스에 대한 종합 의견을 자유롭게 작성해주세요.',
       type: 'textarea', required: true,
       placeholder: '서비스 전반에 대한 의견을 자유롭게 작성해주세요.'
     },
-    {
-      id: 'partner_Q21', colKey: '파트너_Q21',
-      title: 'Q21. 플랫폼 이용 시 적정하다고 생각하는 수수료 부담 수준은 어느 정도인가요?',
+    { id: 'partner_Q21', colKey: '파트너_Q21',
+      title: '플랫폼 이용 시 적정하다고 생각하는 수수료 부담 수준은 어느 정도인가요?',
       desc: '만능맨 플랫폼을 통해 실제 고객 의뢰를 연결받는 경우, 파트너 입장에서 부담 가능하다고 생각하는 수수료 수준을 선택해주세요.',
       type: 'radio', required: true,
       options: ['1% 이하','2%','3%','4%','5%','6% 이상','고정 수수료 방식이 더 적절하다고 생각함','아직 판단하기 어려움']
     },
-    {
-      id: 'partner_Q22', colKey: '파트너_Q22',
-      title: 'Q22. 수수료와 관련해 의견이 있다면 자유롭게 작성해주세요.',
+    { id: 'partner_Q22', colKey: '파트너_Q22',
+      title: '수수료와 관련해 의견이 있다면 자유롭게 작성해주세요.',
       type: 'textarea', required: false,
       placeholder: '수수료 관련 추가 의견을 자유롭게 적어주세요.'
     }
@@ -1667,7 +1077,6 @@ async function confirmCode() {
       document.getElementById('code-input').focus();
     }
   } catch (_) {
-    // 서버 연결 실패 시 진입 차단
     document.getElementById('code-modal-error').textContent = '서버 연결 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
   } finally {
     btn.disabled = false;
@@ -1688,19 +1097,22 @@ function enterSurvey(type) {
 }
 
 function renderSurveyByType(type) {
-  const questions = questionsByType[type];
-  const typeLabels = { general: '일반 사용자', employee: '임직원', partner: '파트너' };
+  const questions = QUESTION_CONFIG[type];
+  const typeLabels  = { general: '일반 사용자', employee: '임직원', partner: '파트너' };
   const typeClasses = { general: 'general', employee: 'employee', partner: 'partner' };
-  const icons = { general: '👤', employee: '🏢', partner: '🔧' };
+  const icons       = { general: '👤', employee: '🏢', partner: '🔧' };
+  const totalItems  = questions.length + 2; // +2 기본정보(이름, 연락처)
 
-  // 유형 배지
   document.getElementById('survey-type-badge').innerHTML =
-    `<span class="type-badge ${typeClasses[type]}">${icons[type]} ${typeLabels[type]} 설문 (총 ${questions.length}문항)</span>`;
+    `<span class="type-badge ${typeClasses[type]}">${icons[type]} ${typeLabels[type]} 설문 (총 ${totalItems}문항)</span>`;
 
   const container = document.getElementById('survey-questions');
   container.innerHTML = '';
 
-  // 섹션 없이 단일 카드로 구성 (유형별 묶음)
+  // 1. 기본정보 카드
+  container.appendChild(buildBasicInfoCard());
+
+  // 2. 질문 카드
   const card = document.createElement('div');
   card.className = 'card section-card';
 
@@ -1712,8 +1124,7 @@ function renderSurveyByType(type) {
   body.className = 'section-body';
 
   questions.forEach((q, idx) => {
-    const block = buildQuestionBlock(q, idx);
-    body.appendChild(block);
+    body.appendChild(buildQuestionBlock(q, idx));
   });
 
   card.appendChild(header);
@@ -1721,8 +1132,63 @@ function renderSurveyByType(type) {
   container.appendChild(card);
 
   initChoiceUI();
-  initSpecialInputs();
+  initBasicInputs();
+  initPhoneInput();
   updateProgress();
+}
+
+// ── 기본정보 카드 생성 ──
+function buildBasicInfoCard() {
+  const card = document.createElement('div');
+  card.className = 'basic-info-card';
+  card.id = 'basic-info-card';
+
+  card.innerHTML = `
+    <div class="basic-info-header">
+      <div class="basic-info-header-row">
+        <span class="basic-info-header-icon">📋</span>
+        <span class="basic-info-header-title">기본정보</span>
+      </div>
+    </div>
+    <div class="basic-info-body">
+      <div class="basic-info-notice">
+        베타테스트 참여 확인 및 리워드 안내를 위해 필요한 정보입니다.
+      </div>
+
+      <div class="basic-field" id="basic-name-field">
+        <div class="basic-field-label">
+          이름 <span class="req">필수</span>
+        </div>
+        <input
+          type="text"
+          id="basic-name"
+          class="text-input"
+          placeholder="이름을 입력해주세요."
+          autocomplete="name"
+          autocapitalize="off"
+          autocorrect="off"
+          spellcheck="false"
+        >
+      </div>
+
+      <div class="basic-field" id="basic-phone-field">
+        <div class="basic-field-label">
+          연락처 <span class="req">필수</span>
+        </div>
+        <input
+          type="tel"
+          id="basic-phone"
+          class="text-input"
+          placeholder="예: 010-0000-0000"
+          autocomplete="tel"
+          inputmode="numeric"
+          maxlength="13"
+        >
+      </div>
+    </div>
+  `;
+
+  return card;
 }
 
 // ── 질문 블록 생성 ──
@@ -1730,13 +1196,14 @@ function buildQuestionBlock(q, idx) {
   const block = document.createElement('div');
   block.className = 'q-block';
   block.id = 'qb-' + q.id;
+  block.dataset.displayNum = idx + 1;
 
   const label = document.createElement('div');
   label.className = 'q-label';
 
   const isMulti = q.type === 'checkbox';
   const multiHint = isMulti ? '<span class="multi-hint">(복수 선택 가능)</span>' : '';
-  label.innerHTML = `${q.title}${q.required !== false ? '<span class="req">필수</span>' : ''}${multiHint}`;
+  label.innerHTML = `Q${idx + 1}. ${esc(q.title)}${q.required !== false ? '<span class="req">필수</span>' : ''}${multiHint}`;
   block.appendChild(label);
 
   if (q.desc) {
@@ -1746,39 +1213,19 @@ function buildQuestionBlock(q, idx) {
     block.appendChild(descEl);
   }
 
-  if (q.type === 'name') {
+  if (q.type === 'text') {
     const input = document.createElement('input');
     input.type = 'text';
     input.className = 'text-input';
     input.dataset.colKey = q.colKey;
-    input.dataset.required = 'true';
-    input.dataset.inputType = 'name';
-    input.placeholder = '이름을 입력해주세요.';
-    input.autocomplete = 'off';
-    block.appendChild(input);
-  } else if (q.type === 'phone') {
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'text-input';
-    input.dataset.colKey = q.colKey;
-    input.dataset.required = 'true';
-    input.dataset.inputType = 'phone';
-    input.placeholder = '예: 010-0000-0000';
-    input.autocomplete = 'off';
-    block.appendChild(input);
-  } else if (q.type === 'text') {
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'text-input';
-    input.dataset.colKey = q.colKey;
-    input.dataset.required = 'true';
+    if (q.required !== false) input.dataset.required = 'true';
     if (q.placeholder) input.placeholder = q.placeholder;
     block.appendChild(input);
   } else if (q.type === 'textarea') {
     const ta = document.createElement('textarea');
     ta.className = 'textarea-input';
     ta.dataset.colKey = q.colKey;
-    ta.dataset.required = 'true';
+    if (q.required !== false) ta.dataset.required = 'true';
     if (q.placeholder) ta.placeholder = q.placeholder;
     ta.rows = 5;
     block.appendChild(ta);
@@ -1786,26 +1233,26 @@ function buildQuestionBlock(q, idx) {
     const group = document.createElement('div');
     group.className = 'radio-group';
     group.dataset.colKey = q.colKey;
-    group.dataset.required = 'true';
+    if (q.required !== false) group.dataset.required = 'true';
     group.dataset.qtype = 'radio';
     q.options.forEach(opt => {
-      const label = document.createElement('label');
-      label.className = 'radio-option';
-      label.innerHTML = `<input type="radio" name="${q.id}" value="${esc(opt)}"><span class="radio-dot"></span><span class="option-text">${esc(opt)}</span>`;
-      group.appendChild(label);
+      const lbl = document.createElement('label');
+      lbl.className = 'radio-option';
+      lbl.innerHTML = `<input type="radio" name="${q.id}" value="${esc(opt)}"><span class="radio-dot"></span><span class="option-text">${esc(opt)}</span>`;
+      group.appendChild(lbl);
     });
     block.appendChild(group);
   } else if (q.type === 'checkbox') {
     const group = document.createElement('div');
     group.className = 'checkbox-group';
     group.dataset.colKey = q.colKey;
-    group.dataset.required = 'true';
+    if (q.required !== false) group.dataset.required = 'true';
     group.dataset.qtype = 'checkbox';
     q.options.forEach(opt => {
-      const label = document.createElement('label');
-      label.className = 'checkbox-option';
-      label.innerHTML = `<input type="checkbox" name="${q.id}" value="${esc(opt)}"><span class="checkbox-box"></span><span class="option-text">${esc(opt)}</span>`;
-      group.appendChild(label);
+      const lbl = document.createElement('label');
+      lbl.className = 'checkbox-option';
+      lbl.innerHTML = `<input type="checkbox" name="${q.id}" value="${esc(opt)}"><span class="checkbox-box"></span><span class="option-text">${esc(opt)}</span>`;
+      group.appendChild(lbl);
     });
     block.appendChild(group);
   } else if (q.type === 'scale') {
@@ -1815,7 +1262,7 @@ function buildQuestionBlock(q, idx) {
     const opts = document.createElement('div');
     opts.className = 'scale-options';
     opts.dataset.colKey = q.colKey;
-    opts.dataset.required = 'true';
+    if (q.required !== false) opts.dataset.required = 'true';
     opts.dataset.qtype = 'scale';
 
     for (let i = q.scaleMin; i <= q.scaleMax; i++) {
@@ -1842,7 +1289,6 @@ function buildQuestionBlock(q, idx) {
 // UI 이벤트 초기화
 // ════════════════════════════════════════════════════════
 function initChoiceUI() {
-  // 라디오
   document.querySelectorAll('#survey-questions .radio-option input[type="radio"]').forEach(input => {
     input.addEventListener('change', function() {
       const group = this.closest('.radio-group');
@@ -1853,7 +1299,6 @@ function initChoiceUI() {
     });
   });
 
-  // 체크박스
   document.querySelectorAll('#survey-questions .checkbox-option input[type="checkbox"]').forEach(input => {
     input.addEventListener('change', function() {
       const opt = this.closest('.checkbox-option');
@@ -1864,7 +1309,6 @@ function initChoiceUI() {
     });
   });
 
-  // 척도
   document.querySelectorAll('#survey-questions .scale-option').forEach(opt => {
     opt.addEventListener('click', function() {
       const group = this.closest('.scale-options');
@@ -1875,7 +1319,6 @@ function initChoiceUI() {
     });
   });
 
-  // 텍스트/텍스트에리어
   document.querySelectorAll('#survey-questions .text-input, #survey-questions .textarea-input').forEach(el => {
     el.addEventListener('input', function() {
       if (this.value.trim()) clearError(this.closest('.q-block'));
@@ -1884,39 +1327,43 @@ function initChoiceUI() {
   });
 }
 
-function initSpecialInputs() {
-  // 연락처 자동 하이픈
-  document.querySelectorAll('[data-input-type="phone"]').forEach(el => {
-    el.addEventListener('keydown', function(e) {
-      const allowed = ['Backspace','Delete','ArrowLeft','ArrowRight','Tab','Home','End'];
-      if (allowed.includes(e.key) || e.ctrlKey || e.metaKey) return;
-      if (!/^\d$/.test(e.key)) e.preventDefault();
-    });
-    el.addEventListener('input', function() {
-      const digits = this.value.replace(/\D/g, '').slice(0, 11);
-      let fmt = digits;
-      if (digits.length > 7) fmt = digits.slice(0,3) + '-' + digits.slice(3,7) + '-' + digits.slice(7);
-      else if (digits.length > 3) fmt = digits.slice(0,3) + '-' + digits.slice(3);
-      this.value = fmt;
-      updateProgress();
-    });
+// ── 기본정보 이름 입력 초기화 (iOS Safari 호환) ──
+function initBasicInputs() {
+  const nameEl = document.getElementById('basic-name');
+  if (!nameEl) return;
+
+  // iOS Safari IME 조합 입력을 방해하지 않도록 단순하게 처리
+  // 문자 필터링 없음 — 한글/영문/공백 모두 자유롭게 입력 가능
+  nameEl.addEventListener('input', function() {
+    if (this.value.trim()) {
+      document.getElementById('basic-name-field').classList.remove('error-field');
+    }
+    updateProgress();
+  });
+}
+
+// ── 연락처 자동 하이픈 ──
+function initPhoneInput() {
+  const phoneEl = document.getElementById('basic-phone');
+  if (!phoneEl) return;
+
+  phoneEl.addEventListener('keydown', function(e) {
+    const allowed = ['Backspace','Delete','ArrowLeft','ArrowRight','Tab','Home','End'];
+    if (allowed.includes(e.key) || e.ctrlKey || e.metaKey) return;
+    if (!/^\d$/.test(e.key)) e.preventDefault();
   });
 
-  // 이름 한글 완성자만
-  document.querySelectorAll('[data-input-type="name"]').forEach(el => {
-    let composing = false;
-    el.addEventListener('compositionstart', () => { composing = true; });
-    el.addEventListener('compositionend', function() {
-      composing = false;
-      this.value = this.value.replace(/[^가-힣\s]/g, '');
-      updateProgress();
-    });
-    el.addEventListener('input', function() {
-      if (!composing) {
-        this.value = this.value.replace(/[^가-힣\s]/g, '');
-        updateProgress();
-      }
-    });
+  phoneEl.addEventListener('input', function() {
+    const digits = this.value.replace(/\D/g, '').slice(0, 11);
+    let formatted = digits;
+    if (digits.length > 7) formatted = digits.slice(0,3) + '-' + digits.slice(3,7) + '-' + digits.slice(7);
+    else if (digits.length > 3) formatted = digits.slice(0,3) + '-' + digits.slice(3);
+    this.value = formatted;
+
+    if (this.value.trim()) {
+      document.getElementById('basic-phone-field').classList.remove('error-field');
+    }
+    updateProgress();
   });
 }
 
@@ -1928,12 +1375,15 @@ function clearError(block) {
 // 진행률 바
 // ════════════════════════════════════════════════════════
 function updateProgress() {
-  const questions = questionsByType[currentType] || [];
-  const requiredQs = questions.filter(q => q.required !== false);
-  const total = requiredQs.length;
-  if (total === 0) return;
+  const questions   = QUESTION_CONFIG[currentType] || [];
+  const requiredQs  = questions.filter(q => q.required !== false);
 
-  let answered = 0;
+  const nameVal  = (document.getElementById('basic-name')?.value || '').trim();
+  const phoneVal = (document.getElementById('basic-phone')?.value || '').trim();
+
+  const total    = requiredQs.length + 2;
+  let answered   = (nameVal ? 1 : 0) + (phoneVal ? 1 : 0);
+
   requiredQs.forEach(q => {
     const val = getAnswerValue(q);
     if (val && val.trim()) answered++;
@@ -1963,7 +1413,7 @@ function getAnswerValue(q) {
     const sel = group.querySelector('.scale-option.selected');
     return sel ? sel.dataset.value : '';
   }
-  if (q.type === 'name' || q.type === 'phone' || q.type === 'text') {
+  if (q.type === 'text') {
     const el = document.querySelector(`input[data-col-key="${q.colKey}"]`);
     return el ? el.value.trim() : '';
   }
@@ -1979,22 +1429,19 @@ function getAnswerValue(q) {
 // ════════════════════════════════════════════════════════
 function collectFormData() {
   const typeLabels = { general: '일반사용자', employee: '임직원', partner: '파트너' };
+
   const data = {
-    participantType: typeLabels[currentType] || currentType,
-    개인정보동의: '동의',
-    개인정보동의일시: consentTimestamp || ''
+    participantType:  typeLabels[currentType] || currentType,
+    respondentName:   (document.getElementById('basic-name')?.value || '').trim(),
+    respondentPhone:  (document.getElementById('basic-phone')?.value || '').trim(),
+    개인정보동의:       '동의',
+    개인정보동의일시:    consentTimestamp || ''
   };
 
-  const questions = questionsByType[currentType] || [];
+  const questions = QUESTION_CONFIG[currentType] || [];
   questions.forEach(q => {
     data[q.colKey] = getAnswerValue(q);
   });
-
-  // name / phone을 최상위 필드로도 저장
-  const nameQ = questions.find(q => q.type === 'name');
-  const phoneQ = questions.find(q => q.type === 'phone');
-  if (nameQ)  data.name  = data[nameQ.colKey]  || '';
-  if (phoneQ) data.phone = data[phoneQ.colKey] || '';
 
   return data;
 }
@@ -2003,33 +1450,41 @@ function collectFormData() {
 // 유효성 검사
 // ════════════════════════════════════════════════════════
 function validateRequiredAnswers() {
-  const questions = questionsByType[currentType] || [];
   const errors = [];
 
+  // 기존 오류 클래스 초기화
   document.querySelectorAll('.q-block.error-field').forEach(el => el.classList.remove('error-field'));
+  document.querySelectorAll('.basic-field.error-field').forEach(el => el.classList.remove('error-field'));
 
-  questions.forEach(q => {
-    if (!q.required) return;
+  // 기본정보 검사
+  const nameEl  = document.getElementById('basic-name');
+  const phoneEl = document.getElementById('basic-phone');
+
+  if (!nameEl.value.trim()) {
+    document.getElementById('basic-name-field').classList.add('error-field');
+    errors.push({ id: 'basic-name-field', label: '이름' });
+  }
+
+  const phoneVal = phoneEl.value.trim();
+  if (!phoneVal) {
+    document.getElementById('basic-phone-field').classList.add('error-field');
+    errors.push({ id: 'basic-phone-field', label: '연락처' });
+  } else if (!/^010-\d{4}-\d{4}$/.test(phoneVal)) {
+    document.getElementById('basic-phone-field').classList.add('error-field');
+    errors.push({ id: 'basic-phone-field', label: '연락처 (형식 오류)' });
+  }
+
+  // 질문 검사
+  const questions = QUESTION_CONFIG[currentType] || [];
+  questions.forEach((q, idx) => {
+    if (q.required === false) return;
     const val = getAnswerValue(q);
     if (!val || !val.trim()) {
       const block = document.getElementById('qb-' + q.id);
       if (block) block.classList.add('error-field');
-      errors.push({ id: 'qb-' + q.id, label: q.title.split('.')[0] });
+      errors.push({ id: 'qb-' + q.id, label: `Q${idx + 1}` });
     }
   });
-
-  // 연락처 형식 검증
-  const phoneQ = questions.find(q => q.type === 'phone');
-  if (phoneQ) {
-    const val = getAnswerValue(phoneQ);
-    if (val && !/^010-\d{4}-\d{4}$/.test(val)) {
-      const block = document.getElementById('qb-' + phoneQ.id);
-      if (block) block.classList.add('error-field');
-      if (!errors.find(e => e.id === 'qb-' + phoneQ.id)) {
-        errors.push({ id: 'qb-' + phoneQ.id, label: phoneQ.title.split('.')[0] + ' (형식 오류)' });
-      }
-    }
-  }
 
   return errors;
 }
@@ -2040,12 +1495,11 @@ function showValidationToast(errors) {
   list.innerHTML = '';
   const seen = new Set();
   errors.forEach(err => {
-    const qNum = err.label;
-    if (seen.has(qNum)) return;
-    seen.add(qNum);
+    if (seen.has(err.label)) return;
+    seen.add(err.label);
     const chip = document.createElement('span');
     chip.className = 'toast-item';
-    chip.textContent = qNum;
+    chip.textContent = err.label;
     chip.addEventListener('click', () => {
       const el = document.getElementById(err.id);
       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2075,7 +1529,8 @@ document.getElementById('survey-form').addEventListener('submit', async function
 
   if (errors.length > 0) {
     showValidationToast(errors);
-    const firstError = document.querySelector('.q-block.error-field');
+    const firstError = document.querySelector('.q-block.error-field') ||
+                       document.querySelector('.basic-field.error-field');
     if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
     return;
   }
@@ -2120,24 +1575,18 @@ function esc(str) {
     .replace(/"/g,'&quot;');
 }
 
-// 토스트 닫기
 document.getElementById('toast-close-btn').addEventListener('click', () => {
   document.getElementById('validation-toast').classList.remove('visible');
 });
 
-// 모달 배경 클릭 닫기
 document.getElementById('code-modal-overlay').addEventListener('click', function(e) {
   if (e.target === this) closeCodeModal();
 });
 
-// 개인정보 모달 배경 클릭 시 닫기 (유형 선택 화면으로 복귀)
 document.getElementById('privacy-modal-overlay').addEventListener('click', function(e) {
   if (e.target === this) closePrivacyModal();
 });
 
-// ════════════════════════════════════════════════════════
-// 초기화
-// ════════════════════════════════════════════════════════
 init();
 </script>
 </body>

@@ -43,7 +43,7 @@ function buildPartnerCols() {
   return cols;
 }
 
-var COMMON_COLS   = ['submittedAt', 'participantType', 'responseId', 'name', 'phone'];
+var COMMON_COLS   = ['submittedAt', 'participantType', 'responseId', 'respondentName', 'respondentPhone'];
 var GENERAL_COLS  = buildGeneralCols();
 var EMPLOYEE_COLS = buildEmployeeCols();
 var PARTNER_COLS  = buildPartnerCols();
@@ -76,6 +76,9 @@ function doPost(e) {
     }
     if (action === 'updateresponse') {
       return handleUpdateResponse(data);
+    }
+    if (action === 'resetdata') {
+      return handleResetData(data);
     }
 
     // ── 설문 응답 저장 ──
@@ -144,6 +147,31 @@ function handleSetSecretCode(data) {
 
   writeLog('INFO', '비밀코드 변경', key + ' → ' + code);
   return makeResponse({ success: true });
+}
+
+// ── 응답 데이터 초기화 (백업 후 삭제) ──
+function handleResetData(data) {
+  if (!isValidPassword(data.password || '')) {
+    return makeResponse({ success: false, error: 'UNAUTHORIZED' });
+  }
+  var ss  = SpreadsheetApp.openById(SHEET_ID);
+  var now = new Date();
+  var timestamp = Utilities.formatDate(now, 'Asia/Seoul', 'yyyyMMdd_HHmmss');
+  var backupName = 'Backup_' + timestamp;
+
+  var oldSheet = ss.getSheetByName(SHEET_RESPONSES);
+  if (oldSheet) {
+    oldSheet.copyTo(ss).setName(backupName);
+    var dataCount = Math.max(0, oldSheet.getLastRow() - 1);
+    ss.deleteSheet(oldSheet);
+    getOrCreateSheet(ss, SHEET_RESPONSES, RESPONSE_HEADERS);
+    writeLog('INFO', '데이터 초기화 완료', '백업: ' + backupName + ' / 삭제 행 수: ' + dataCount);
+    return makeResponse({ success: true, backupName: backupName, deletedCount: dataCount });
+  }
+
+  getOrCreateSheet(ss, SHEET_RESPONSES, RESPONSE_HEADERS);
+  writeLog('INFO', '데이터 초기화 완료 (기존 시트 없음)', backupName);
+  return makeResponse({ success: true, backupName: backupName, deletedCount: 0 });
 }
 
 // ── 처리상태/메모 변경 ──
@@ -343,12 +371,10 @@ function fixSheets() {
 function testDoPost_general() {
   var testData = {
     participantType: '일반사용자',
-    name: '테스트 일반',
-    phone: '010-1111-2222',
+    respondentName: '테스트 일반',
+    respondentPhone: '010-1111-2222',
     개인정보동의: '동의',
-    개인정보동의일시: '2026-06-30 12:00:00',
-    일반_Q1: '테스트 일반',
-    일반_Q2: '010-1111-2222',
+    개인정보동의일시: '2026-07-01 12:00:00',
     일반_Q3: '집수리/설비 전문가를 연결해주는 서비스',
     일반_Q4: '4',
     일반_Q5: '누수,수도/배관',
@@ -370,10 +396,10 @@ function testDoPost_general() {
 function testDoPost_employee() {
   var testData = {
     participantType: '임직원',
-    name: '테스트 임직원',
-    phone: '010-3333-4444',
+    respondentName: '테스트 임직원',
+    respondentPhone: '010-3333-4444',
     개인정보동의: '동의',
-    개인정보동의일시: '2026-06-30 12:00:00'
+    개인정보동의일시: '2026-07-01 12:00:00'
   };
   for (var i = 1; i <= 25; i++) testData['임직원_Q' + i] = '테스트 응답 ' + i;
   var result = doPost({ postData: { contents: JSON.stringify(testData) }, parameter: testData });
@@ -383,10 +409,10 @@ function testDoPost_employee() {
 function testDoPost_partner() {
   var testData = {
     participantType: '파트너',
-    name: '테스트 파트너',
-    phone: '010-5555-6666',
+    respondentName: '테스트 파트너',
+    respondentPhone: '010-5555-6666',
     개인정보동의: '동의',
-    개인정보동의일시: '2026-06-30 12:00:00'
+    개인정보동의일시: '2026-07-01 12:00:00'
   };
   for (var i = 1; i <= 22; i++) testData['파트너_Q' + i] = '테스트 응답 ' + i;
   testData['파트너_Q21'] = '3%';
