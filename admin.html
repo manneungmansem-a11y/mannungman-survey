@@ -211,6 +211,29 @@
     .opinions-q-section { margin-bottom:18px; }
     .opinions-q-title { font-size:13px; font-weight:700; color:#1e293b; margin-bottom:10px; line-height:1.5; }
 
+    /* ══════════════════════════════════════
+       추첨 관리 — 기존 설문 통계와 분리된 전용 UI
+       ══════════════════════════════════════ */
+    .raffle-actions-row { display:flex; flex-wrap:wrap; gap:12px; margin-bottom:20px; }
+    .raffle-action-card { background:#fff; border-radius:12px; padding:18px 20px; box-shadow:0 1px 4px rgba(0,0,0,.06); flex:1; min-width:220px; }
+    .raffle-action-card h5 { font-size:13px; font-weight:700; color:#1e293b; margin-bottom:4px; }
+    .raffle-action-card p { font-size:12px; color:#64748b; margin-bottom:12px; line-height:1.6; }
+    .btn-raffle-action { padding:9px 16px; border:none; border-radius:7px; font-size:13px; font-weight:700; cursor:pointer; transition:opacity .15s; }
+    .btn-raffle-action:disabled { opacity:.5; cursor:not-allowed; }
+    .btn-raffle-run { background:#ea580c; color:#fff; }
+    .btn-raffle-toggle-on { background:#16a34a; color:#fff; }
+    .btn-raffle-toggle-off { background:#64748b; color:#fff; }
+    .btn-raffle-reset { background:#fff; color:#dc2626; border:1.5px solid #fecaca !important; }
+
+    .raffle-tier-badge { display:inline-block; padding:2px 9px; border-radius:99px; font-size:11px; font-weight:700; color:#fff; }
+    .raffle-tier-badge[data-tier="1등"]   { background:#dc2626; }
+    .raffle-tier-badge[data-tier="2등"]   { background:#ea580c; }
+    .raffle-tier-badge[data-tier="3등"]   { background:#1a56db; }
+    .raffle-tier-badge[data-tier="참가상"] { background:#16a34a; }
+
+    .raffle-masked { filter:blur(4px); cursor:pointer; transition:filter .15s; user-select:none; }
+    .raffle-masked.revealed { filter:none; }
+
     /* ── 반응형 ── */
     @media (max-width: 768px) {
       .sidebar { width:100%; position:relative; height:auto; }
@@ -248,6 +271,7 @@
         <div class="sidebar-item" onclick="switchView(this,'opinions')"><span class="icon">💬</span> 주관식 답변</div>
         <div class="sidebar-item" onclick="switchView(this,'download')"><span class="icon">⬇️</span> 엑셀 다운로드</div>
         <div class="sidebar-item" onclick="switchView(this,'codes')"><span class="icon">🔐</span> 진입 코드 관리</div>
+        <div class="sidebar-item" onclick="switchView(this,'raffle')"><span class="icon">🎁</span> 추첨 관리</div>
         <div class="sidebar-item" style="color:#f87171;" onclick="openResetModal()"><span class="icon">🗑️</span> 데이터 초기화</div>
       </div>
       <div class="sidebar-footer">
@@ -366,7 +390,61 @@
           </div>
         </div>
 
+        <!-- 추첨 관리 (기존 설문/통계 기능과 분리된 별도 시트 기반) -->
+        <div class="view-panel" id="view-raffle">
+          <div id="raffle-status-content"><div class="loading-state"><div class="spin"></div> 추첨 상태 로딩 중...</div></div>
+        </div>
+
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- 추첨 실행 확인 모달 -->
+<div id="raffle-run-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;width:100%;max-width:440px;margin:24px;box-shadow:0 8px 40px rgba(0,0,0,.25);overflow:hidden;">
+    <div style="background:#fff7ed;padding:18px 24px;border-bottom:1px solid #fed7aa;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:20px;">🎲</span>
+      <h3 style="font-size:15px;font-weight:700;color:#c2410c;">랜덤 추첨 실행</h3>
+    </div>
+    <div style="padding:22px 24px;">
+      <p style="font-size:13.5px;color:#374151;line-height:1.7;margin-bottom:12px;">
+        참여자 <strong id="raffle-run-eligible-count">-</strong>명(중복 제출 제거)을 대상으로 추첨을 실행합니다.<br>
+        결과는 <strong>구글시트(raffle_results)에 고정 저장</strong>되며, 실행 후에는 <strong>재실행이 불가능</strong>합니다.
+      </p>
+      <p style="font-size:12.5px;color:#94a3b8;margin-bottom:14px;">※ 실행 전 구글시트 상단 메뉴 [파일 → 사본 만들기]로 백업을 남겨두는 것을 권장합니다.<br>※ 실행 후 결과를 되돌리려면 별도의 "추첨 초기화"가 필요합니다 (백업 후 초기화됨).</p>
+      <div style="display:flex;gap:10px;">
+        <button onclick="closeRaffleRunModal()" style="flex:1;padding:11px;background:#f1f5f9;color:#374151;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">취소</button>
+        <button id="raffle-run-confirm-btn" onclick="confirmRaffleRun()" style="flex:1;padding:11px;background:#ea580c;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">추첨 실행</button>
+      </div>
+      <div id="raffle-run-status" style="margin-top:10px;font-size:13px;min-height:18px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 추첨 초기화 확인 모달 -->
+<div id="raffle-reset-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;width:100%;max-width:440px;margin:24px;box-shadow:0 8px 40px rgba(0,0,0,.25);overflow:hidden;">
+    <div style="background:#fef2f2;padding:18px 24px;border-bottom:1px solid #fecaca;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:20px;">⚠️</span>
+      <h3 style="font-size:15px;font-weight:700;color:#b91c1c;">추첨 초기화 (재추첨 가능 상태로 복구)</h3>
+    </div>
+    <div style="padding:22px 24px;">
+      <p style="font-size:14px;color:#374151;line-height:1.7;margin-bottom:14px;">
+        현재 추첨 결과가 <strong>백업 후 삭제</strong>되고, 당첨확인 공개가 비활성화됩니다.<br>
+        설문 응답 데이터(responses 시트)는 전혀 영향받지 않습니다.
+      </p>
+      <p style="font-size:13px;color:#64748b;margin-bottom:14px;">확인을 위해 아래 입력창에 <code style="background:#f1f5f9;padding:2px 6px;border-radius:4px;font-weight:700;color:#dc2626;">재추첨</code> 를 입력하세요.</p>
+      <input type="text" id="raffle-reset-confirm-input" placeholder="재추첨" autocomplete="off"
+        style="width:100%;padding:10px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:15px;outline:none;transition:border-color .2s;"
+        oninput="document.getElementById('raffle-reset-confirm-btn').disabled=this.value!=='재추첨';document.getElementById('raffle-reset-confirm-btn').style.opacity=this.value==='재추첨'?'1':'.4';this.style.borderColor=this.value==='재추첨'?'#16a34a':'#e2e8f0'">
+      <div style="display:flex;gap:10px;margin-top:16px;">
+        <button onclick="closeRaffleResetModal()" style="flex:1;padding:11px;background:#f1f5f9;color:#374151;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">취소</button>
+        <button id="raffle-reset-confirm-btn" onclick="confirmRaffleReset()"
+          style="flex:1;padding:11px;background:#dc2626;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;opacity:.4;transition:opacity .2s;"
+          disabled>초기화 실행</button>
+      </div>
+      <div id="raffle-reset-status" style="margin-top:10px;font-size:13px;min-height:18px;"></div>
     </div>
   </div>
 </div>
@@ -506,7 +584,7 @@ let statsCurrentTab = '일반사용자';
 
 const VIEW_TITLES = {
   summary:'전체 요약', list:'개별 응답 목록', stats:'통계 분석',
-  opinions:'주관식 답변', download:'엑셀 다운로드', codes:'진입 코드 관리'
+  opinions:'주관식 답변', download:'엑셀 다운로드', codes:'진입 코드 관리', raffle:'추첨 관리'
 };
 
 // ════════════════════════════════════════════════════════
@@ -560,6 +638,7 @@ function renderCurrentView() {
     case 'list':     renderList(filteredResponses.length ? filteredResponses : allResponses); break;
     case 'stats':    renderStats(); break;
     case 'opinions': renderOpinions(); break;
+    case 'raffle':   renderRaffle(); break;
   }
   document.getElementById('last-updated').textContent = '업데이트: ' + new Date().toLocaleTimeString('ko-KR');
 }
@@ -1366,6 +1445,256 @@ async function saveSecretCode(type) {
   } catch(e) { msgEl.className='code-save-msg err'; msgEl.textContent='저장 중 오류가 발생했습니다.'; }
   setTimeout(()=>{msgEl.textContent='';},4000);
 }
+
+// ════════════════════════════════════════════════════════
+// 추첨 관리 — 기존 설문 응답/통계 로직과 완전히 분리된 모듈
+// (raffle_config / raffle_results / raffle_logs 시트만 사용, responses 시트는 읽기 전용 참조)
+// ════════════════════════════════════════════════════════
+let raffleStatusData = { executed:false, revealEnabled:false, executedAt:'', eligibleCount:0, duplicateCount:0, tiers:[] };
+let raffleWinnersData = [];
+let raffleDuplicatesData = [];
+let raffleWinnerTierFilter = '';
+let raffleWinnerConfirmedFilter = '';
+
+async function raffleFetchStatus() {
+  const res = await fetch(`${SCRIPT_URL}?action=rafflestatus`);
+  return await res.json();
+}
+async function raffleFetchWinners() {
+  const res = await fetch(`${SCRIPT_URL}?action=rafflewinners&password=${encodeURIComponent(adminPassword)}`);
+  return await res.json();
+}
+async function raffleFetchDuplicates() {
+  const res = await fetch(`${SCRIPT_URL}?action=raffleduplicates&password=${encodeURIComponent(adminPassword)}`);
+  return await res.json();
+}
+
+async function renderRaffle() {
+  const container = document.getElementById('raffle-status-content');
+  container.innerHTML = '<div class="loading-state"><div class="spin"></div> 추첨 상태 로딩 중...</div>';
+  try {
+    const [statusJson, winnersJson, dupJson] = await Promise.all([
+      raffleFetchStatus(), raffleFetchWinners(), raffleFetchDuplicates()
+    ]);
+    if (statusJson.success) raffleStatusData = statusJson;
+    raffleWinnersData    = (winnersJson.success && winnersJson.data) ? winnersJson.data : [];
+    raffleDuplicatesData = (dupJson.success && dupJson.data) ? dupJson.data : [];
+    renderRaffleContent();
+  } catch (e) {
+    console.error('추첨 데이터 로딩 실패', e);
+    container.innerHTML = `<div style="background:#fef2f2;border:1.5px solid #fca5a5;color:#b91c1c;border-radius:10px;padding:18px 20px;">⚠ 추첨 데이터를 불러오지 못했습니다. Apps Script 배포 상태를 확인해주세요.</div>`;
+  }
+}
+
+function renderRaffleContent() {
+  const s = raffleStatusData;
+  const container = document.getElementById('raffle-status-content');
+
+  const revealBtnHtml = !s.executed
+    ? `<button class="btn-raffle-action btn-raffle-toggle-on" disabled>🔓 당첨확인 공개</button>`
+    : (s.revealEnabled
+        ? `<button class="btn-raffle-action btn-raffle-toggle-off" onclick="toggleRaffleReveal(false)">🔒 당첨확인 공개 끄기</button>`
+        : `<button class="btn-raffle-action btn-raffle-toggle-on" onclick="toggleRaffleReveal(true)">🔓 당첨확인 공개 켜기</button>`);
+
+  container.innerHTML = `
+    <div class="summary-grid" style="margin-bottom:20px;">
+      <div class="stat-card ${s.executed?'green':''}"><div class="sc-label">추첨 실행 여부</div><div class="sc-value" style="font-size:20px">${s.executed?'실행됨':'미실행'}</div><div class="sc-sub">${esc(s.executedAt)||'-'}</div></div>
+      <div class="stat-card ${s.revealEnabled?'blue':''}"><div class="sc-label">당첨확인 공개</div><div class="sc-value" style="font-size:20px">${s.revealEnabled?'공개중':'비공개'}</div></div>
+      <div class="stat-card"><div class="sc-label">추첨 대상(중복제거)</div><div class="sc-value">${s.eligibleCount||0}</div><div class="sc-sub">명</div></div>
+      <div class="stat-card orange"><div class="sc-label">중복 제출 번호</div><div class="sc-value">${s.duplicateCount||0}</div><div class="sc-sub">건</div></div>
+      <div class="stat-card purple"><div class="sc-label">당첨자 수</div><div class="sc-value">${raffleWinnersData.length}</div><div class="sc-sub">확인완료 ${raffleWinnersData.filter(w=>w.confirmed==='TRUE').length}명</div></div>
+    </div>
+
+    <div class="raffle-actions-row">
+      <div class="raffle-action-card">
+        <h5>🎲 랜덤 추첨 실행</h5>
+        <p>참여자 중 중복 제거된 번호를 대상으로 1회 추첨을 실행합니다. 실행 후 재실행은 불가하며, 재추첨하려면 초기화가 필요합니다.</p>
+        <button class="btn-raffle-action btn-raffle-run" onclick="openRaffleRunModal()" ${s.executed?'disabled':''}>추첨 실행</button>
+      </div>
+      <div class="raffle-action-card">
+        <h5>👀 당첨확인 공개</h5>
+        <p>설문 페이지의 '당첨확인하기' 버튼 활성화 여부를 제어합니다.</p>
+        ${revealBtnHtml}
+      </div>
+      <div class="raffle-action-card">
+        <h5>🔁 추첨 초기화</h5>
+        <p>기존 추첨 결과를 백업 후 삭제하고 재추첨 가능한 상태로 되돌립니다.</p>
+        <button class="btn-raffle-action btn-raffle-reset" onclick="openRaffleResetModal()" ${s.executed?'':'disabled'}>초기화</button>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <h4>경품 구성</h4>
+      <table>
+        <thead><tr><th>등수</th><th>인원</th><th>경품</th></tr></thead>
+        <tbody>
+          ${(s.tiers||[]).map(t=>`<tr><td><span class="raffle-tier-badge" data-tier="${esc(t.tier)}">${esc(t.tier)}</span></td><td>${t.count}명</td><td>${esc(t.prize)}</td></tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-card">
+      <h4>당첨자 목록 (${raffleWinnersData.length}건)</h4>
+      <div class="filter-bar">
+        <select id="raffle-tier-filter" onchange="applyRaffleWinnerFilter()">
+          <option value="">등수 전체</option>
+          ${(s.tiers||[]).map(t=>`<option value="${esc(t.tier)}">${esc(t.tier)}</option>`).join('')}
+        </select>
+        <select id="raffle-confirmed-filter" onchange="applyRaffleWinnerFilter()">
+          <option value="">확인여부 전체</option>
+          <option value="TRUE">확인완료</option>
+          <option value="FALSE">미확인</option>
+        </select>
+      </div>
+      <div id="raffle-winners-table">${renderRaffleWinnersTable(raffleWinnersData)}</div>
+    </div>
+
+    <div class="table-card">
+      <h4>중복 제출 번호 (${raffleDuplicatesData.length}건)</h4>
+      <p style="font-size:12px;color:#94a3b8;margin-bottom:12px;">동일 번호로 여러 번 제출한 경우이며, 추첨 대상 풀에는 가장 최근 제출 1건만 반영됩니다.</p>
+      ${renderRaffleDuplicatesTable(raffleDuplicatesData)}
+    </div>`;
+}
+
+function renderRaffleWinnersTable(data) {
+  const tierF = raffleWinnerTierFilter;
+  const confF = raffleWinnerConfirmedFilter;
+  const filtered = data.filter(w => (!tierF || w.tier===tierF) && (!confF || w.confirmed===confF));
+  if (filtered.length===0) return '<div class="empty-state">해당 조건의 당첨자가 없습니다.</div>';
+  return `<table>
+    <thead><tr><th>등수</th><th>경품</th><th>휴대폰번호</th><th>추첨일시</th><th>확인여부</th><th>확인일시</th></tr></thead>
+    <tbody>
+      ${filtered.map(w => `<tr>
+        <td><span class="raffle-tier-badge" data-tier="${esc(w.tier)}">${esc(w.tier)}</span></td>
+        <td style="font-size:12px">${esc(w.prize)}</td>
+        <td><span class="raffle-masked" onclick="this.classList.toggle('revealed')" title="클릭하여 보기">${esc(formatPhoneDisplay(w.phone))}</span></td>
+        <td style="font-size:12px;white-space:nowrap">${esc(w.drawnAt)}</td>
+        <td>${w.confirmed==='TRUE' ? '<span class="badge badge-green">확인완료</span>' : '<span class="badge badge-gray">미확인</span>'}</td>
+        <td style="font-size:12px;white-space:nowrap">${esc(w.confirmedAt)||'-'}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+function applyRaffleWinnerFilter() {
+  raffleWinnerTierFilter = document.getElementById('raffle-tier-filter').value;
+  raffleWinnerConfirmedFilter = document.getElementById('raffle-confirmed-filter').value;
+  document.getElementById('raffle-winners-table').innerHTML = renderRaffleWinnersTable(raffleWinnersData);
+}
+
+function renderRaffleDuplicatesTable(list) {
+  if (list.length===0) return '<div class="empty-state">중복 제출된 번호가 없습니다.</div>';
+  return `<table>
+    <thead><tr><th>휴대폰번호</th><th>제출 건수</th><th>제출 내역 (제출일시 / 응답ID)</th></tr></thead>
+    <tbody>
+      ${list.map(d => `<tr>
+        <td><span class="raffle-masked" onclick="this.classList.toggle('revealed')" title="클릭하여 보기">${esc(formatPhoneDisplay(d.phone))}</span></td>
+        <td>${d.count}건</td>
+        <td style="font-size:12px;color:#64748b">${d.entries.map(e=>`${esc(e.submittedAt)} (${esc(e.responseId)||'-'})`).join('<br>')}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table>`;
+}
+
+function formatPhoneDisplay(phone) {
+  if (!phone) return '-';
+  const p = String(phone);
+  if (p.length === 11) return `${p.slice(0,3)}-${p.slice(3,7)}-${p.slice(7)}`;
+  if (p.length === 10) return `${p.slice(0,3)}-${p.slice(3,6)}-${p.slice(6)}`;
+  return p;
+}
+
+// ── 추첨 실행 ──
+function openRaffleRunModal() {
+  document.getElementById('raffle-run-eligible-count').textContent = raffleStatusData.eligibleCount || 0;
+  document.getElementById('raffle-run-status').textContent = '';
+  document.getElementById('raffle-run-confirm-btn').disabled = false;
+  document.getElementById('raffle-run-modal').style.display = 'flex';
+}
+function closeRaffleRunModal() {
+  document.getElementById('raffle-run-modal').style.display = 'none';
+}
+async function confirmRaffleRun() {
+  const btn = document.getElementById('raffle-run-confirm-btn');
+  const statusEl = document.getElementById('raffle-run-status');
+  btn.disabled = true; btn.textContent = '실행 중...';
+  statusEl.style.color = '#64748b'; statusEl.textContent = '추첨을 실행하는 중입니다...';
+  try {
+    const res = await fetch(SCRIPT_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action:'rafflerun', password: adminPassword }) });
+    const json = await res.json();
+    if (json.success) {
+      statusEl.style.color = '#16a34a';
+      statusEl.textContent = `추첨 완료! (${(json.summary||[]).map(t=>`${t.tier} ${t.drawn}/${t.planned}`).join(', ')})`;
+      setTimeout(() => { closeRaffleRunModal(); renderRaffle(); }, 1500);
+    } else {
+      const msg = json.error === 'ALREADY_EXECUTED' ? '이미 추첨이 실행되었습니다. 재추첨하려면 먼저 초기화해주세요.' : ('오류: ' + (json.error||'알 수 없는 오류'));
+      statusEl.style.color = '#dc2626'; statusEl.textContent = msg;
+      btn.disabled = false; btn.textContent = '추첨 실행';
+    }
+  } catch (e) {
+    statusEl.style.color = '#dc2626'; statusEl.textContent = '서버 연결 오류. 다시 시도해주세요.';
+    btn.disabled = false; btn.textContent = '추첨 실행';
+  }
+}
+
+// ── 당첨확인 공개 토글 ──
+async function toggleRaffleReveal(enabled) {
+  try {
+    const res = await fetch(SCRIPT_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action:'raffletogglereveal', password: adminPassword, enabled }) });
+    const json = await res.json();
+    if (json.success) {
+      raffleStatusData.revealEnabled = json.revealEnabled;
+      renderRaffleContent();
+    } else {
+      alert('공개 상태 변경 실패: ' + (json.error||'알 수 없는 오류'));
+    }
+  } catch (e) {
+    alert('서버 연결 오류로 공개 상태를 변경하지 못했습니다.');
+  }
+}
+
+// ── 추첨 초기화 ──
+function openRaffleResetModal() {
+  document.getElementById('raffle-reset-confirm-input').value = '';
+  document.getElementById('raffle-reset-confirm-btn').disabled = true;
+  document.getElementById('raffle-reset-confirm-btn').style.opacity = '.4';
+  document.getElementById('raffle-reset-status').textContent = '';
+  document.getElementById('raffle-reset-modal').style.display = 'flex';
+}
+function closeRaffleResetModal() {
+  document.getElementById('raffle-reset-modal').style.display = 'none';
+}
+async function confirmRaffleReset() {
+  const btn = document.getElementById('raffle-reset-confirm-btn');
+  const statusEl = document.getElementById('raffle-reset-status');
+  btn.disabled = true; btn.textContent = '초기화 중...';
+  statusEl.style.color = '#64748b'; statusEl.textContent = '백업 생성 후 초기화하는 중입니다...';
+  try {
+    const res = await fetch(SCRIPT_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action:'rafflereset', password: adminPassword, confirm:'RESET' }) });
+    const json = await res.json();
+    if (json.success) {
+      statusEl.style.color = '#16a34a';
+      statusEl.textContent = json.backedUpCount > 0 ? `완료! 백업: ${json.backupName} (${json.backedUpCount}건)` : '완료! (기존 추첨 데이터 없음)';
+      setTimeout(() => { closeRaffleResetModal(); renderRaffle(); }, 1500);
+    } else {
+      statusEl.style.color = '#dc2626'; statusEl.textContent = '오류: ' + (json.error||'알 수 없는 오류');
+      btn.disabled = false; btn.textContent = '초기화 실행'; btn.style.opacity = '1';
+    }
+  } catch (e) {
+    statusEl.style.color = '#dc2626'; statusEl.textContent = '서버 연결 오류. 다시 시도해주세요.';
+    btn.disabled = false; btn.textContent = '초기화 실행'; btn.style.opacity = '1';
+  }
+}
+
+document.getElementById('raffle-run-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeRaffleRunModal();
+});
+document.getElementById('raffle-reset-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeRaffleResetModal();
+});
 
 // ════════════════════════════════════════════════════════
 // 데이터 초기화
