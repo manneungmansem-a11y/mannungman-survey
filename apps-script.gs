@@ -439,7 +439,9 @@ var RAFFLE_PRIZE_TIERS = [
 // ── raffle_config / raffle_results / raffle_logs 시트 보장 (없으면 생성, 있으면 그대로 사용) ──
 function raffleEnsureSheets(ss) {
   getOrCreateSheet(ss, RAFFLE_SHEET_CONFIG, RAFFLE_CONFIG_HEADERS);
-  getOrCreateSheet(ss, RAFFLE_SHEET_RESULTS, RAFFLE_RESULTS_HEADERS);
+  var resultsSheet = getOrCreateSheet(ss, RAFFLE_SHEET_RESULTS, RAFFLE_RESULTS_HEADERS);
+  // phone 컬럼(A열)을 텍스트 서식으로 고정 — 숫자 변환으로 앞자리 0이 사라지는 것 방지
+  resultsSheet.getRange('A:A').setNumberFormat('@');
   getOrCreateSheet(ss, RAFFLE_SHEET_LOGS, RAFFLE_LOGS_HEADERS);
 }
 
@@ -479,9 +481,18 @@ function raffleWriteLog(ss, action, detail) {
   }
 }
 
-// 휴대폰 번호 정규화 — 하이픈/공백/괄호 등 숫자가 아닌 문자를 모두 제거
+// 구글시트가 'TRUE'/'FALSE' 문자열을 불리언으로 자동 변환해 소문자 'true'로
+// 읽히는 문제가 있으므로, 반드시 이 함수로만 참/거짓을 판정한다.
+function raffleIsTrue(v) {
+  return String(v).trim().toUpperCase() === 'TRUE';
+}
+
+// 휴대폰 번호 정규화 — 하이픈/공백/괄호 등 숫자가 아닌 문자를 모두 제거하고,
+// 시트가 숫자로 저장하며 잘려나간 맨 앞 0을 복원한다 (01012345678 → 1012345678 방지).
 function raffleNormalizePhone(raw) {
-  return String(raw || '').replace(/\D/g, '');
+  var d = String(raw || '').replace(/\D/g, '');
+  if (d && d.charAt(0) !== '0') d = '0' + d;
+  return d;
 }
 
 // 관리자 화면 로그용 — 번호 중간 자리를 마스킹 (구글시트 raffle_results/responses에는 영향 없음)
@@ -550,7 +561,7 @@ function raffleRun(data) {
   var configSheet = ss.getSheetByName(RAFFLE_SHEET_CONFIG);
   var configMap   = raffleGetConfigMap(ss);
 
-  if (configMap.executed === 'TRUE') {
+  if (raffleIsTrue(configMap.executed)) {
     return makeResponse({ success: false, error: 'ALREADY_EXECUTED' });
   }
 
@@ -625,7 +636,7 @@ function raffleToggleReveal(data) {
   var ss = SpreadsheetApp.openById(SHEET_ID);
   raffleEnsureSheets(ss);
   var configMap = raffleGetConfigMap(ss);
-  if (configMap.executed !== 'TRUE') {
+  if (!raffleIsTrue(configMap.executed)) {
     return makeResponse({ success: false, error: 'NOT_EXECUTED' });
   }
 
@@ -644,8 +655,8 @@ function raffleStatus() {
   var eligible  = raffleGetEligibleEntries(ss);
   return makeResponse({
     success: true,
-    executed: configMap.executed === 'TRUE',
-    revealEnabled: configMap.revealEnabled === 'TRUE',
+    executed: raffleIsTrue(configMap.executed),
+    revealEnabled: raffleIsTrue(configMap.revealEnabled),
     executedAt: configMap.executedAt || '',
     eligibleCount: eligible.entries.length,
     duplicateCount: Object.keys(eligible.duplicatesMap).length,
@@ -663,7 +674,7 @@ function raffleCheck(data) {
   raffleEnsureSheets(ss);
   var configMap = raffleGetConfigMap(ss);
 
-  if (configMap.executed !== 'TRUE' || configMap.revealEnabled !== 'TRUE') {
+  if (!raffleIsTrue(configMap.executed) || !raffleIsTrue(configMap.revealEnabled)) {
     return makeResponse({ success: true, revealEnabled: false });
   }
 
@@ -678,7 +689,8 @@ function raffleCheck(data) {
   var rows = resultsSheet ? sheetToObjects(ss, RAFFLE_SHEET_RESULTS) : [];
   var idx = -1, row = null;
   for (var i = 0; i < rows.length; i++) {
-    if (rows[i].phone === phone) { row = rows[i]; idx = i; break; }
+    // 시트에 저장된 번호도 정규화해 비교 (숫자 변환으로 0이 잘린 기존 데이터 호환)
+    if (raffleNormalizePhone(rows[i].phone) === phone) { row = rows[i]; idx = i; break; }
   }
 
   if (!row) {
@@ -686,7 +698,7 @@ function raffleCheck(data) {
     return makeResponse({ success: true, revealEnabled: true, found: true, won: false });
   }
 
-  if (row.confirmed !== 'TRUE') {
+  if (!raffleIsTrue(row.confirmed)) {
     var sheetRowNum = idx + 2; // 헤더(1행) + 1-index 보정
     var nowStr = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd HH:mm:ss');
     resultsSheet.getRange(sheetRowNum, 5).setValue('TRUE');   // confirmed
@@ -706,7 +718,12 @@ function raffleCheck(data) {
 function raffleWinners() {
   var ss = SpreadsheetApp.openById(SHEET_ID);
   raffleEnsureSheets(ss);
-  var rows = sheetToObjects(ss, RAFFLE_SHEET_RESULTS);
+  // 시트의 불리언 자동 변환/숫자 변환 값을 프론트가 기대하는 형식으로 정규화해 반환
+  var rows = sheetToObjects(ss, RAFFLE_SHEET_RESULTS).map(function(r) {
+    r.phone     = raffleNormalizePhone(r.phone);
+    r.confirmed = raffleIsTrue(r.confirmed) ? 'TRUE' : 'FALSE';
+    return r;
+  });
   return makeResponse({ success: true, data: rows });
 }
 
