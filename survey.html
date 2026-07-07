@@ -481,6 +481,10 @@
     .text-input:focus, .textarea-input:focus { border-color: #1a56db; }
     .textarea-input { min-height: 120px; }
 
+    /* ══ 기타 직접입력 ══ */
+    .etc-input-wrap { margin-top: 8px; display: none; }
+    .etc-input-wrap.visible { display: block; }
+
     /* ══ 제출 버튼 ══ */
     .submit-area { margin-top: 10px; }
     .btn-submit { width: 100%; padding: 16px; background: #1a56db; color: #fff; border: none; border-radius: 10px; font-size: 17px; font-weight: 700; cursor: pointer; transition: background .2s, transform .1s; letter-spacing: .3px; }
@@ -1085,6 +1089,33 @@ const QUESTION_CONFIG = {
       title: '수수료와 관련해 의견이 있다면 자유롭게 작성해주세요.',
       type: 'textarea', required: false,
       placeholder: '수수료 관련 추가 의견을 자유롭게 적어주세요.'
+    },
+    // ── 파트너 추가 질문 (정산/수수료/입점 지원) — colKey는 제출 필드명, 시트 헤더 매핑은 Apps Script에서 처리 ──
+    { id: 'partner_settlement_priority', colKey: 'partner_settlement_priority',
+      title: '정산 방식에서 가장 중요하게 생각하는 부분은 무엇인가요?',
+      type: 'radio', required: true,
+      options: ['작업 완료 후 빠른 정산','정산 기준의 명확성','정산 내역 확인의 편리함','고객 결제 완료 보장 / 미수금 방지','수수료 및 공제 내역의 투명성','기타'],
+      etcColKey: 'partner_settlement_priority_etc',
+      etcPlaceholder: '기타 의견을 직접 입력해주세요.'
+    },
+    { id: 'partner_fee_burden_type', colKey: 'partner_fee_burden_type',
+      title: '수수료 구조에서 부담되는 방식은 무엇인가요?',
+      type: 'checkbox', required: true,
+      options: ['월 고정 이용료','건당 고정 수수료','결제 금액 비율 수수료','광고비 / 상위노출 비용','정산·결제 수수료 별도 부담','초기 입점비 / 가입비','기타'],
+      etcColKey: 'partner_fee_burden_type_etc',
+      etcPlaceholder: '기타 의견을 직접 입력해주세요.'
+    },
+    { id: 'partner_required_support', colKey: 'partner_required_support',
+      title: '만능맨에 입점한다면 가장 필요한 지원은 무엇인가요?',
+      type: 'checkbox', required: true,
+      options: ['고객 의뢰 / 견적 요청 노출','초기 앱 사용법 교육','견적 작성 가이드','적정 시공 단가 안내','고객 응대 / CS 지원','광고 / 홍보 지원','정산 및 세금 관련 안내','분쟁 / 환불 대응 지원','프로필 / 리뷰 관리 지원','기타'],
+      etcColKey: 'partner_required_support_etc',
+      etcPlaceholder: '기타 의견을 직접 입력해주세요.'
+    },
+    { id: 'partner_must_not_be_inconvenient', colKey: 'partner_must_not_be_inconvenient',
+      title: '입점사 입장에서 절대 불편하면 안 되는 부분은 무엇인가요?',
+      type: 'textarea', required: true,
+      placeholder: '예: 정산 지연, 고객과의 분쟁, 견적 방식, 앱 사용 불편, 고객 응대 문제 등 자유롭게 작성해주세요.'
     }
   ]
 };
@@ -1435,6 +1466,20 @@ function buildQuestionBlock(q, idx) {
     block.appendChild(wrap);
   }
 
+  // '기타' 선택 시 노출되는 직접입력칸
+  if ((q.type === 'radio' || q.type === 'checkbox') && q.etcColKey) {
+    const etcWrap = document.createElement('div');
+    etcWrap.className = 'etc-input-wrap';
+    etcWrap.id = 'etc-wrap-' + q.id;
+    const etcInput = document.createElement('input');
+    etcInput.type = 'text';
+    etcInput.className = 'text-input';
+    etcInput.dataset.etcColKey = q.etcColKey;
+    etcInput.placeholder = q.etcPlaceholder || '기타 내용을 직접 입력해주세요.';
+    etcWrap.appendChild(etcInput);
+    block.appendChild(etcWrap);
+  }
+
   return block;
 }
 
@@ -1503,6 +1548,7 @@ function initChoiceUI() {
       group.querySelectorAll('.radio-option').forEach(o => o.classList.remove('selected'));
       this.closest('.radio-option').classList.add('selected');
       clearError(group.closest('.q-block'));
+      updateEtcVisibility(this.name);
       updateProgress();
     });
   });
@@ -1513,6 +1559,7 @@ function initChoiceUI() {
       if (this.checked) opt.classList.add('checked');
       else opt.classList.remove('checked');
       clearError(opt.closest('.q-block'));
+      updateEtcVisibility(this.name);
       updateProgress();
     });
   });
@@ -1631,6 +1678,31 @@ function getAnswerValue(q) {
   return '';
 }
 
+// ── '기타' 직접입력 처리 ──
+function isEtcSelected(q) {
+  const val = getAnswerValue(q);
+  return val.split(',').map(v => v.trim()).includes('기타');
+}
+
+function getEtcInput(q) {
+  if (!q.etcColKey) return null;
+  return document.querySelector(`input[data-etc-col-key="${q.etcColKey}"]`);
+}
+
+function updateEtcVisibility(qId) {
+  const q = (QUESTION_CONFIG[currentType] || []).find(x => x.id === qId);
+  if (!q || !q.etcColKey) return;
+  const wrap  = document.getElementById('etc-wrap-' + q.id);
+  const input = getEtcInput(q);
+  if (!wrap || !input) return;
+  if (isEtcSelected(q)) {
+    wrap.classList.add('visible');
+  } else {
+    wrap.classList.remove('visible');
+    input.value = '';
+  }
+}
+
 // ════════════════════════════════════════════════════════
 // 폼 데이터 수집
 // ════════════════════════════════════════════════════════
@@ -1648,6 +1720,10 @@ function collectFormData() {
   const questions = QUESTION_CONFIG[currentType] || [];
   questions.forEach(q => {
     data[q.colKey] = getAnswerValue(q);
+    if (q.etcColKey) {
+      const etcEl = getEtcInput(q);
+      data[q.etcColKey] = (isEtcSelected(q) && etcEl) ? etcEl.value.trim() : '';
+    }
   });
 
   return data;
@@ -1681,12 +1757,23 @@ function validateRequiredAnswers() {
 
   const questions = QUESTION_CONFIG[currentType] || [];
   questions.forEach((q, idx) => {
-    if (q.required === false) return;
-    const val = getAnswerValue(q);
-    if (!val || !val.trim()) {
-      const block = document.getElementById('qb-' + q.id);
-      if (block) block.classList.add('error-field');
-      errors.push({ id: 'qb-' + q.id, label: `Q${idx + 1}` });
+    if (q.required !== false) {
+      const val = getAnswerValue(q);
+      if (!val || !val.trim()) {
+        const block = document.getElementById('qb-' + q.id);
+        if (block) block.classList.add('error-field');
+        errors.push({ id: 'qb-' + q.id, label: `Q${idx + 1}` });
+        return;
+      }
+    }
+    // '기타' 선택 시 직접입력값 필수
+    if (q.etcColKey && isEtcSelected(q)) {
+      const etcEl = getEtcInput(q);
+      if (!etcEl || !etcEl.value.trim()) {
+        const block = document.getElementById('qb-' + q.id);
+        if (block) block.classList.add('error-field');
+        errors.push({ id: 'qb-' + q.id, label: `Q${idx + 1} 기타 입력` });
+      }
     }
   });
 

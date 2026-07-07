@@ -26,7 +26,7 @@ var DEFAULT_CODE_EMPLOYEE = 'samyang';
 var DEFAULT_CODE_PARTNER  = '10000';
 
 // ── responses 시트 컬럼 (통합형) ──────────────────────────
-// 공통 5 + 일반 15 + 임직원 25 + 파트너 20 + 관리 2 = 67컬럼
+// 공통 5 + 일반 15 + 임직원 25 + 파트너 22 + 관리 2 + 동의 2 + 파트너추가 7 = 78컬럼
 function buildGeneralCols() {
   var cols = [];
   for (var i = 1; i <= 15; i++) cols.push('일반_Q' + i);
@@ -51,7 +51,28 @@ var ADMIN_COLS    = ['처리상태', '관리자메모'];
 // 개인정보 동의 관련 컬럼 — 기존 시트에 없을 경우 fixSheets() 실행 필요
 var CONSENT_COLS  = ['개인정보동의', '개인정보동의일시'];
 
-var RESPONSE_HEADERS = COMMON_COLS.concat(GENERAL_COLS).concat(EMPLOYEE_COLS).concat(PARTNER_COLS).concat(ADMIN_COLS).concat(CONSENT_COLS);
+// 파트너 추가 질문 컬럼 — 기존 컬럼 순서를 유지하기 위해 반드시 전체 헤더 "맨 뒤"에 추가
+var PARTNER_EXTRA_COLS = [
+  '정산 방식에서 가장 중요하게 생각하는 부분',
+  '정산 방식 기타 의견',
+  '수수료 구조에서 부담되는 방식',
+  '수수료 구조 기타 의견',
+  '입점 시 가장 필요한 지원',
+  '입점 지원 기타 의견',
+  '입점사 입장에서 절대 불편하면 안 되는 부분'
+];
+// 시트 헤더명(한글) ← 설문 페이지 제출 필드명(영문) 매핑
+var PARTNER_EXTRA_FIELD_MAP = {
+  '정산 방식에서 가장 중요하게 생각하는 부분': 'partner_settlement_priority',
+  '정산 방식 기타 의견':                       'partner_settlement_priority_etc',
+  '수수료 구조에서 부담되는 방식':             'partner_fee_burden_type',
+  '수수료 구조 기타 의견':                     'partner_fee_burden_type_etc',
+  '입점 시 가장 필요한 지원':                  'partner_required_support',
+  '입점 지원 기타 의견':                       'partner_required_support_etc',
+  '입점사 입장에서 절대 불편하면 안 되는 부분': 'partner_must_not_be_inconvenient'
+};
+
+var RESPONSE_HEADERS = COMMON_COLS.concat(GENERAL_COLS).concat(EMPLOYEE_COLS).concat(PARTNER_COLS).concat(ADMIN_COLS).concat(CONSENT_COLS).concat(PARTNER_EXTRA_COLS);
 var LOG_HEADERS      = ['loggedAt', 'type', 'message', 'detail'];
 var SETTINGS_HEADERS = ['key', 'value'];
 
@@ -96,12 +117,18 @@ function doPost(e) {
                        Math.random().toString(36).slice(2, 5).toUpperCase();
 
     var respSheet = getOrCreateSheet(ss, SHEET_RESPONSES, RESPONSE_HEADERS);
+    ensureResponseHeaders(respSheet); // 새로 추가된 컬럼 헤더가 없으면 맨 뒤에 자동 추가 (기존 컬럼은 건드리지 않음)
     var row = RESPONSE_HEADERS.map(function(key) {
       if (key === 'submittedAt')    return submittedAt;
       if (key === 'responseId')     return responseId;
       if (key === 'participantType') return participantType;
       if (key === '처리상태')        return DEFAULT_STATUS;
       if (key === '관리자메모')      return '';
+      // 파트너 추가 질문 — 한글 헤더에 영문 필드명으로 제출된 값을 매핑
+      if (PARTNER_EXTRA_FIELD_MAP[key] !== undefined) {
+        var fieldKey = PARTNER_EXTRA_FIELD_MAP[key];
+        return data[fieldKey] !== undefined ? String(data[fieldKey]) : '';
+      }
       return data[key] !== undefined ? String(data[key]) : '';
     });
     respSheet.appendRow(row);
@@ -417,6 +444,14 @@ function testDoPost_partner() {
   for (var i = 1; i <= 22; i++) testData['파트너_Q' + i] = '테스트 응답 ' + i;
   testData['파트너_Q21'] = '3%';
   testData['파트너_Q22'] = '테스트 수수료 의견';
+  // 파트너 추가 질문 (영문 필드명으로 제출됨)
+  testData['partner_settlement_priority']       = '기타';
+  testData['partner_settlement_priority_etc']   = '정산 기타 의견 테스트';
+  testData['partner_fee_burden_type']           = '건당 고정 수수료, 결제 금액 비율 수수료';
+  testData['partner_fee_burden_type_etc']       = '';
+  testData['partner_required_support']          = '고객 의뢰 / 견적 요청 노출, 기타';
+  testData['partner_required_support_etc']      = '입점 지원 기타 의견 테스트';
+  testData['partner_must_not_be_inconvenient']  = '정산 지연이 절대 없어야 합니다.';
   var result = doPost({ postData: { contents: JSON.stringify(testData) }, parameter: testData });
   Logger.log('testDoPost_partner 결과: ' + result.getContent());
 }
@@ -462,6 +497,21 @@ function sheetToObjects(ss, sheetName) {
       obj[h] = (val !== undefined && val !== null) ? String(val) : '';
     });
     return obj;
+  });
+}
+
+// responses 시트에 RESPONSE_HEADERS 중 누락된 헤더를 맨 뒤에 추가 (기존 컬럼 순서/데이터 유지)
+function ensureResponseHeaders(sheet) {
+  var lastCol = sheet.getLastColumn();
+  var headerRow = lastCol > 0 ? sheet.getRange(1, 1, 1, lastCol).getValues()[0].map(String) : [];
+  RESPONSE_HEADERS.forEach(function(h) {
+    if (headerRow.indexOf(h) === -1) {
+      var newCol = sheet.getLastColumn() + 1;
+      var cell = sheet.getRange(1, newCol);
+      cell.setValue(h);
+      cell.setFontWeight('bold').setBackground('#1a56db').setFontColor('#ffffff');
+      headerRow.push(h);
+    }
   });
 }
 
