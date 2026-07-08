@@ -107,6 +107,7 @@ function doPost(e) {
     if (action === 'rafflereset')        return raffleReset(data);
     if (action === 'raffletogglereveal') return raffleToggleReveal(data);
     if (action === 'rafflecheck')        return raffleCheck(data);
+    if (action === 'rafflepreview')      return rafflePreview(data);
 
     // ── 설문 응답 저장 ──
     var participantType = String(data.participantType || '').trim();
@@ -264,8 +265,10 @@ function doGet(e) {
       case 'list':            return handleList();
       case 'detail':          return handleDetail(e.parameter.responseId);
       case 'getSecretCodes':  return handleGetSecretCodes();
-      case 'rafflewinners':    return raffleWinners();
-      case 'raffleduplicates': return raffleDuplicates();
+      case 'rafflepreview':    return rafflePreview(e.parameter);
+      case 'rafflerounds':     return raffleRoundsList();
+      case 'rafflewinners':    return raffleWinners(e.parameter);
+      case 'raffleduplicates': return raffleDuplicates(e.parameter);
       default:
         return makeResponse({ success: false, error: 'UNKNOWN_ACTION' });
     }
@@ -407,26 +410,44 @@ function fixSheets() {
 // ══                  추첨(Raffle) 기능 — 완전 분리 모듈                ══
 // ════════════════════════════════════════════════════════════════════
 // 기존 설문 저장/조회 로직(responses, settings, logs 시트)에는 전혀
-// 손대지 않고, 별도 시트(raffle_config / raffle_results / raffle_logs)와
-// raffle 접두어가 붙은 함수만 사용합니다. 아래 함수들을 삭제하거나
-// doGet/doPost의 raffle* 라우팅을 제거해도 설문 제출·통계 기능은
-// 100% 그대로 동작합니다.
+// 손대지 않고, 별도 시트(raffle_config / raffle_rounds / raffle_results /
+// raffle_logs)와 raffle 접두어가 붙은 함수만 사용합니다. 아래 함수들을
+// 삭제하거나 doGet/doPost의 raffle* 라우팅을 제거해도 설문 제출·통계
+// 기능은 100% 그대로 동작합니다.
+//
+// ── 회차(round) 개념 ──
+// 관리자가 조건(날짜/참여유형)을 선택해 "추첨 실행"을 누를 때마다
+// raffle_rounds에 새 회차(raffleId)가 하나 생성되고, 그 회차의 조건에
+// 해당하는 대상자 전원(당첨자 + 낙첨자)이 raffle_results에 raffleId와
+// 함께 저장됩니다. raffle_config.currentRoundId가 "현재 공개 대상 회차"를
+// 가리키며, 그 회차만 사용자 당첨확인(rafflecheck) 조회 대상이 됩니다.
 //
 // 당첨 판정 기준: 응답자 "휴대폰 번호"(하이픈/공백 제거 후 숫자만 비교).
-// 동일 번호로 여러 번 제출한 경우 "가장 최근 제출 1건"만 추첨 대상 풀에
-// 포함시켜 중복 참여를 방지합니다 (관리자는 raffleduplicates로 중복 제출
-// 현황을 별도 확인 가능).
+// 동일 번호로 여러 번 제출한 경우 "필터 조건 내에서 가장 최근 제출 1건"만
+// 추첨 대상 풀에 포함시켜 중복 참여를 방지합니다.
 // ════════════════════════════════════════════════════════════════════
 
 var RAFFLE_SHEET_CONFIG  = 'raffle_config';
+var RAFFLE_SHEET_ROUNDS  = 'raffle_rounds';
 var RAFFLE_SHEET_RESULTS = 'raffle_results';
 var RAFFLE_SHEET_LOGS    = 'raffle_logs';
 
-var RAFFLE_CONFIG_HEADERS  = ['key', 'value'];
-// phone: 정규화된(숫자만) 휴대폰 번호 — 당첨 판정 키
-// responseId: 관리자 참고용(당첨자가 최종적으로 인정된 응답 건)
-var RAFFLE_RESULTS_HEADERS = ['phone', 'tier', 'prize', 'drawnAt', 'confirmed', 'confirmedAt', 'responseId'];
-var RAFFLE_LOGS_HEADERS    = ['loggedAt', 'action', 'detail'];
+var RAFFLE_CONFIG_HEADERS = ['key', 'value'];
+
+// raffleId: 회차 식별자 (예: RAFFLE_20260707_184230)
+var RAFFLE_ROUNDS_HEADERS = [
+  'raffleId', 'raffleName', 'targetDateType', 'targetStartDate', 'targetEndDate',
+  'targetUserType', 'targetCount', 'duplicateCount', 'status', 'drawnAt',
+  'revealEnabled', 'createdAt'
+];
+
+// phone: 정규화된(숫자만) 휴대폰 번호. tier: 당첨 등수 또는 'NONE'(낙첨/미당첨).
+// 해당 회차의 "추첨 대상자 전원"이 한 행씩 저장됩니다 (당첨자만이 아님).
+var RAFFLE_RESULTS_HEADERS = [
+  'raffleId', 'phone', 'tier', 'prize', 'drawnAt',
+  'confirmed', 'firstConfirmedAt', 'lastConfirmedAt', 'confirmedCount', 'responseId'
+];
+var RAFFLE_LOGS_HEADERS = ['loggedAt', 'raffleId', 'action', 'detail'];
 
 // 경품 구성 — 필요 시 이 배열만 수정하면 됩니다.
 var RAFFLE_PRIZE_TIERS = [
@@ -436,12 +457,17 @@ var RAFFLE_PRIZE_TIERS = [
   { tier: '참가상', count: 20, prize: '2,000원 커피쿠폰' }
 ];
 
-// ── raffle_config / raffle_results / raffle_logs 시트 보장 (없으면 생성, 있으면 그대로 사용) ──
+function raffleTotalPrizeCount() {
+  return RAFFLE_PRIZE_TIERS.reduce(function(sum, t) { return sum + t.count; }, 0);
+}
+
+// ── raffle_config / raffle_rounds / raffle_results / raffle_logs 시트 보장 ──
 function raffleEnsureSheets(ss) {
   getOrCreateSheet(ss, RAFFLE_SHEET_CONFIG, RAFFLE_CONFIG_HEADERS);
+  getOrCreateSheet(ss, RAFFLE_SHEET_ROUNDS, RAFFLE_ROUNDS_HEADERS);
   var resultsSheet = getOrCreateSheet(ss, RAFFLE_SHEET_RESULTS, RAFFLE_RESULTS_HEADERS);
-  // phone 컬럼(A열)을 텍스트 서식으로 고정 — 숫자 변환으로 앞자리 0이 사라지는 것 방지
-  resultsSheet.getRange('A:A').setNumberFormat('@');
+  // phone 컬럼(B열)을 텍스트 서식으로 고정 — 숫자 변환으로 앞자리 0이 사라지는 것 방지
+  resultsSheet.getRange('B:B').setNumberFormat('@');
   getOrCreateSheet(ss, RAFFLE_SHEET_LOGS, RAFFLE_LOGS_HEADERS);
 }
 
@@ -450,7 +476,7 @@ function raffleEnsureSheets(ss) {
 function raffleSetupSheets() {
   var ss = SpreadsheetApp.openById(SHEET_ID);
   raffleEnsureSheets(ss);
-  Logger.log('raffleSetupSheets 완료 — raffle_config / raffle_results / raffle_logs 시트 준비됨');
+  Logger.log('raffleSetupSheets 완료 — raffle_config / raffle_rounds / raffle_results / raffle_logs 시트 준비됨');
 }
 
 function raffleGetConfigMap(ss) {
@@ -471,11 +497,11 @@ function raffleSetConfigValue(ss, sheet, key, value) {
   sheet.appendRow([key, value]);
 }
 
-function raffleWriteLog(ss, action, detail) {
+function raffleWriteLog(ss, raffleId, action, detail) {
   try {
     var sheet = getOrCreateSheet(ss, RAFFLE_SHEET_LOGS, RAFFLE_LOGS_HEADERS);
     var now = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd HH:mm:ss');
-    sheet.appendRow([now, action, detail]);
+    sheet.appendRow([now, raffleId || '', action, detail]);
   } catch (_) {
     Logger.log('[RAFFLE LOG FAIL] ' + action + ': ' + detail);
   }
@@ -489,6 +515,7 @@ function raffleIsTrue(v) {
 
 // 휴대폰 번호 정규화 — 하이픈/공백/괄호 등 숫자가 아닌 문자를 모두 제거하고,
 // 시트가 숫자로 저장하며 잘려나간 맨 앞 0을 복원한다 (01012345678 → 1012345678 방지).
+// 반드시 문자열로만 다루며 Number()/parseInt() 등 숫자 변환은 절대 사용하지 않는다.
 function raffleNormalizePhone(raw) {
   var d = String(raw || '').replace(/\D/g, '');
   if (d && d.charAt(0) !== '0') d = '0' + d;
@@ -502,46 +529,83 @@ function raffleMaskPhone(phone) {
   return phone.slice(0, 3) + '****' + phone.slice(-4);
 }
 
-// responses 시트를 원본 그대로 "읽기만" 하여 번호별 추첨 대상 풀과 중복 제출 현황을 계산합니다.
-// responses 시트에는 어떤 쓰기 작업도 하지 않습니다 (기존 데이터 보존).
-// 연락처가 비어 있는 기존 데이터(레거시)는 자동으로 대상에서 제외됩니다.
-function raffleGetEligibleEntries(ss) {
-  var sheet = ss.getSheetByName(SHEET_RESPONSES);
-  if (!sheet) return { entries: [], duplicatesMap: {} };
-  var values = sheet.getDataRange().getValues();
-  if (values.length < 2) return { entries: [], duplicatesMap: {} };
+// responses 시트를 원본 그대로 "읽기만" 하여, 주어진 필터(날짜기준/참여유형) 조건에
+// 해당하는 응답들 중 번호별 "필터 내 최신 제출 1건"으로 구성된 추첨 대상 풀과
+// 중복 제출 현황을 계산합니다. responses 시트에는 어떤 쓰기 작업도 하지 않습니다.
+// filters: { dateType: 'all'|'today'|'yesterday'|'specific'|'range', startDate, endDate, userType: 'all'|'일반사용자'|'임직원'|'파트너' }
+function raffleGetEligibleEntries(ss, filters) {
+  filters = filters || {};
+  var dateType  = filters.dateType  || 'all';
+  var startDate = filters.startDate || '';
+  var endDate   = filters.endDate   || '';
+  var userType  = filters.userType  || 'all';
 
-  var headers   = values[0];
-  var phoneCol  = headers.indexOf('respondentPhone');
-  var idCol     = headers.indexOf('responseId');
-  var atCol     = headers.indexOf('submittedAt');
-  if (phoneCol < 0) return { entries: [], duplicatesMap: {} };
+  var empty = { entries: [], duplicatesMap: {}, totalMatched: 0 };
+  var sheet = ss.getSheetByName(SHEET_RESPONSES);
+  if (!sheet) return empty;
+  var lastRow = sheet.getLastRow();
+  var lastCol = sheet.getLastColumn();
+  if (lastRow < 2) return empty;
+
+  var headers  = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+  var phoneCol = headers.indexOf('respondentPhone');
+  var idCol    = headers.indexOf('responseId');
+  var atCol    = headers.indexOf('submittedAt');
+  var typeCol  = headers.indexOf('participantType');
+  if (phoneCol < 0) return empty;
+
+  var values = sheet.getRange(2, 1, lastRow - 1, lastCol).getValues();
+  // 휴대폰 번호는 표시값(getDisplayValues) 기준으로 읽어 숫자 변환에 의한 손실을 최소화한다.
+  var phoneDisplay = sheet.getRange(2, phoneCol + 1, lastRow - 1, 1).getDisplayValues();
+
+  var now = new Date();
+  var todayStr = Utilities.formatDate(now, 'Asia/Seoul', 'yyyy-MM-dd');
+  var yesterdayStr = Utilities.formatDate(new Date(now.getTime() - 24 * 60 * 60 * 1000), 'Asia/Seoul', 'yyyy-MM-dd');
 
   var byPhone = {};
-  for (var i = 1; i < values.length; i++) {
-    var norm = raffleNormalizePhone(values[i][phoneCol]);
-    if (!norm) continue; // 연락처 없는 응답은 추첨 대상에서 제외 (레거시 데이터 예외처리)
-    var rid = idCol >= 0 ? String(values[i][idCol] || '').trim() : '';
-    var atRaw = atCol >= 0 ? values[i][atCol] : '';
-    // 시트가 값을 Date 객체로 돌려줄 수도, 문자열로 돌려줄 수도 있으므로
-    // 최신 제출 판정용 타임스탬프(ms)와 표시용 문자열을 분리해 보관
-    var atStr, atMs;
+  var totalMatched = 0;
+
+  for (var i = 0; i < values.length; i++) {
+    var row = values[i];
+    var rawPhone = (phoneDisplay[i] && phoneDisplay[i][0]) ? phoneDisplay[i][0] : row[phoneCol];
+    var norm = raffleNormalizePhone(rawPhone);
+    if (!norm) continue; // 연락처 없는 레거시 응답은 추첨 대상에서 제외
+
+    var atRaw = atCol >= 0 ? row[atCol] : '';
+    var atStr, atMs, dateOnly;
     if (atRaw instanceof Date) {
-      atMs  = atRaw.getTime();
+      atMs = atRaw.getTime();
       atStr = Utilities.formatDate(atRaw, 'Asia/Seoul', 'yyyy-MM-dd HH:mm:ss');
+      dateOnly = Utilities.formatDate(atRaw, 'Asia/Seoul', 'yyyy-MM-dd');
     } else {
       atStr = String(atRaw);
-      atMs  = Date.parse(atStr.replace(' ', 'T')) || 0;
+      atMs = Date.parse(atStr.replace(' ', 'T')) || 0;
+      dateOnly = atStr.slice(0, 10);
     }
+
+    // ── 날짜 기준 필터 ──
+    if (dateType === 'today' && dateOnly !== todayStr) continue;
+    if (dateType === 'yesterday' && dateOnly !== yesterdayStr) continue;
+    if (dateType === 'specific' && dateOnly !== startDate) continue;
+    if (dateType === 'range') {
+      if (startDate && dateOnly < startDate) continue;
+      if (endDate && dateOnly > endDate) continue;
+    }
+
+    // ── 참여 유형 필터 ──
+    var pType = typeCol >= 0 ? String(row[typeCol] || '') : '';
+    if (userType !== 'all' && pType !== userType) continue;
+
+    totalMatched++;
+    var rid = idCol >= 0 ? String(row[idCol] || '').trim() : '';
     if (!byPhone[norm]) byPhone[norm] = [];
     byPhone[norm].push({ responseId: rid, submittedAt: atStr, sortKey: atMs, rowIndex: i });
   }
 
-  var entries = [];       // 추첨 대상 풀 — 번호당 "가장 최근 제출" 1건만 포함
+  var entries = [];       // 추첨 대상 풀 — 번호당 "필터 내 가장 최근 제출" 1건만 포함
   var duplicatesMap = {}; // 번호당 2건 이상 제출된 경우 (관리자 조회용)
   Object.keys(byPhone).forEach(function(norm) {
     var list = byPhone[norm].slice().sort(function(a, b) {
-      // 타임스탬프 우선, 파싱 실패(0)로 동률이면 시트 행 순서(뒤에 추가된 행이 최신)로 판정
       return (a.sortKey - b.sortKey) || (a.rowIndex - b.rowIndex);
     });
     var latest = list[list.length - 1];
@@ -549,102 +613,222 @@ function raffleGetEligibleEntries(ss) {
     if (list.length > 1) duplicatesMap[norm] = list;
   });
 
-  return { entries: entries, duplicatesMap: duplicatesMap };
+  return { entries: entries, duplicatesMap: duplicatesMap, totalMatched: totalMatched };
 }
 
-// ── 랜덤 추첨 실행 (관리자, 1회만 가능) ──
+// responses 시트에 해당 번호로 제출된 이력이 "필터와 무관하게 전체 기간" 존재하는지 확인.
+// 당첨확인 1단계(설문 참여 이력 자체 확인)에 사용 — 회차/추첨 조건과 별개.
+function rafflePhoneHasHistory(ss, phone) {
+  var sheet = ss.getSheetByName(SHEET_RESPONSES);
+  if (!sheet) return false;
+  var lastRow = sheet.getLastRow();
+  if (lastRow < 2) return false;
+  var headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+  var phoneCol = headers.indexOf('respondentPhone');
+  if (phoneCol < 0) return false;
+  var displayVals = sheet.getRange(2, phoneCol + 1, lastRow - 1, 1).getDisplayValues();
+  for (var i = 0; i < displayVals.length; i++) {
+    if (raffleNormalizePhone(displayVals[i][0]) === phone) return true;
+  }
+  return false;
+}
+
+function raffleFindRound(ss, raffleId) {
+  if (!raffleId) return null;
+  var rows = sheetToObjects(ss, RAFFLE_SHEET_ROUNDS);
+  for (var i = 0; i < rows.length; i++) {
+    if (rows[i].raffleId === raffleId) return rows[i];
+  }
+  return null;
+}
+
+function raffleFiltersFromParams(params) {
+  params = params || {};
+  return {
+    dateType:  params.dateType  || 'all',
+    startDate: params.startDate || '',
+    endDate:   params.endDate   || '',
+    userType:  params.userType  || 'all'
+  };
+}
+
+// ── 추첨 대상자 미리보기 (관리자 전용 — 실행 전 조건별 대상 수 확인) ──
+function rafflePreview(params) {
+  params = params || {};
+  if (!isValidPassword(params.password || '')) return makeResponse({ success: false, error: 'UNAUTHORIZED' });
+
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var filters = raffleFiltersFromParams(params);
+  var eligible = raffleGetEligibleEntries(ss, filters);
+
+  return makeResponse({
+    success: true,
+    totalMatched: eligible.totalMatched,
+    targetCount: eligible.entries.length,
+    duplicateCount: Object.keys(eligible.duplicatesMap).length,
+    totalPrizeCapacity: raffleTotalPrizeCount()
+  });
+}
+
+// ── 랜덤 추첨 실행 (관리자 전용) — 조건에 맞는 대상자만으로 새 회차를 생성합니다. ──
 function raffleRun(data) {
   if (!isValidPassword(data.password || '')) return makeResponse({ success: false, error: 'UNAUTHORIZED' });
 
   var ss = SpreadsheetApp.openById(SHEET_ID);
   raffleEnsureSheets(ss);
-  var configSheet = ss.getSheetByName(RAFFLE_SHEET_CONFIG);
-  var configMap   = raffleGetConfigMap(ss);
 
-  if (raffleIsTrue(configMap.executed)) {
-    return makeResponse({ success: false, error: 'ALREADY_EXECUTED' });
+  var filters = raffleFiltersFromParams(data);
+  var raffleName = String(data.raffleName || '').trim();
+  if (!raffleName) {
+    raffleName = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd') + ' 설문 경품 추첨';
   }
 
-  var eligible = raffleGetEligibleEntries(ss);
+  var eligible = raffleGetEligibleEntries(ss, filters);
   var pool = eligible.entries.slice();
+  if (pool.length === 0) {
+    return makeResponse({ success: false, error: 'NO_TARGET' });
+  }
+
   // Fisher–Yates shuffle
   for (var i = pool.length - 1; i > 0; i--) {
     var j = Math.floor(Math.random() * (i + 1));
     var tmp = pool[i]; pool[i] = pool[j]; pool[j] = tmp;
   }
 
-  var resultsSheet = getOrCreateSheet(ss, RAFFLE_SHEET_RESULTS, RAFFLE_RESULTS_HEADERS);
   var now = new Date();
+  var raffleId = 'RAFFLE_' + Utilities.formatDate(now, 'Asia/Seoul', 'yyyyMMdd_HHmmss');
   var drawnAt = Utilities.formatDate(now, 'Asia/Seoul', 'yyyy-MM-dd HH:mm:ss');
 
+  var tierByPhone = {};
   var cursor = 0;
   var summary = [];
   RAFFLE_PRIZE_TIERS.forEach(function(tierDef) {
     var count = 0;
     for (; count < tierDef.count && cursor < pool.length; count++, cursor++) {
-      var entry = pool[cursor];
-      resultsSheet.appendRow([entry.phone, tierDef.tier, tierDef.prize, drawnAt, 'FALSE', '', entry.responseId]);
+      tierByPhone[pool[cursor].phone] = { tier: tierDef.tier, prize: tierDef.prize };
     }
     summary.push({ tier: tierDef.tier, drawn: count, planned: tierDef.count });
   });
 
-  raffleSetConfigValue(ss, configSheet, 'executed', 'TRUE');
-  raffleSetConfigValue(ss, configSheet, 'executedAt', drawnAt);
-  raffleSetConfigValue(ss, configSheet, 'revealEnabled', 'FALSE');
-  raffleSetConfigValue(ss, configSheet, 'eligibleCount', String(pool.length));
+  // 대상자 전원(당첨자 + 낙첨자)을 raffle_results에 기록 — 낙첨자는 tier='NONE'
+  var resultsSheet = getOrCreateSheet(ss, RAFFLE_SHEET_RESULTS, RAFFLE_RESULTS_HEADERS);
+  var rowsToWrite = pool.map(function(entry) {
+    var win = tierByPhone[entry.phone];
+    return [
+      raffleId, entry.phone, win ? win.tier : 'NONE', win ? win.prize : '', drawnAt,
+      'FALSE', '', '', '0', entry.responseId
+    ];
+  });
+  resultsSheet.getRange(resultsSheet.getLastRow() + 1, 1, rowsToWrite.length, RAFFLE_RESULTS_HEADERS.length)
+    .setValues(rowsToWrite);
+  resultsSheet.getRange('B:B').setNumberFormat('@');
 
-  raffleWriteLog(ss, 'RUN', '추첨 실행 완료 — 참여번호(중복제거) ' + pool.length + '명 / 당첨 배정 ' + cursor + '명');
-  return makeResponse({ success: true, executedAt: drawnAt, eligibleCount: pool.length, summary: summary });
+  var duplicateCount = Object.keys(eligible.duplicatesMap).length;
+  var roundsSheet = getOrCreateSheet(ss, RAFFLE_SHEET_ROUNDS, RAFFLE_ROUNDS_HEADERS);
+  roundsSheet.appendRow([
+    raffleId, raffleName, filters.dateType, filters.startDate, filters.endDate, filters.userType,
+    pool.length, duplicateCount, 'executed', drawnAt, 'FALSE', drawnAt
+  ]);
+
+  var configSheet = getOrCreateSheet(ss, RAFFLE_SHEET_CONFIG, RAFFLE_CONFIG_HEADERS);
+  raffleSetConfigValue(ss, configSheet, 'currentRoundId', raffleId);
+  raffleSetConfigValue(ss, configSheet, 'revealEnabled', 'FALSE');
+
+  raffleWriteLog(ss, raffleId, 'RUN',
+    raffleName + ' 실행 완료 — 대상(중복제거) ' + pool.length + '명 / 중복제출 ' + duplicateCount + '건 / 당첨 배정 ' + cursor + '명');
+
+  return makeResponse({
+    success: true, raffleId: raffleId, raffleName: raffleName,
+    targetCount: pool.length, duplicateCount: duplicateCount,
+    drawnAt: drawnAt, summary: summary
+  });
 }
 
-// ── 추첨 초기화 (관리자 전용, 백업 후 재추첨 가능 상태로 복구) ──
+// ── 현재 회차 초기화 (관리자 전용, 백업 후 재추첨 가능 상태로 복구) ──
+// raffle_results/raffle_rounds 전체가 아니라 "현재 공개 대상 회차"의 결과만 제거하며,
+// 과거 다른 회차의 기록은 그대로 유지됩니다.
 function raffleReset(data) {
   if (!isValidPassword(data.password || '')) return makeResponse({ success: false, error: 'UNAUTHORIZED' });
   if (String(data.confirm || '') !== 'RESET') return makeResponse({ success: false, error: 'CONFIRM_REQUIRED' });
 
   var ss = SpreadsheetApp.openById(SHEET_ID);
   raffleEnsureSheets(ss);
+  var configMap = raffleGetConfigMap(ss);
+  var raffleId = configMap.currentRoundId || '';
+  if (!raffleId) return makeResponse({ success: false, error: 'NO_ROUND' });
 
   var now = new Date();
   var timestamp = Utilities.formatDate(now, 'Asia/Seoul', 'yyyyMMdd_HHmmss');
   var backupName = 'raffle_results_backup_' + timestamp;
 
   var resultsSheet = ss.getSheetByName(RAFFLE_SHEET_RESULTS);
-  var backedUpCount = 0;
-  if (resultsSheet) {
-    backedUpCount = Math.max(0, resultsSheet.getLastRow() - 1);
-    if (backedUpCount > 0) {
-      resultsSheet.copyTo(ss).setName(backupName);
+  var removedCount = 0;
+  if (resultsSheet && resultsSheet.getLastRow() > 1) {
+    // 다른 회차 기록까지 포함해 시트 전체를 백업(안전망)한 뒤, 현재 회차 행만 삭제
+    resultsSheet.copyTo(ss).setName(backupName);
+    var values = resultsSheet.getDataRange().getValues();
+    var headers = values[0];
+    var idCol = headers.indexOf('raffleId');
+    for (var i = values.length - 1; i >= 1; i--) {
+      if (String(values[i][idCol]) === raffleId) {
+        resultsSheet.deleteRow(i + 1);
+        removedCount++;
+      }
     }
-    ss.deleteSheet(resultsSheet);
   }
-  getOrCreateSheet(ss, RAFFLE_SHEET_RESULTS, RAFFLE_RESULTS_HEADERS);
 
-  var configSheet = getOrCreateSheet(ss, RAFFLE_SHEET_CONFIG, RAFFLE_CONFIG_HEADERS);
-  raffleSetConfigValue(ss, configSheet, 'executed', 'FALSE');
-  raffleSetConfigValue(ss, configSheet, 'executedAt', '');
+  var roundsSheet = ss.getSheetByName(RAFFLE_SHEET_ROUNDS);
+  if (roundsSheet) {
+    var rvalues = roundsSheet.getDataRange().getValues();
+    var rheaders = rvalues[0];
+    var ridCol = rheaders.indexOf('raffleId');
+    var statusCol = rheaders.indexOf('status');
+    for (var j = 1; j < rvalues.length; j++) {
+      if (String(rvalues[j][ridCol]) === raffleId) {
+        roundsSheet.getRange(j + 1, statusCol + 1).setValue('reset');
+        break;
+      }
+    }
+  }
+
+  var configSheet = ss.getSheetByName(RAFFLE_SHEET_CONFIG);
+  raffleSetConfigValue(ss, configSheet, 'currentRoundId', '');
   raffleSetConfigValue(ss, configSheet, 'revealEnabled', 'FALSE');
 
-  raffleWriteLog(ss, 'RESET', '추첨 초기화 완료 — 백업: ' + (backedUpCount > 0 ? backupName : '(기존 데이터 없음)') + ' / ' + backedUpCount + '건');
-  return makeResponse({ success: true, backupName: backedUpCount > 0 ? backupName : null, backedUpCount: backedUpCount });
+  raffleWriteLog(ss, raffleId, 'RESET', '회차 초기화 완료 — 백업: ' + backupName + ' / 삭제 ' + removedCount + '건');
+  return makeResponse({ success: true, raffleId: raffleId, backupName: backupName, removedCount: removedCount });
 }
 
-// ── 당첨확인 공개 여부 전환 (관리자 전용) ──
+// ── 당첨확인 공개 여부 전환 (관리자 전용, 현재 회차 대상) ──
 function raffleToggleReveal(data) {
   if (!isValidPassword(data.password || '')) return makeResponse({ success: false, error: 'UNAUTHORIZED' });
 
   var ss = SpreadsheetApp.openById(SHEET_ID);
   raffleEnsureSheets(ss);
   var configMap = raffleGetConfigMap(ss);
-  if (!raffleIsTrue(configMap.executed)) {
-    return makeResponse({ success: false, error: 'NOT_EXECUTED' });
-  }
+  var raffleId = configMap.currentRoundId || '';
+  if (!raffleId) return makeResponse({ success: false, error: 'NO_ROUND' });
 
   var enabled = (data.enabled === true || String(data.enabled) === 'true');
   var configSheet = ss.getSheetByName(RAFFLE_SHEET_CONFIG);
   raffleSetConfigValue(ss, configSheet, 'revealEnabled', enabled ? 'TRUE' : 'FALSE');
-  raffleWriteLog(ss, 'TOGGLE_REVEAL', '당첨 공개 상태 변경 → ' + (enabled ? '공개' : '비공개'));
-  return makeResponse({ success: true, revealEnabled: enabled });
+
+  var roundsSheet = ss.getSheetByName(RAFFLE_SHEET_ROUNDS);
+  if (roundsSheet) {
+    var values = roundsSheet.getDataRange().getValues();
+    var headers = values[0];
+    var idCol = headers.indexOf('raffleId');
+    var revCol = headers.indexOf('revealEnabled');
+    for (var i = 1; i < values.length; i++) {
+      if (String(values[i][idCol]) === raffleId) {
+        roundsSheet.getRange(i + 1, revCol + 1).setValue(enabled ? 'TRUE' : 'FALSE');
+        break;
+      }
+    }
+  }
+
+  raffleWriteLog(ss, raffleId, 'TOGGLE_REVEAL', (enabled ? '공개' : '비공개') + ' 전환');
+  return makeResponse({ success: true, revealEnabled: enabled, raffleId: raffleId });
 }
 
 // ── 추첨 진행 상태 조회 (공개 API — 비밀번호 불필요, 개인정보 미포함) ──
@@ -652,89 +836,147 @@ function raffleStatus() {
   var ss = SpreadsheetApp.openById(SHEET_ID);
   raffleEnsureSheets(ss);
   var configMap = raffleGetConfigMap(ss);
-  var eligible  = raffleGetEligibleEntries(ss);
+  var raffleId = configMap.currentRoundId || '';
+  var revealEnabled = raffleIsTrue(configMap.revealEnabled);
+  var round = raffleId ? raffleFindRound(ss, raffleId) : null;
+
   return makeResponse({
     success: true,
-    executed: raffleIsTrue(configMap.executed),
-    revealEnabled: raffleIsTrue(configMap.revealEnabled),
-    executedAt: configMap.executedAt || '',
-    eligibleCount: eligible.entries.length,
-    duplicateCount: Object.keys(eligible.duplicatesMap).length,
+    hasActiveRound: !!(round && round.status === 'executed'),
+    executed: !!(round && round.status === 'executed'),
+    revealEnabled: revealEnabled,
+    raffleName: round ? round.raffleName : '',
     tiers: RAFFLE_PRIZE_TIERS
   });
 }
 
 // ── 휴대폰 번호로 본인 당첨 여부 확인 (공개 API — 비밀번호 불필요) ──
 // 이름/연락처 전체/전체 당첨자 명단은 절대 반환하지 않고, 입력한 번호 1건의 결과만 반환합니다.
+// status: 'NO_HISTORY'(설문 참여 이력 없음) | 'NOT_REVEALED'(아직 공개 전)
+//       | 'NOT_TARGET'(참여 이력은 있으나 이번 회차 대상 아님) | 'RESULT'(대상자 — 당첨/낙첨 결과 포함)
 function raffleCheck(data) {
   var phone = raffleNormalizePhone(data.phone);
-  if (!phone) return makeResponse({ success: false, error: 'NO_PHONE' });
+  if (!phone || phone.length < 10) return makeResponse({ success: false, error: 'INVALID_PHONE' });
 
   var ss = SpreadsheetApp.openById(SHEET_ID);
   raffleEnsureSheets(ss);
-  var configMap = raffleGetConfigMap(ss);
 
-  if (!raffleIsTrue(configMap.executed) || !raffleIsTrue(configMap.revealEnabled)) {
-    return makeResponse({ success: true, revealEnabled: false });
+  if (!rafflePhoneHasHistory(ss, phone)) {
+    raffleWriteLog(ss, '', 'CHECK_NO_HISTORY', raffleMaskPhone(phone));
+    return makeResponse({ success: true, status: 'NO_HISTORY' });
   }
 
-  var eligible = raffleGetEligibleEntries(ss);
-  var isParticipant = eligible.entries.some(function(e) { return e.phone === phone; });
-  if (!isParticipant) {
-    raffleWriteLog(ss, 'CHECK_NOT_FOUND', '참여내역 없음 조회 (' + raffleMaskPhone(phone) + ')');
-    return makeResponse({ success: true, revealEnabled: true, found: false });
+  var configMap = raffleGetConfigMap(ss);
+  var raffleId = configMap.currentRoundId || '';
+  var revealEnabled = raffleIsTrue(configMap.revealEnabled);
+  var round = raffleId ? raffleFindRound(ss, raffleId) : null;
+
+  if (!round || round.status !== 'executed' || !revealEnabled) {
+    raffleWriteLog(ss, raffleId, 'CHECK_NOT_REVEALED', raffleMaskPhone(phone));
+    return makeResponse({ success: true, status: 'NOT_REVEALED' });
   }
 
   var resultsSheet = ss.getSheetByName(RAFFLE_SHEET_RESULTS);
   var rows = resultsSheet ? sheetToObjects(ss, RAFFLE_SHEET_RESULTS) : [];
   var idx = -1, row = null;
   for (var i = 0; i < rows.length; i++) {
-    // 시트에 저장된 번호도 정규화해 비교 (숫자 변환으로 0이 잘린 기존 데이터 호환)
-    if (raffleNormalizePhone(rows[i].phone) === phone) { row = rows[i]; idx = i; break; }
+    if (rows[i].raffleId === raffleId && raffleNormalizePhone(rows[i].phone) === phone) {
+      row = rows[i]; idx = i; break;
+    }
   }
 
   if (!row) {
-    raffleWriteLog(ss, 'CHECK_LOSE', '낙첨 확인 (' + raffleMaskPhone(phone) + ')');
-    return makeResponse({ success: true, revealEnabled: true, found: true, won: false });
+    raffleWriteLog(ss, raffleId, 'CHECK_NOT_TARGET', raffleMaskPhone(phone));
+    return makeResponse({ success: true, status: 'NOT_TARGET' });
   }
+
+  var won = row.tier !== 'NONE';
+  var headers = resultsSheet.getRange(1, 1, 1, resultsSheet.getLastColumn()).getValues()[0];
+  var confirmedCol      = headers.indexOf('confirmed') + 1;
+  var firstConfirmedCol = headers.indexOf('firstConfirmedAt') + 1;
+  var lastConfirmedCol  = headers.indexOf('lastConfirmedAt') + 1;
+  var confirmedCountCol = headers.indexOf('confirmedCount') + 1;
+  var sheetRowNum = idx + 2;
+  var nowStr = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd HH:mm:ss');
 
   if (!raffleIsTrue(row.confirmed)) {
-    var sheetRowNum = idx + 2; // 헤더(1행) + 1-index 보정
-    var nowStr = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd HH:mm:ss');
-    resultsSheet.getRange(sheetRowNum, 5).setValue('TRUE');   // confirmed
-    resultsSheet.getRange(sheetRowNum, 6).setValue(nowStr);   // confirmedAt
-    row.confirmed = 'TRUE';
-    row.confirmedAt = nowStr;
-    raffleWriteLog(ss, 'CONFIRM', row.tier + ' 당첨 확인 (' + raffleMaskPhone(phone) + ')');
+    resultsSheet.getRange(sheetRowNum, confirmedCol).setValue('TRUE');
+    resultsSheet.getRange(sheetRowNum, firstConfirmedCol).setValue(nowStr);
+    resultsSheet.getRange(sheetRowNum, lastConfirmedCol).setValue(nowStr);
+    resultsSheet.getRange(sheetRowNum, confirmedCountCol).setValue('1');
+    row.firstConfirmedAt = nowStr;
+    row.confirmedCount = '1';
+  } else {
+    var newCount = (parseInt(row.confirmedCount, 10) || 0) + 1;
+    resultsSheet.getRange(sheetRowNum, lastConfirmedCol).setValue(nowStr);
+    resultsSheet.getRange(sheetRowNum, confirmedCountCol).setValue(String(newCount));
+    row.confirmedCount = String(newCount);
   }
 
+  raffleWriteLog(ss, raffleId, won ? 'CHECK_WIN' : 'CHECK_LOSE', raffleMaskPhone(phone) + (won ? (' ' + row.tier) : ''));
+
   return makeResponse({
-    success: true, revealEnabled: true, found: true, won: true,
-    tier: row.tier, prize: row.prize, confirmedAt: row.confirmedAt
+    success: true, status: 'RESULT', won: won,
+    tier: won ? row.tier : '', prize: won ? row.prize : '',
+    confirmedAt: row.firstConfirmedAt || nowStr
   });
 }
 
-// ── 당첨자 목록 조회 (관리자 전용) ──
-function raffleWinners() {
+// ── 회차 목록 조회 (관리자 전용) ──
+function raffleRoundsList(params) {
+  params = params || {};
+  if (!isValidPassword(params.password || '')) return makeResponse({ success: false, error: 'UNAUTHORIZED' });
+
   var ss = SpreadsheetApp.openById(SHEET_ID);
   raffleEnsureSheets(ss);
-  // 시트의 불리언 자동 변환/숫자 변환 값을 프론트가 기대하는 형식으로 정규화해 반환
-  var rows = sheetToObjects(ss, RAFFLE_SHEET_RESULTS).map(function(r) {
-    r.phone     = raffleNormalizePhone(r.phone);
-    r.confirmed = raffleIsTrue(r.confirmed) ? 'TRUE' : 'FALSE';
+  var rows = sheetToObjects(ss, RAFFLE_SHEET_ROUNDS).map(function(r) {
+    r.revealEnabled = raffleIsTrue(r.revealEnabled) ? 'TRUE' : 'FALSE';
     return r;
   });
-  return makeResponse({ success: true, data: rows });
+  rows.reverse(); // 최신 회차 먼저
+  var configMap = raffleGetConfigMap(ss);
+  return makeResponse({ success: true, data: rows, currentRoundId: configMap.currentRoundId || '' });
 }
 
-// ── 동일 번호 중복 제출 현황 조회 (관리자 전용) ──
-function raffleDuplicates() {
+// ── 당첨자(+대상자) 목록 조회 (관리자 전용, 회차 지정 없으면 현재 회차) ──
+function raffleWinners(params) {
+  params = params || {};
+  if (!isValidPassword(params.password || '')) return makeResponse({ success: false, error: 'UNAUTHORIZED' });
+
   var ss = SpreadsheetApp.openById(SHEET_ID);
-  var eligible = raffleGetEligibleEntries(ss);
+  raffleEnsureSheets(ss);
+  var configMap = raffleGetConfigMap(ss);
+  var raffleId = params.raffleId || configMap.currentRoundId || '';
+
+  var rows = sheetToObjects(ss, RAFFLE_SHEET_RESULTS)
+    .filter(function(r) { return r.raffleId === raffleId; })
+    .map(function(r) {
+      r.phone = raffleNormalizePhone(r.phone);
+      r.confirmed = raffleIsTrue(r.confirmed) ? 'TRUE' : 'FALSE';
+      return r;
+    });
+  return makeResponse({ success: true, raffleId: raffleId, data: rows });
+}
+
+// ── 동일 번호 중복 제출 현황 조회 (관리자 전용, 회차 지정 없으면 현재 회차 조건 기준) ──
+function raffleDuplicates(params) {
+  params = params || {};
+  if (!isValidPassword(params.password || '')) return makeResponse({ success: false, error: 'UNAUTHORIZED' });
+
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  raffleEnsureSheets(ss);
+  var configMap = raffleGetConfigMap(ss);
+  var raffleId = params.raffleId || configMap.currentRoundId || '';
+  var round = raffleFindRound(ss, raffleId);
+  var filters = round
+    ? { dateType: round.targetDateType, startDate: round.targetStartDate, endDate: round.targetEndDate, userType: round.targetUserType }
+    : { dateType: 'all', userType: 'all' };
+
+  var eligible = raffleGetEligibleEntries(ss, filters);
   var list = Object.keys(eligible.duplicatesMap).map(function(phone) {
     return { phone: phone, count: eligible.duplicatesMap[phone].length, entries: eligible.duplicatesMap[phone] };
   });
-  return makeResponse({ success: true, data: list });
+  return makeResponse({ success: true, raffleId: raffleId, data: list });
 }
 
 // ════════════════════════════════════════════════════════════════════
