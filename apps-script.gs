@@ -266,7 +266,7 @@ function doGet(e) {
       case 'detail':          return handleDetail(e.parameter.responseId);
       case 'getSecretCodes':  return handleGetSecretCodes();
       case 'rafflepreview':    return rafflePreview(e.parameter);
-      case 'rafflerounds':     return raffleRoundsList();
+      case 'rafflerounds':     return raffleRoundsList(e.parameter);
       case 'rafflewinners':    return raffleWinners(e.parameter);
       case 'raffleduplicates': return raffleDuplicates(e.parameter);
       default:
@@ -449,7 +449,8 @@ var RAFFLE_ROUNDS_HEADERS = [
 // 해당 회차의 "추첨 대상자 전원"이 한 행씩 저장됩니다 (당첨자만이 아님).
 var RAFFLE_RESULTS_HEADERS = [
   'raffleId', 'phone', 'tier', 'prize', 'drawnAt',
-  'confirmed', 'firstConfirmedAt', 'lastConfirmedAt', 'confirmedCount', 'responseId'
+  'confirmed', 'firstConfirmedAt', 'lastConfirmedAt', 'confirmedCount', 'responseId',
+  'name', 'userType', 'submittedAt'
 ];
 var RAFFLE_LOGS_HEADERS = ['loggedAt', 'raffleId', 'action', 'detail'];
 
@@ -469,6 +470,7 @@ function raffleEnsureSheets(ss) {
   var roundsSheet = getOrCreateSheet(ss, RAFFLE_SHEET_ROUNDS, RAFFLE_ROUNDS_HEADERS);
   ensureSheetHeaders(roundsSheet, RAFFLE_ROUNDS_HEADERS); // 기존 회차 데이터 유지한 채 신규 컬럼만 추가
   var resultsSheet = getOrCreateSheet(ss, RAFFLE_SHEET_RESULTS, RAFFLE_RESULTS_HEADERS);
+  ensureSheetHeaders(resultsSheet, RAFFLE_RESULTS_HEADERS); // 기존 결과 데이터 유지한 채 신규 컬럼만 추가
   // phone 컬럼(B열)을 텍스트 서식으로 고정 — 숫자 변환으로 앞자리 0이 사라지는 것 방지
   resultsSheet.getRange('B:B').setNumberFormat('@');
   getOrCreateSheet(ss, RAFFLE_SHEET_LOGS, RAFFLE_LOGS_HEADERS);
@@ -786,7 +788,8 @@ function raffleRun(data) {
     var win = tierByPhone[entry.phone];
     return [
       raffleId, entry.phone, win ? win.tier : 'NONE', win ? win.prize : '', drawnAt,
-      'FALSE', '', '', '0', entry.responseId
+      'FALSE', '', '', '0', entry.responseId,
+      entry.name || '', entry.participantType || '', entry.submittedAt || ''
     ];
   });
   resultsSheet.getRange(resultsSheet.getLastRow() + 1, 1, rowsToWrite.length, RAFFLE_RESULTS_HEADERS.length)
