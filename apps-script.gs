@@ -484,6 +484,37 @@ function raffleSetupSheets() {
   Logger.log('raffleSetupSheets 완료 — raffle_config / raffle_rounds / raffle_results / raffle_logs 시트 준비됨');
 }
 
+// ── 과거 버그로 남은 잘못된 공개 상태 정리 (수동 1회 실행용) ──
+// 예전 코드는 "현재 회차 초기화" 시 그 회차의 raffle_rounds.revealEnabled 값을
+// 지우지 않아, 이미 초기화된 옛 회차가 이력 표에서 계속 "공개중"으로 잘못
+// 표시되는 문제가 있었다. 이 함수는 raffle_config.currentRoundId와 실제로
+// 일치하는 회차 한 건만 revealEnabled=TRUE로 남기고 나머지는 전부 FALSE로
+// 맞춘다. raffle_results/raffle_rounds의 어떤 데이터도 삭제하지 않는다.
+// Apps Script 편집기에서 필요할 때 한 번 실행하면 된다.
+function raffleFixStaleRevealFlags() {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  raffleEnsureSheets(ss);
+  var configMap = raffleGetConfigMap(ss);
+  var publicRaffleId = configMap.currentRoundId || '';
+
+  var roundsSheet = ss.getSheetByName(RAFFLE_SHEET_ROUNDS);
+  if (!roundsSheet) { Logger.log('raffle_rounds 시트 없음'); return; }
+  var values = roundsSheet.getDataRange().getValues();
+  var headers = values[0];
+  var idCol = headers.indexOf('raffleId');
+  var revCol = headers.indexOf('revealEnabled');
+  var fixedCount = 0;
+  for (var i = 1; i < values.length; i++) {
+    var isPublic = !!publicRaffleId && String(values[i][idCol]) === publicRaffleId;
+    var shouldBe = isPublic ? 'TRUE' : 'FALSE';
+    if (String(values[i][revCol]).trim().toUpperCase() !== shouldBe) {
+      roundsSheet.getRange(i + 1, revCol + 1).setValue(shouldBe);
+      fixedCount++;
+    }
+  }
+  Logger.log('raffleFixStaleRevealFlags 완료 — 공개 대상 회차: ' + (publicRaffleId || '(없음)') + ' / 수정된 행: ' + fixedCount + '건');
+}
+
 function raffleGetConfigMap(ss) {
   var rows = sheetToObjects(ss, RAFFLE_SHEET_CONFIG);
   var map = {};
@@ -698,17 +729,11 @@ function raffleRun(data) {
   var ss = SpreadsheetApp.openById(SHEET_ID);
   raffleEnsureSheets(ss);
 
-  // ── 이미 실행 완료된(공개 여부 무관) 현재 회차가 있으면 재실행 자체를 막는다.
-  // 재추첨이 필요하면 반드시 rafflereset(초기화)을 먼저 거쳐야 한다.
-  var configMapForGuard = raffleGetConfigMap(ss);
-  var existingRoundId = configMapForGuard.currentRoundId || '';
-  var existingRound = existingRoundId ? raffleFindRound(ss, existingRoundId) : null;
-  if (existingRound && existingRound.status === 'executed') {
-    return makeResponse({
-      success: false, error: 'ALREADY_EXECUTED',
-      message: '이미 추첨이 완료된 회차입니다. 재추첨이 필요한 경우 초기화 후 다시 진행해주세요.'
-    });
-  }
+  // ── 회차는 항상 새로 생성 가능(다른 회차의 실행/공개 상태와 무관) ──
+  // 여러 회차가 동시에 "실행됨" 상태로 공존할 수 있으며, 그중 "당첨확인 공개"로
+  // 지정된 회차 하나만 raffle_config.currentRoundId(공개 대상 회차)가 된다.
+  // 새로 실행한 회차는 기본적으로 비공개 상태이며, 기존에 공개 중이던 회차의
+  // 공개 상태는 그대로 유지된다(관리자가 명시적으로 공개 전환해야 바뀜).
 
   // ── 경품 수량 입력값 검증 ──
   var prizeTotalCount = parseInt(data.prizeTotalCount, 10);
@@ -807,9 +832,8 @@ function raffleRun(data) {
     unassignedCount, leftoverPrizeCount
   ]);
 
-  var configSheet = getOrCreateSheet(ss, RAFFLE_SHEET_CONFIG, RAFFLE_CONFIG_HEADERS);
-  raffleSetConfigValue(ss, configSheet, 'currentRoundId', raffleId);
-  raffleSetConfigValue(ss, configSheet, 'revealEnabled', 'FALSE');
+  // 새 회차는 기본 비공개 상태로 생성되며, raffle_config.currentRoundId(공개 대상 회차)는
+  // 관리자가 명시적으로 "공개하기"를 눌러야만 이 회차로 바뀐다 (raffleToggleReveal 참고).
 
   raffleWriteLog(ss, raffleId, 'RUN',
     raffleName + ' 실행 완료 — 확정 대상 ' + pool.length + '명 / 중복제출 ' + duplicateCount + '건 / 당첨 배정 ' + assignedCount + '명 / 미당첨 ' + unassignedCount + '명');
@@ -822,9 +846,11 @@ function raffleRun(data) {
   });
 }
 
-// ── 현재 회차 초기화 (관리자 전용, 백업 후 재추첨 가능 상태로 복구) ──
-// raffle_results/raffle_rounds 전체가 아니라 "현재 공개 대상 회차"의 결과만 제거하며,
-// 과거 다른 회차의 기록은 그대로 유지됩니다.
+// ── 현재 공개 회차 초기화 (관리자 전용) ──
+// "초기화"는 raffle_config.currentRoundId(현재 공개 대상 회차) 연결을 해제하는
+// 기능일 뿐이며, raffle_results/raffle_rounds의 실제 결과 데이터는 절대 삭제하지
+// 않는다. 초기화된 회차도 과거 회차 이력에서 "보기"로 계속 조회 가능하고,
+// 필요하면 다시 "공개하기"로 재공개할 수 있다.
 function raffleReset(data) {
   if (!isValidPassword(data.password || '')) return makeResponse({ success: false, error: 'UNAUTHORIZED' });
   if (String(data.confirm || '') !== 'RESET') return makeResponse({ success: false, error: 'CONFIRM_REQUIRED' });
@@ -835,35 +861,17 @@ function raffleReset(data) {
   var raffleId = configMap.currentRoundId || '';
   if (!raffleId) return makeResponse({ success: false, error: 'NO_ROUND' });
 
-  var now = new Date();
-  var timestamp = Utilities.formatDate(now, 'Asia/Seoul', 'yyyyMMdd_HHmmss');
-  var backupName = 'raffle_results_backup_' + timestamp;
-
-  var resultsSheet = ss.getSheetByName(RAFFLE_SHEET_RESULTS);
-  var removedCount = 0;
-  if (resultsSheet && resultsSheet.getLastRow() > 1) {
-    // 다른 회차 기록까지 포함해 시트 전체를 백업(안전망)한 뒤, 현재 회차 행만 삭제
-    resultsSheet.copyTo(ss).setName(backupName);
-    var values = resultsSheet.getDataRange().getValues();
-    var headers = values[0];
-    var idCol = headers.indexOf('raffleId');
-    for (var i = values.length - 1; i >= 1; i--) {
-      if (String(values[i][idCol]) === raffleId) {
-        resultsSheet.deleteRow(i + 1);
-        removedCount++;
-      }
-    }
-  }
-
   var roundsSheet = ss.getSheetByName(RAFFLE_SHEET_ROUNDS);
   if (roundsSheet) {
     var rvalues = roundsSheet.getDataRange().getValues();
     var rheaders = rvalues[0];
     var ridCol = rheaders.indexOf('raffleId');
     var statusCol = rheaders.indexOf('status');
+    var revCol = rheaders.indexOf('revealEnabled');
     for (var j = 1; j < rvalues.length; j++) {
       if (String(rvalues[j][ridCol]) === raffleId) {
         roundsSheet.getRange(j + 1, statusCol + 1).setValue('reset');
+        roundsSheet.getRange(j + 1, revCol + 1).setValue('FALSE');
         break;
       }
     }
@@ -873,40 +881,66 @@ function raffleReset(data) {
   raffleSetConfigValue(ss, configSheet, 'currentRoundId', '');
   raffleSetConfigValue(ss, configSheet, 'revealEnabled', 'FALSE');
 
-  raffleWriteLog(ss, raffleId, 'RESET', '회차 초기화 완료 — 백업: ' + backupName + ' / 삭제 ' + removedCount + '건');
-  return makeResponse({ success: true, raffleId: raffleId, backupName: backupName, removedCount: removedCount });
+  raffleWriteLog(ss, raffleId, 'RESET', '공개 대상 회차 연결 해제(초기화) 완료 — 결과 데이터는 삭제되지 않음');
+  return makeResponse({ success: true, raffleId: raffleId });
 }
 
-// ── 당첨확인 공개 여부 전환 (관리자 전용, 현재 회차 대상) ──
+// ── 당첨확인 공개 여부 전환 (관리자 전용, 지정한 회차 대상) ──
+// 특정 회차를 공개(enabled=true)로 전환하면 raffle_config.currentRoundId가 그 회차로
+// 바뀌고, 다른 모든 회차는 자동으로 비공개(revealEnabled=FALSE) 처리된다.
+// (동시에 공개중인 회차가 두 개 이상 존재할 수 없다.)
 function raffleToggleReveal(data) {
   if (!isValidPassword(data.password || '')) return makeResponse({ success: false, error: 'UNAUTHORIZED' });
 
   var ss = SpreadsheetApp.openById(SHEET_ID);
   raffleEnsureSheets(ss);
   var configMap = raffleGetConfigMap(ss);
-  var raffleId = configMap.currentRoundId || '';
-  if (!raffleId) return makeResponse({ success: false, error: 'NO_ROUND' });
+  var targetRaffleId = String(data.raffleId || configMap.currentRoundId || '');
+  if (!targetRaffleId) return makeResponse({ success: false, error: 'NO_ROUND' });
+
+  var round = raffleFindRound(ss, targetRaffleId);
+  if (!round) return makeResponse({ success: false, error: 'ROUND_NOT_FOUND' });
 
   var enabled = (data.enabled === true || String(data.enabled) === 'true');
   var configSheet = ss.getSheetByName(RAFFLE_SHEET_CONFIG);
-  raffleSetConfigValue(ss, configSheet, 'revealEnabled', enabled ? 'TRUE' : 'FALSE');
-
   var roundsSheet = ss.getSheetByName(RAFFLE_SHEET_ROUNDS);
-  if (roundsSheet) {
-    var values = roundsSheet.getDataRange().getValues();
-    var headers = values[0];
-    var idCol = headers.indexOf('raffleId');
-    var revCol = headers.indexOf('revealEnabled');
-    for (var i = 1; i < values.length; i++) {
-      if (String(values[i][idCol]) === raffleId) {
-        roundsSheet.getRange(i + 1, revCol + 1).setValue(enabled ? 'TRUE' : 'FALSE');
-        break;
+
+  if (enabled) {
+    // 지정한 회차만 공개로 설정하고, 나머지 회차는 전부 비공개로 되돌린다.
+    raffleSetConfigValue(ss, configSheet, 'currentRoundId', targetRaffleId);
+    raffleSetConfigValue(ss, configSheet, 'revealEnabled', 'TRUE');
+    if (roundsSheet) {
+      var values = roundsSheet.getDataRange().getValues();
+      var headers = values[0];
+      var idCol = headers.indexOf('raffleId');
+      var revCol = headers.indexOf('revealEnabled');
+      for (var i = 1; i < values.length; i++) {
+        var isTarget = String(values[i][idCol]) === targetRaffleId;
+        roundsSheet.getRange(i + 1, revCol + 1).setValue(isTarget ? 'TRUE' : 'FALSE');
+      }
+    }
+  } else {
+    // 지정한 회차를 비공개로 전환. 그 회차가 현재 공개 대상이었다면 공개 연결도 해제한다.
+    if (configMap.currentRoundId === targetRaffleId) {
+      raffleSetConfigValue(ss, configSheet, 'currentRoundId', '');
+      raffleSetConfigValue(ss, configSheet, 'revealEnabled', 'FALSE');
+    }
+    if (roundsSheet) {
+      var values2 = roundsSheet.getDataRange().getValues();
+      var headers2 = values2[0];
+      var idCol2 = headers2.indexOf('raffleId');
+      var revCol2 = headers2.indexOf('revealEnabled');
+      for (var k = 1; k < values2.length; k++) {
+        if (String(values2[k][idCol2]) === targetRaffleId) {
+          roundsSheet.getRange(k + 1, revCol2 + 1).setValue('FALSE');
+          break;
+        }
       }
     }
   }
 
-  raffleWriteLog(ss, raffleId, 'TOGGLE_REVEAL', (enabled ? '공개' : '비공개') + ' 전환');
-  return makeResponse({ success: true, revealEnabled: enabled, raffleId: raffleId });
+  raffleWriteLog(ss, targetRaffleId, 'TOGGLE_REVEAL', (enabled ? '공개 전환' : '비공개 전환'));
+  return makeResponse({ success: true, revealEnabled: enabled, raffleId: targetRaffleId });
 }
 
 // ── 추첨 진행 상태 조회 (공개 API — 비밀번호 불필요, 개인정보 미포함) ──
@@ -932,8 +966,8 @@ function raffleStatus() {
 
   return makeResponse({
     success: true,
-    hasActiveRound: !!(round && round.status === 'executed'),
-    executed: !!(round && round.status === 'executed'),
+    hasActiveRound: !!round,
+    executed: !!round,
     revealEnabled: revealEnabled,
     raffleName: round ? round.raffleName : '',
     tiers: tiers
@@ -961,7 +995,7 @@ function raffleCheck(data) {
   var revealEnabled = raffleIsTrue(configMap.revealEnabled);
   var round = raffleId ? raffleFindRound(ss, raffleId) : null;
 
-  if (!round || round.status !== 'executed' || !revealEnabled) {
+  if (!round || !revealEnabled) {
     raffleWriteLog(ss, raffleId, 'CHECK_NOT_REVEALED', raffleMaskPhone(phone));
     return makeResponse({ success: true, status: 'NOT_REVEALED' });
   }
