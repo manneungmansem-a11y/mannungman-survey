@@ -575,8 +575,17 @@
     .raffle-modal h3 { font-size: 19px; font-weight: 800; color: #1e293b; margin-bottom: 6px; }
     .raffle-modal-desc { font-size: 13.5px; color: #64748b; margin-bottom: 18px; line-height: 1.6; }
 
-    .raffle-phone-input { width: 100%; padding: 13px 16px; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 16px; text-align: center; outline: none; transition: border-color .2s; font-family: inherit; letter-spacing: .5px; }
-    .raffle-phone-input:focus { border-color: #1a56db; }
+    .raffle-phone-group { display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .raffle-phone-part {
+      width: 100%; min-width: 0; padding: 13px 0; border: 1.5px solid #e2e8f0; border-radius: 10px;
+      font-size: 17px; text-align: center; outline: none; transition: border-color .2s;
+      font-family: inherit; letter-spacing: 1px;
+    }
+    .raffle-phone-part:focus { border-color: #1a56db; }
+    .raffle-phone-part[data-part="1"] { flex: 0 0 64px; }
+    .raffle-phone-part[data-part="2"],
+    .raffle-phone-part[data-part="3"] { flex: 1 1 0; }
+    .raffle-phone-sep { flex: 0 0 auto; color: #cbd5e1; font-weight: 700; font-size: 16px; }
     .raffle-modal-error { margin-top: 8px; font-size: 13px; color: #dc2626; min-height: 20px; line-height: 1.5; }
     .raffle-modal-btns { display: flex; gap: 10px; margin-top: 14px; }
     .btn-raffle-cancel { flex: 1; padding: 12px; background: #f1f5f9; color: #64748b; border: none; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; }
@@ -618,6 +627,16 @@
 
     .raffle-result-panel { display: none; margin-top: 18px; }
     .raffle-result-panel.active { display: block; }
+    .raffle-result-image {
+      display: none; width: 100%; max-width: 320px; height: auto;
+      margin: 0 auto 14px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,.14);
+      opacity: 0; transform: translateY(14px);
+    }
+    .raffle-result-image.show { display: block; animation: raffleResultImageIn .55s cubic-bezier(.16,.84,.32,1) forwards; }
+    @keyframes raffleResultImageIn {
+      from { opacity: 0; transform: translateY(14px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
     .raffle-result-icon { font-size: 42px; margin-bottom: 8px; }
     .raffle-result-title { font-size: 18px; font-weight: 800; margin-bottom: 6px; }
     .raffle-result-title.win  { color: #ea580c; }
@@ -627,6 +646,7 @@
 
     @media (max-width: 420px) {
       .roulette-seg { flex-basis: 76px; font-size: 13px; }
+      .raffle-result-image { max-width: 260px; }
     }
 
     /* ══ 반응형 ══ */
@@ -882,7 +902,13 @@
       <div class="raffle-modal-icon">🎁</div>
       <h3>당첨확인하기</h3>
       <p class="raffle-modal-desc">설문 참여 시 입력하신 휴대폰 번호를 입력하시면<br>당첨 여부를 확인할 수 있습니다.</p>
-      <input type="tel" id="raffle-phone-input" class="raffle-phone-input" placeholder="01012345678" inputmode="numeric" autocomplete="off">
+      <div class="raffle-phone-group">
+        <input type="tel" id="raffle-phone-part1" class="raffle-phone-part" data-part="1" placeholder="010" inputmode="numeric" maxlength="3" autocomplete="off">
+        <span class="raffle-phone-sep">-</span>
+        <input type="tel" id="raffle-phone-part2" class="raffle-phone-part" data-part="2" placeholder="1234" inputmode="numeric" maxlength="4" autocomplete="off">
+        <span class="raffle-phone-sep">-</span>
+        <input type="tel" id="raffle-phone-part3" class="raffle-phone-part" data-part="3" placeholder="5678" inputmode="numeric" maxlength="4" autocomplete="off">
+      </div>
       <div class="raffle-modal-error" id="raffle-modal-error"></div>
       <div class="raffle-modal-btns">
         <button type="button" class="btn-raffle-cancel" onclick="closeRaffleModal()">취소</button>
@@ -893,7 +919,7 @@
     <div class="raffle-info-msg" id="raffle-info-msg"></div>
 
     <div id="raffle-roulette-section">
-      <div class="roulette-caption">두근두근, 결과를 확인하는 중...</div>
+      <div class="roulette-caption" id="raffle-roulette-caption">행운의 룰렛이 돌아가고 있어요…</div>
       <div id="raffle-roulette-outer">
         <div class="roulette-pointer"></div>
         <div class="roulette-pointer bottom"></div>
@@ -902,6 +928,7 @@
     </div>
 
     <div class="raffle-result-panel" id="raffle-result-panel">
+      <img class="raffle-result-image" id="raffle-result-image" alt="">
       <div class="raffle-result-icon" id="raffle-result-icon"></div>
       <div class="raffle-result-title" id="raffle-result-title"></div>
       <div class="raffle-result-desc" id="raffle-result-desc"></div>
@@ -2010,6 +2037,31 @@ document.getElementById('privacy-modal-overlay').addEventListener('click', funct
 let raffleStatusCache = { executed: false, revealEnabled: false };
 const RAFFLE_ROULETTE_TYPES = ['1등', '2등', '3등', '참가상', '꽝'];
 
+// 결과 등수 → 결과 이미지 매핑 (파일은 프로젝트 내 "이미지 파일" 폴더, 배포 시에도 상대경로로 그대로 접근됨)
+const RAFFLE_PRIZE_IMAGES = {
+  '1등': '이미지 파일/1등.png',
+  '2등': '이미지 파일/2등.png',
+  '3등': '이미지 파일/3등.png',
+  '참가상': '이미지 파일/참가상.png'
+};
+
+// 백엔드 값은 항상 '1등'/'2등'/'3등'/'참가상' 형태로 내려오지만(apps-script.gs RAFFLE_PRIZE_TIERS 참고),
+// "1등 당첨", 상품권 금액 문구 등 변형 표기가 섞여 들어와도 안전하게 매핑되도록 정규화한다.
+function raffleNormalizeTier(raw) {
+  const t = String(raw || '').trim();
+  if (!t) return '';
+  if (t.indexOf('1등') === 0 || t.indexOf('100,000') !== -1) return '1등';
+  if (t.indexOf('2등') === 0 || t.indexOf('30,000') !== -1) return '2등';
+  if (t.indexOf('3등') === 0 || t.indexOf('10,000') !== -1) return '3등';
+  if (t.indexOf('참가상') === 0 || t.indexOf('2,000') !== -1) return '참가상';
+  return t;
+}
+
+function raffleResolvePrizeImage(rawTier) {
+  const tier = raffleNormalizeTier(rawTier);
+  return RAFFLE_PRIZE_IMAGES[tier] || '';
+}
+
 async function refreshRaffleStatus() {
   try {
     const res = await fetch(`${SCRIPT_URL}?action=rafflestatus`);
@@ -2031,6 +2083,59 @@ function updateRaffleButtonUI() {
   });
 }
 
+// ── 휴대폰 번호 3분할 입력 (010 / 1234 / 5678) ──
+// 내부 조회값은 항상 문자열로만 다루며 parseInt/Number 변환은 절대 사용하지 않는다.
+const RAFFLE_PHONE_PART_LENS = { 1: 3, 2: 4, 3: 4 };
+function rafflePhonePartEl(n) { return document.getElementById('raffle-phone-part' + n); }
+
+function raffleGetPhoneDigits() {
+  return rafflePhonePartEl(1).value + rafflePhonePartEl(2).value + rafflePhonePartEl(3).value;
+}
+function raffleFormatPhoneDisplay() {
+  const p1 = rafflePhonePartEl(1).value, p2 = rafflePhonePartEl(2).value, p3 = rafflePhonePartEl(3).value;
+  return [p1, p2, p3].filter(v => v).join('-');
+}
+
+function raffleDistributeDigitsToParts(digits) {
+  let d = String(digits || '').replace(/\D/g, '');
+  rafflePhonePartEl(1).value = d.slice(0, 3);
+  d = d.slice(3);
+  rafflePhonePartEl(2).value = d.slice(0, 4);
+  d = d.slice(4);
+  rafflePhonePartEl(3).value = d.slice(0, 4);
+}
+
+[1, 2, 3].forEach(n => {
+  const el = rafflePhonePartEl(n);
+
+  el.addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g, '').slice(0, RAFFLE_PHONE_PART_LENS[n]);
+    if (this.value.length === RAFFLE_PHONE_PART_LENS[n] && n < 3) {
+      rafflePhonePartEl(n + 1).focus();
+    }
+  });
+
+  el.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { submitRaffleCheck(); return; }
+    if (e.key === 'Backspace' && this.value === '' && n > 1) {
+      const prev = rafflePhonePartEl(n - 1);
+      prev.focus();
+      prev.setSelectionRange(prev.value.length, prev.value.length);
+    }
+  });
+
+  // 010-1234-5678 / 01012345678 / 010 1234 5678 등 붙여넣기 시 자동 분리
+  el.addEventListener('paste', function(e) {
+    const text = (e.clipboardData || window.clipboardData).getData('text');
+    const digits = String(text || '').replace(/\D/g, '');
+    if (digits.length >= 10) {
+      e.preventDefault();
+      raffleDistributeDigitsToParts(digits);
+      rafflePhonePartEl(3).focus();
+    }
+  });
+});
+
 function openRaffleModal() {
   if (!raffleStatusCache.revealEnabled) {
     refreshRaffleStatus();
@@ -2038,7 +2143,7 @@ function openRaffleModal() {
   }
   resetRaffleModal();
   document.getElementById('raffle-modal-overlay').classList.add('visible');
-  setTimeout(() => document.getElementById('raffle-phone-input').focus(), 100);
+  setTimeout(() => rafflePhonePartEl(1).focus(), 100);
 }
 
 function closeRaffleModal() {
@@ -2046,20 +2151,25 @@ function closeRaffleModal() {
 }
 
 function resetRaffleModal() {
-  document.getElementById('raffle-phone-input').value = '';
+  raffleSessionId++;       // 이전에 진행 중이던 룰렛/조회 결과가 뒤늦게 반영되는 것을 방지
+  raffleRequestInFlight = false;
+
+  [1, 2, 3].forEach(n => { rafflePhonePartEl(n).value = ''; });
   document.getElementById('raffle-modal-error').textContent = '';
   document.getElementById('raffle-input-section').style.display = 'block';
   document.getElementById('raffle-roulette-section').classList.remove('active');
   document.getElementById('raffle-result-panel').classList.remove('active');
   document.getElementById('raffle-info-msg').style.display = 'none';
+
+  const imageEl = document.getElementById('raffle-result-image');
+  imageEl.classList.remove('show');
+  imageEl.removeAttribute('src');
+  document.getElementById('raffle-result-icon').style.display = '';
+
   const btn = document.getElementById('btn-raffle-submit');
   btn.disabled = false;
   btn.textContent = '확인하기';
 }
-
-document.getElementById('raffle-phone-input').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') submitRaffleCheck();
-});
 
 document.getElementById('raffle-modal-overlay').addEventListener('click', function(e) {
   if (e.target === this) closeRaffleModal();
@@ -2072,17 +2182,22 @@ function showRaffleInfoMsg(type, text) {
   el.style.display = 'block';
 }
 
+let raffleRequestInFlight = false; // 조회 시작~룰렛 종료까지 중복 클릭/중복 요청 방지
+let raffleSessionId = 0;
+
 async function submitRaffleCheck() {
-  const raw = document.getElementById('raffle-phone-input').value.trim();
-  const digits = raw.replace(/\D/g, '');
+  if (raffleRequestInFlight) return; // 룰렛 진행 중 중복 클릭/중복 Enter 방지
+
+  const digits = raffleGetPhoneDigits(); // 문자열 — 절대 숫자로 변환하지 않음
   const errEl = document.getElementById('raffle-modal-error');
   errEl.textContent = '';
 
-  if (!/^0\d{9,10}$/.test(digits)) {
-    errEl.textContent = '올바른 휴대폰 번호를 입력해주세요. (예: 01012345678)';
+  if (!/^01[0-9]\d{7,8}$/.test(digits)) {
+    errEl.textContent = '올바른 휴대폰 번호를 입력해주세요. (예: 010-1234-5678)';
     return;
   }
 
+  raffleRequestInFlight = true;
   const btn = document.getElementById('btn-raffle-submit');
   btn.disabled = true;
   btn.textContent = '조회 중...';
@@ -2096,6 +2211,7 @@ async function submitRaffleCheck() {
     });
     json = await res.json();
   } catch (e) {
+    raffleRequestInFlight = false;
     btn.disabled = false;
     btn.textContent = '확인하기';
     errEl.textContent = '서버 연결 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
@@ -2103,31 +2219,45 @@ async function submitRaffleCheck() {
   }
 
   if (!json || !json.success) {
+    raffleRequestInFlight = false;
     btn.disabled = false;
     btn.textContent = '확인하기';
     errEl.textContent = '조회 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
     return;
   }
 
-  if (!json.revealEnabled) {
-    raffleStatusCache.revealEnabled = false;
-    updateRaffleButtonUI();
-    showRaffleInfoMsg('warn', '추첨 결과는 아직 공개되지 않았습니다. 공개 후 다시 확인해주세요.');
-    btn.disabled = false;
-    btn.textContent = '확인하기';
-    return;
-  }
-
-  if (!json.found) {
+  // 백엔드가 판정한 4가지 상태 — status 값 기준으로만 분기 (프론트에서 자체 판단하지 않음)
+  if (json.status === 'NO_HISTORY') {
+    raffleRequestInFlight = false;
     showRaffleInfoMsg('error', '입력하신 휴대폰 번호로 확인되는 설문 참여 내역이 없습니다. 설문에 참여하신 휴대폰 번호를 다시 확인해주세요.');
     btn.disabled = false;
     btn.textContent = '확인하기';
     return;
   }
 
-  // 여기서부터는 실제 결과가 확정된 상태 — 연출용 룰렛 애니메이션 후 결과 공개
+  if (json.status === 'NOT_REVEALED') {
+    raffleRequestInFlight = false;
+    raffleStatusCache.revealEnabled = false;
+    updateRaffleButtonUI();
+    showRaffleInfoMsg('warn', '아직 당첨확인 기간이 아닙니다. 관리자 공개 이후 확인 가능합니다.');
+    btn.disabled = false;
+    btn.textContent = '확인하기';
+    return;
+  }
+
+  if (json.status === 'NOT_TARGET') {
+    raffleRequestInFlight = false;
+    showRaffleInfoMsg('warn', '설문 참여 내역은 확인되었지만, 이번 추첨 대상자가 아닙니다. 추첨 대상 기준을 다시 확인해주세요.');
+    btn.disabled = false;
+    btn.textContent = '확인하기';
+    return;
+  }
+
+  // status === 'RESULT' — 정상 추첨 대상자. 실제 결과는 이미 서버에 고정 저장되어 있고,
+  // 여기서는 연출용 룰렛 애니메이션 후 그 결과를 그대로 표시한다 (프론트에서 재추첨하지 않음).
   document.getElementById('raffle-input-section').style.display = 'none';
   await playRouletteAndReveal(json);
+  raffleRequestInFlight = false;
 }
 
 function buildRouletteTrack(finalType) {
@@ -2159,12 +2289,50 @@ function raffleSleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+const RAFFLE_ROULETTE_CAPTIONS = [
+  '행운의 룰렛이 돌아가고 있어요…',
+  '두근두근, 결과를 확인하는 중…',
+  '곧 결과가 공개됩니다…',
+  '마지막까지 기대해주세요…'
+];
+
+function setRouletteCaption(text) {
+  const el = document.getElementById('raffle-roulette-caption');
+  if (el) el.textContent = text;
+}
+
+// track을 xPx로 이동시키는 한 구간의 애니메이션을 재생하고, transitionend(또는 안전장치 타임아웃)에서 resolve된다.
+function raffleAnimateStep(track, xPx, durationMs, easing) {
+  return new Promise(resolve => {
+    let settled = false;
+    const finish = () => {
+      if (settled) return;
+      settled = true;
+      track.removeEventListener('transitionend', onEnd);
+      clearTimeout(fallback);
+      resolve();
+    };
+    const onEnd = (e) => { if (e.target === track && e.propertyName === 'transform') finish(); };
+    track.addEventListener('transitionend', onEnd);
+    track.style.transition = `transform ${durationMs}ms ${easing}`;
+    void track.offsetWidth; // 강제 리플로우 — transition 값이 실제 반영된 뒤 transform이 바뀌도록 보장
+    track.style.transform = `translateX(${xPx}px)`;
+    const fallback = setTimeout(finish, durationMs + 150);
+  });
+}
+
+// 룰렛 연출: 처음엔 빠르게 회전 → 점점 감속 → 마지막 몇 칸은 한 칸씩 천천히 → 살짝 튕기며 정착.
+// 어느 단계든 최종적으로 도착하는 칸(targetIndex)은 서버가 확정한 결과이며, 프론트는 그 결과를 향해
+// 이동 경로/속도만 연출할 뿐 결과 자체를 바꾸지 않는다.
 async function playRouletteAndReveal(json) {
+  const mySession = raffleSessionId;
   const won = !!json.won;
-  const finalType = won ? json.tier : '꽝';
+  const canonicalTier = won ? raffleNormalizeTier(json.tier) : '꽝';
+  const finalType = RAFFLE_ROULETTE_TYPES.includes(canonicalTier) ? canonicalTier : '꽝';
 
   const section = document.getElementById('raffle-roulette-section');
   section.classList.add('active');
+  setRouletteCaption(RAFFLE_ROULETTE_CAPTIONS[0]);
 
   const { track, targetIndex } = buildRouletteTrack(finalType);
 
@@ -2173,26 +2341,77 @@ async function playRouletteAndReveal(json) {
 
   const wrap = document.getElementById('raffle-roulette-outer');
   const targetSeg = track.children[targetIndex];
+  const segWidth = targetSeg.offsetWidth;
+  const cycleWidth = RAFFLE_ROULETTE_TYPES.length * segWidth;
   const wrapWidth = wrap.getBoundingClientRect().width;
-  const segCenter = targetSeg.offsetLeft + targetSeg.offsetWidth / 2;
-  const offsetX = (wrapWidth / 2) - segCenter;
+  const segCenter = targetSeg.offsetLeft + segWidth / 2;
+  const finalOffsetX = (wrapWidth / 2) - segCenter; // 최종 정착 위치 (서버 결과로 고정된 칸)
 
-  const spinMs = 2600 + Math.floor(Math.random() * 900); // 2.6~3.5초
-  track.style.transition = `transform ${spinMs}ms cubic-bezier(.1,.7,.25,1)`;
-  track.style.transform = `translateX(${offsetX}px)`;
+  const totalMs = 4500 + Math.floor(Math.random() * 2000); // 4.5~6.5초
+  const fastMs  = Math.round(totalMs * 0.36);
+  const decelMs = Math.round(totalMs * 0.30);
+  const creepSteps = 4;
+  const creepEachMs = Math.round((totalMs * 0.26) / creepSteps);
+  const bounceMs = Math.max(220, totalMs - fastMs - decelMs - (creepEachMs * creepSteps));
 
-  await raffleSleep(spinMs + 150);
+  if (mySession !== raffleSessionId) return;
+
+  // 1단계 — 빠른 회전
+  await raffleAnimateStep(track, finalOffsetX + segWidth * creepSteps + cycleWidth * 1.6, fastMs, 'cubic-bezier(.35,0,.6,.3)');
+  if (mySession !== raffleSessionId) return;
+
+  // 2단계 — 점점 감속
+  setRouletteCaption(RAFFLE_ROULETTE_CAPTIONS[1]);
+  await raffleAnimateStep(track, finalOffsetX + segWidth * creepSteps, decelMs, 'cubic-bezier(.2,.6,.35,1)');
+  if (mySession !== raffleSessionId) return;
+
+  // 3단계 — 마지막 몇 칸(1등/2등/3등/참가상/꽝)을 한 칸씩 천천히, 긴장감 있게
+  setRouletteCaption(RAFFLE_ROULETTE_CAPTIONS[2]);
+  for (let i = creepSteps; i >= 1; i--) {
+    if (i === 2) setRouletteCaption(RAFFLE_ROULETTE_CAPTIONS[3]);
+    const stepMs = Math.round(creepEachMs * (1 + (creepSteps - i) * 0.2)); // 뒤로 갈수록 더 느리게
+    await raffleAnimateStep(track, finalOffsetX + segWidth * (i - 1), stepMs, 'cubic-bezier(.3,0,.4,1)');
+    if (mySession !== raffleSessionId) return;
+  }
+
+  // 4단계 — 살짝 튕기며(bounce) 최종 결과 칸에 정착
+  await raffleAnimateStep(track, finalOffsetX - Math.round(segWidth * 0.12), Math.round(bounceMs * 0.55), 'cubic-bezier(.34,1.56,.64,1)');
+  if (mySession !== raffleSessionId) return;
+  await raffleAnimateStep(track, finalOffsetX, Math.round(bounceMs * 0.45), 'cubic-bezier(.33,1,.68,1)');
+  if (mySession !== raffleSessionId) return;
+
+  await raffleSleep(150);
+  if (mySession !== raffleSessionId) return; // 모달을 닫았다 다시 연 경우 — 이전 세션 결과를 뒤늦게 표시하지 않음
   revealRaffleResult(json);
 }
 
 function revealRaffleResult(json) {
   const panel   = document.getElementById('raffle-result-panel');
+  const imageEl = document.getElementById('raffle-result-image');
   const iconEl  = document.getElementById('raffle-result-icon');
   const titleEl = document.getElementById('raffle-result-title');
   const descEl  = document.getElementById('raffle-result-desc');
   const metaEl  = document.getElementById('raffle-result-meta');
 
+  imageEl.classList.remove('show');
+  imageEl.removeAttribute('src');
+  imageEl.onerror = null;
+  iconEl.style.display = '';
+
   if (json.won) {
+    const imgSrc = raffleResolvePrizeImage(json.tier);
+    if (imgSrc) {
+      imageEl.onerror = function() {
+        // 이미지 로드 실패 시(경로 오류 등) 조용히 아이콘 표시로 대체 — 결과 표시 자체는 막지 않는다.
+        imageEl.classList.remove('show');
+        imageEl.removeAttribute('src');
+        iconEl.style.display = '';
+      };
+      imageEl.alt = `${json.tier} 당첨 이미지`;
+      imageEl.src = imgSrc;
+      imageEl.classList.add('show');
+      iconEl.style.display = 'none';
+    }
     iconEl.textContent = '🎉';
     titleEl.className = 'raffle-result-title win';
     titleEl.textContent = `${json.tier} 당첨 — ${json.prize}`;
