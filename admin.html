@@ -248,6 +248,17 @@
     .raffle-preview-card .pv-label { font-size:11.5px; color:#94a3b8; margin-bottom:4px; }
     .raffle-preview-card .pv-value { font-size:24px; font-weight:800; color:#1e293b; }
     .raffle-warning-banner { background:#fffbeb; border:1px solid #fde68a; color:#92400e; border-radius:8px; padding:10px 14px; font-size:12.5px; line-height:1.6; margin-bottom:12px; }
+    .raffle-warning-banner.blocking { background:#fef2f2; border-color:#fecaca; color:#b91c1c; }
+    .raffle-filter-field input[type="number"]:disabled, .raffle-filter-field input[type="text"]:disabled {
+      background:#f1f5f9; color:#64748b; font-weight:700;
+    }
+    .raffle-select-actions { display:flex; align-items:center; gap:10px; margin:14px 0 10px; flex-wrap:wrap; }
+    .raffle-select-actions .btn-raffle-action { background:#f1f5f9; color:#374151; padding:6px 12px; font-size:12px; }
+    .raffle-selected-count-badge { font-size:13px; font-weight:700; color:#1a56db; }
+    .raffle-phone-cell { cursor:pointer; border-bottom:1px dashed #94a3b8; }
+    .raffle-summary-panel { background:#f8fafc; border-radius:10px; padding:14px 16px; font-size:13px; color:#374151; line-height:1.9; margin:14px 0; }
+    .raffle-summary-panel strong { color:#1e293b; }
+    .raffle-summary-panel .rs-title { font-size:13.5px; font-weight:800; color:#1e293b; margin-bottom:6px; }
 
     /* ── 반응형 ── */
     @media (max-width: 768px) {
@@ -408,7 +419,7 @@
         <!-- 추첨 관리 (기존 설문/통계 기능과 분리된 별도 시트 기반) -->
         <div class="view-panel" id="view-raffle">
           <div class="raffle-filter-card">
-            <h4 style="font-size:14px;font-weight:800;color:#1e293b;margin-bottom:14px;">🎯 추첨 대상 조건 선택</h4>
+            <h4 style="font-size:14px;font-weight:800;color:#1e293b;margin-bottom:14px;">🎯 추첨 후보자 조건 선택 (조회용 — 실제 대상은 아래 목록에서 직접 체크)</h4>
             <div class="raffle-filter-row">
               <div class="raffle-filter-field" style="min-width:220px;">
                 <label>추첨 회차 이름</label>
@@ -445,6 +456,32 @@
                 <button class="btn-raffle-action" style="background:#1a56db;color:#fff;" onclick="raffleRunPreview()">🔍 대상자 미리보기</button>
               </div>
             </div>
+
+            <h4 style="font-size:14px;font-weight:800;color:#1e293b;margin:20px 0 14px;">🎁 경품 수량 설정</h4>
+            <div class="raffle-filter-row">
+              <div class="raffle-filter-field">
+                <label>총 경품 수량</label>
+                <input type="number" id="raffle-f-prizetotal" min="1" step="1" value="30" oninput="onRafflePrizeInputChange()">
+              </div>
+              <div class="raffle-filter-field">
+                <label>1등 인원</label>
+                <input type="number" id="raffle-f-tier1" min="0" step="1" value="1" oninput="onRafflePrizeInputChange()">
+              </div>
+              <div class="raffle-filter-field">
+                <label>2등 인원</label>
+                <input type="number" id="raffle-f-tier2" min="0" step="1" value="3" oninput="onRafflePrizeInputChange()">
+              </div>
+              <div class="raffle-filter-field">
+                <label>3등 인원</label>
+                <input type="number" id="raffle-f-tier3" min="0" step="1" value="6" oninput="onRafflePrizeInputChange()">
+              </div>
+              <div class="raffle-filter-field">
+                <label>참가상 인원 (자동계산)</label>
+                <input type="text" id="raffle-f-participation-display" disabled value="20">
+              </div>
+            </div>
+            <div id="raffle-prize-warning"></div>
+
             <div id="raffle-preview-area"></div>
           </div>
 
@@ -468,7 +505,7 @@
         정말 선택한 대상자 기준으로 랜덤 추첨을 실행하시겠습니까?<br>추첨 결과는 저장 후 고정됩니다.
       </p>
       <div id="raffle-run-summary" style="font-size:12.5px;color:#475569;line-height:1.8;background:#f8fafc;border-radius:8px;padding:12px 14px;margin-bottom:12px;"></div>
-      <p style="font-size:12px;color:#94a3b8;margin-bottom:14px;">※ 대상 인원: <strong id="raffle-run-eligible-count">-</strong>명 (중복 제출 제거) · 결과는 새 회차로 <strong>구글시트(raffle_results)에 고정 저장</strong>됩니다.<br>※ 실행 후 결과를 되돌리려면 별도의 "현재 회차 초기화"가 필요합니다 (백업 후 초기화됨).</p>
+      <p style="font-size:12px;color:#94a3b8;margin-bottom:14px;">※ 대상 인원: <strong id="raffle-run-eligible-count">-</strong>명 (관리자가 체크한 최종 확정 인원) · 결과는 새 회차로 <strong>구글시트(raffle_results)에 고정 저장</strong>됩니다.<br>※ 실행 후 결과를 되돌리려면 별도의 "현재 회차 초기화"가 필요합니다 (백업 후 초기화됨).</p>
       <div style="display:flex;gap:10px;">
         <button onclick="closeRaffleRunModal()" style="flex:1;padding:11px;background:#f1f5f9;color:#374151;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">취소</button>
         <button id="raffle-run-confirm-btn" onclick="confirmRaffleRun()" style="flex:1;padding:11px;background:#ea580c;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">추첨 실행</button>
@@ -1515,7 +1552,10 @@ let raffleWinnersData = [];    // 조회 중인 회차의 대상자 전원(당�
 let raffleDuplicatesData = [];
 let raffleWinnerTierFilter = '';
 let raffleWinnerConfirmedFilter = '';
-let raffleLastPreview = null; // 마지막 "대상자 미리보기" 결과 { totalMatched, targetCount, duplicateCount, totalPrizeCapacity, filters }
+
+// 대상자 미리보기 — 조건 조회 결과 후보자 목록(관리자가 체크박스로 최종 확정)
+let raffleCandidatesData = [];     // [{ phone, name, participantType, submittedAt, responseId, isDuplicate, checked }]
+let raffleCandidatesMeta = null;   // { totalMatched, duplicateCount, dedupedCandidateCount, filters }
 
 function raffleDateTypeLabel(dt) {
   return { all:'전체 기간', today:'오늘 참여자', yesterday:'어제 참여자', specific:'특정 날짜', range:'특정 기간' }[dt] || (dt || '-');
@@ -1550,15 +1590,55 @@ function getRaffleFilterState() {
   };
 }
 
-// ── 대상자 미리보기 (실행 전 조건별 대상 수 확인) ──
+// ── 경품 수량 입력 ──
+function getRafflePrizeConfig() {
+  const num = (id) => {
+    const v = parseInt(document.getElementById(id).value, 10);
+    return Number.isFinite(v) ? v : NaN;
+  };
+  const prizeTotal = num('raffle-f-prizetotal');
+  const tier1 = num('raffle-f-tier1');
+  const tier2 = num('raffle-f-tier2');
+  const tier3 = num('raffle-f-tier3');
+  return { prizeTotal, tier1, tier2, tier3 };
+}
+
+function onRafflePrizeInputChange() {
+  const cfg = getRafflePrizeConfig();
+  const participation = (Number.isFinite(cfg.prizeTotal) ? cfg.prizeTotal : 0)
+    - (Number.isFinite(cfg.tier1) ? cfg.tier1 : 0)
+    - (Number.isFinite(cfg.tier2) ? cfg.tier2 : 0)
+    - (Number.isFinite(cfg.tier3) ? cfg.tier3 : 0);
+  document.getElementById('raffle-f-participation-display').value = String(participation);
+
+  const warnEl = document.getElementById('raffle-prize-warning');
+  if (Number.isFinite(cfg.prizeTotal) && Number.isFinite(cfg.tier1) && Number.isFinite(cfg.tier2) && Number.isFinite(cfg.tier3)
+      && (cfg.tier1 + cfg.tier2 + cfg.tier3) > cfg.prizeTotal) {
+    warnEl.innerHTML = `<div class="raffle-warning-banner blocking">1등, 2등, 3등 인원 합계가 총 경품 수량보다 많습니다. 경품 수량을 다시 확인해주세요.</div>`;
+  } else {
+    warnEl.innerHTML = '';
+  }
+
+  if (raffleCandidatesData.length || raffleCandidatesMeta) renderRafflePreviewArea();
+}
+
+// ── 후보자 미리보기 (조건에 맞는 후보자 "조회"만 수행 — 최종 확정은 체크박스로) ──
+function raffleSelectedCandidates() {
+  return raffleCandidatesData.filter(c => c.checked);
+}
+function raffleSelectedCount() {
+  return raffleSelectedCandidates().length;
+}
+
 async function raffleRunPreview() {
   const filters = getRaffleFilterState();
   if (filters.dateType === 'specific' && !filters.startDate) { alert('날짜를 선택해주세요.'); return; }
   if (filters.dateType === 'range' && (!filters.startDate || !filters.endDate)) { alert('시작일과 종료일을 모두 선택해주세요.'); return; }
 
   const area = document.getElementById('raffle-preview-area');
-  area.innerHTML = '<div class="loading-state" style="padding:12px 0;"><div class="spin"></div> 대상자 계산 중...</div>';
-  raffleLastPreview = null;
+  area.innerHTML = '<div class="loading-state" style="padding:12px 0;"><div class="spin"></div> 후보자 조회 중...</div>';
+  raffleCandidatesData = [];
+  raffleCandidatesMeta = null;
   try {
     const qs = new URLSearchParams({
       action: 'rafflepreview', password: adminPassword,
@@ -1571,32 +1651,173 @@ async function raffleRunPreview() {
       return;
     }
 
-    raffleLastPreview = Object.assign({}, json, { filters });
-
-    let warningHtml = '';
-    if (json.targetCount === 0) {
-      warningHtml = `<div class="raffle-warning-banner">⚠ 선택한 조건에 해당하는 대상자가 없습니다.</div>`;
-    } else if (json.targetCount < json.totalPrizeCapacity) {
-      warningHtml = `<div class="raffle-warning-banner">⚠ 현재 추첨 대상자는 <strong>${json.targetCount}명</strong>입니다. 총 경품 수량 ${json.totalPrizeCapacity}개보다 적습니다. 현재 대상자 기준으로 추첨을 진행하시겠습니까?</div>`;
-    } else if (json.targetCount > json.totalPrizeCapacity) {
-      warningHtml = `<div class="raffle-warning-banner">ℹ 대상자 ${json.targetCount}명 중 ${json.totalPrizeCapacity}명만 당첨 처리되고, 나머지 ${json.targetCount - json.totalPrizeCapacity}명은 미당첨 처리됩니다.</div>`;
-    }
-    if (raffleStatusData.hasActiveRound) {
-      warningHtml += `<div class="raffle-warning-banner">⚠ 현재 공개 중인 회차가 있습니다. 이 조건으로 추첨을 실행하면 새 회차가 생성되어 당첨확인 대상이 새 회차로 교체됩니다 (과거 회차 기록은 유지).</div>`;
-    }
-
-    area.innerHTML = `
-      <div class="raffle-preview-row">
-        <div class="raffle-preview-card"><div class="pv-label">전체 응답 수</div><div class="pv-value">${json.totalMatched}</div></div>
-        <div class="raffle-preview-card"><div class="pv-label">중복 제거 후 추첨 대상</div><div class="pv-value">${json.targetCount}</div></div>
-        <div class="raffle-preview-card"><div class="pv-label">중복 제출 번호</div><div class="pv-value">${json.duplicateCount}</div></div>
-      </div>
-      ${warningHtml}
-      <button class="btn-raffle-action btn-raffle-run" onclick="openRaffleRunModal()" ${json.targetCount===0?'disabled':''}>🎲 이 조건으로 추첨 실행</button>
-    `;
+    // 기본 상태: 전체 미체크 — 관리자가 직접 체크한 사람만 최종 추첨 대상이 된다.
+    raffleCandidatesData = (json.entries || []).map(e => ({ ...e, checked: false }));
+    raffleCandidatesMeta = {
+      totalMatched: json.totalMatched, duplicateCount: json.duplicateCount,
+      dedupedCandidateCount: json.dedupedCandidateCount, filters
+    };
+    renderRafflePreviewArea();
   } catch (e) {
     area.innerHTML = `<div class="raffle-warning-banner">서버 연결 오류로 미리보기를 불러오지 못했습니다.</div>`;
   }
+}
+
+function raffleSelectAll() {
+  raffleCandidatesData.forEach(c => c.checked = true);
+  renderRafflePreviewArea();
+}
+function raffleDeselectAll() {
+  raffleCandidatesData.forEach(c => c.checked = false);
+  renderRafflePreviewArea();
+}
+function toggleRaffleCandidate(idx) {
+  raffleCandidatesData[idx].checked = !raffleCandidatesData[idx].checked;
+  refreshRaffleSelectionDependentUI();
+}
+
+// selectedCount/prizeConfig가 바뀔 때마다 확률·요약·실행버튼만 갱신 (체크박스 테이블은 그대로 유지)
+function refreshRaffleSelectionDependentUI() {
+  const countEl = document.getElementById('raffle-selected-count');
+  if (countEl) countEl.textContent = raffleSelectedCount();
+  const badgeEl = document.getElementById('raffle-selected-badge');
+  if (badgeEl) badgeEl.textContent = `현재 ${raffleSelectedCount()}명 선택됨`;
+  const probEl = document.getElementById('raffle-probability-area');
+  if (probEl) probEl.innerHTML = renderRaffleProbabilityAndSummary();
+}
+
+// ── 확률/배정 계산 (명세 [1][2][3] 예시로 검증된 공식) ──
+function computeRaffleAllocation(selectedCount, prizeTotal, tier1, tier2, tier3) {
+  const safe = (n) => Number.isFinite(n) && n >= 0 ? n : 0;
+  prizeTotal = safe(prizeTotal); tier1 = safe(tier1); tier2 = safe(tier2); tier3 = safe(tier3);
+  const participationConfigured = Math.max(prizeTotal - tier1 - tier2 - tier3, 0);
+  let cursor = 0;
+  const assign = (want) => { const c = Math.max(Math.min(want, selectedCount - cursor), 0); cursor += c; return c; };
+  const a1 = assign(tier1), a2 = assign(tier2), a3 = assign(tier3), aP = assign(participationConfigured);
+  const assignedTotal = cursor;
+  const unassigned = Math.max(selectedCount - assignedTotal, 0);
+  const leftover = Math.max(prizeTotal - assignedTotal, 0);
+  const pct = (n) => selectedCount > 0 ? (n / selectedCount * 100) : 0;
+  return {
+    tier1: a1, tier2: a2, tier3: a3, participation: aP, unassigned, leftover,
+    pct1: pct(a1), pct2: pct(a2), pct3: pct(a3), pctP: pct(aP), pctU: pct(unassigned)
+  };
+}
+
+function fmtPct(n) {
+  const r = Math.round(n * 10) / 10;
+  return (Number.isInteger(r) ? r : r.toFixed(1)) + '%';
+}
+
+function raffleValidationState() {
+  const cfg = getRafflePrizeConfig();
+  const selectedCount = raffleSelectedCount();
+  const blocking = [];
+  const warning = [];
+  if (raffleStatusData.hasActiveRound) {
+    blocking.push('이미 추첨이 완료된 회차입니다. 재추첨이 필요한 경우 초기화 후 다시 진행해주세요.');
+  }
+  if (!Number.isFinite(cfg.prizeTotal) || cfg.prizeTotal < 1) {
+    blocking.push('총 경품 수량은 1 이상이어야 합니다.');
+  }
+  if (!Number.isFinite(cfg.tier1) || cfg.tier1 < 0 || !Number.isFinite(cfg.tier2) || cfg.tier2 < 0 || !Number.isFinite(cfg.tier3) || cfg.tier3 < 0) {
+    blocking.push('1등/2등/3등 인원은 0 이상이어야 합니다.');
+  }
+  const topCount = (cfg.tier1||0) + (cfg.tier2||0) + (cfg.tier3||0);
+  if (Number.isFinite(cfg.prizeTotal) && topCount > cfg.prizeTotal) {
+    blocking.push('1등, 2등, 3등 인원 합계가 총 경품 수량보다 많습니다. 경품 수량을 다시 확인해주세요.');
+  } else if (topCount > selectedCount) {
+    warning.push('상위 당첨 인원이 추첨 대상자 수보다 많습니다. 당첨 인원을 다시 확인해주세요.');
+  }
+  if (selectedCount === 0) {
+    blocking.push('추첨 대상자가 없습니다. 대상 조건 또는 선택 인원을 확인해주세요.');
+  }
+  return { cfg, selectedCount, blocking, warning };
+}
+
+function renderRaffleProbabilityAndSummary() {
+  const { cfg, selectedCount, blocking, warning } = raffleValidationState();
+  const alloc = computeRaffleAllocation(selectedCount, cfg.prizeTotal, cfg.tier1, cfg.tier2, cfg.tier3);
+  const bannerHtml = blocking.map(m => `<div class="raffle-warning-banner blocking">⛔ ${esc(m)}</div>`).join('')
+    + warning.map(m => `<div class="raffle-warning-banner">⚠ ${esc(m)}</div>`).join('');
+
+  const nameLabel = document.getElementById('raffle-f-name').value.trim() || '(자동 생성)';
+  const meta = raffleCandidatesMeta || { totalMatched: 0, duplicateCount: 0, dedupedCandidateCount: 0 };
+
+  const summaryHtml = `
+    <div class="raffle-summary-panel">
+      <div class="rs-title">📋 추첨 실행 전 최종 요약</div>
+      추첨 회차명: <strong>${esc(nameLabel)}</strong><br>
+      조건 조회 결과: <strong>${meta.totalMatched}명</strong><br>
+      중복 제출 번호: <strong>${meta.duplicateCount}건</strong><br>
+      중복 제거 후 후보자: <strong>${meta.dedupedCandidateCount}명</strong><br>
+      관리자 선택 인원: <strong>${selectedCount}명</strong><br>
+      <br>
+      총 경품 수량: <strong>${Number.isFinite(cfg.prizeTotal)?cfg.prizeTotal:'-'}개</strong><br>
+      1등: <strong>${alloc.tier1}명</strong> / ${fmtPct(alloc.pct1)}<br>
+      2등: <strong>${alloc.tier2}명</strong> / ${fmtPct(alloc.pct2)}<br>
+      3등: <strong>${alloc.tier3}명</strong> / ${fmtPct(alloc.pct3)}<br>
+      참가상: <strong>${alloc.participation}명</strong> / ${fmtPct(alloc.pctP)}<br>
+      미당첨: <strong>${alloc.unassigned}명</strong> / ${fmtPct(alloc.pctU)}<br>
+      남는 경품: <strong>${alloc.leftover}개</strong>
+    </div>
+  `;
+
+  return bannerHtml + summaryHtml
+    + `<button class="btn-raffle-action btn-raffle-run" onclick="openRaffleRunModal()" ${blocking.length?'disabled':''}>🎲 선택한 대상자로 추첨 실행</button>`;
+}
+
+function renderRafflePreviewArea() {
+  const area = document.getElementById('raffle-preview-area');
+  if (!raffleCandidatesMeta) { area.innerHTML = ''; return; }
+  const meta = raffleCandidatesMeta;
+
+  area.innerHTML = `
+    <div class="raffle-preview-row">
+      <div class="raffle-preview-card"><div class="pv-label">조건 조회 결과</div><div class="pv-value">${meta.totalMatched}</div></div>
+      <div class="raffle-preview-card"><div class="pv-label">중복 제출 번호</div><div class="pv-value">${meta.duplicateCount}</div></div>
+      <div class="raffle-preview-card"><div class="pv-label">중복 제거 후 후보자</div><div class="pv-value">${meta.dedupedCandidateCount}</div></div>
+      <div class="raffle-preview-card"><div class="pv-label">관리자 선택 인원</div><div class="pv-value" id="raffle-selected-count">${raffleSelectedCount()}</div></div>
+    </div>
+    <div class="raffle-select-actions">
+      <button class="btn-raffle-action" onclick="raffleSelectAll()">전체 선택</button>
+      <button class="btn-raffle-action" onclick="raffleDeselectAll()">전체 해제</button>
+      <span class="raffle-selected-count-badge" id="raffle-selected-badge">현재 ${raffleSelectedCount()}명 선택됨</span>
+    </div>
+    <div class="table-card" style="padding:0;box-shadow:none;border:1px solid #e2e8f0;">
+      ${renderRaffleCandidatesTable()}
+    </div>
+    <div id="raffle-probability-area">${renderRaffleProbabilityAndSummary()}</div>
+  `;
+}
+
+function formatPhoneMasked(phone) {
+  const full = formatPhoneDisplay(phone);
+  if (!phone || full === '-') return '-';
+  const p = String(phone);
+  if (p.length === 11) return `${p.slice(0,3)}-****-${p.slice(7)}`;
+  if (p.length === 10) return `${p.slice(0,3)}-****-${p.slice(6)}`;
+  return full;
+}
+function raffleTogglePhoneCell(el) {
+  el.textContent = (el.textContent === el.dataset.masked) ? el.dataset.full : el.dataset.masked;
+}
+
+function renderRaffleCandidatesTable() {
+  if (raffleCandidatesData.length === 0) return '<div class="empty-state">조건에 해당하는 후보자가 없습니다.</div>';
+  return `<div style="overflow-x:auto;"><table>
+    <thead><tr><th></th><th>이름</th><th>휴대폰번호</th><th>참여유형</th><th>응답일시</th><th>중복여부</th></tr></thead>
+    <tbody>
+      ${raffleCandidatesData.map((c, i) => `<tr>
+        <td><input type="checkbox" ${c.checked?'checked':''} onchange="toggleRaffleCandidate(${i})"></td>
+        <td>${esc(c.name)||'-'}</td>
+        <td><span class="raffle-phone-cell" data-full="${esc(formatPhoneDisplay(c.phone))}" data-masked="${esc(formatPhoneMasked(c.phone))}" onclick="raffleTogglePhoneCell(this)" title="클릭하여 전체 번호 보기">${esc(formatPhoneMasked(c.phone))}</span></td>
+        <td>${esc(c.participantType)||'-'}</td>
+        <td style="font-size:12px;white-space:nowrap">${esc(c.submittedAt)}</td>
+        <td>${c.isDuplicate ? '<span class="badge badge-orange">중복 제출</span>' : ''}</td>
+      </tr>`).join('')}
+    </tbody>
+  </table></div>`;
 }
 
 async function raffleFetchStatus() {
@@ -1688,13 +1909,13 @@ function renderRaffleContent() {
     </div>
 
     <div class="table-card">
-      <h4>경품 구성</h4>
-      <table>
+      <h4>경품 구성 (조회 중 회차 기준)</h4>
+      ${(s.tiers && s.tiers.length) ? `<table>
         <thead><tr><th>등수</th><th>인원</th><th>경품</th></tr></thead>
         <tbody>
-          ${(s.tiers||[]).map(t=>`<tr><td><span class="raffle-tier-badge" data-tier="${esc(t.tier)}">${esc(t.tier)}</span></td><td>${t.count}명</td><td>${esc(t.prize)}</td></tr>`).join('')}
+          ${s.tiers.map(t=>`<tr><td><span class="raffle-tier-badge" data-tier="${esc(t.tier)}">${esc(t.tier)}</span></td><td>${t.count}명</td><td>${esc(t.prize)}</td></tr>`).join('')}
         </tbody>
-      </table>
+      </table>` : '<div class="empty-state">실행된 회차가 없어 경품 구성 정보가 없습니다.</div>'}
     </div>
 
     <div class="table-card">
@@ -1774,20 +1995,23 @@ function renderRaffleDuplicatesTable(list) {
 
 function renderRaffleRoundsTable(list) {
   if (list.length===0) return '<div class="empty-state">아직 실행된 추첨 회차가 없습니다.</div>';
-  return `<table>
-    <thead><tr><th>회차</th><th>조건</th><th>대상/중복</th><th>상태</th><th>추첨일시</th><th>공개</th><th></th></tr></thead>
+  return `<div style="overflow-x:auto;"><table>
+    <thead><tr><th>회차</th><th>조건</th><th>후보(조회/중복제거)</th><th>최종선택/중복</th><th>경품(총/1·2·3등)</th><th>참가상/미당첨/남는경품</th><th>상태</th><th>추첨일시</th><th>공개</th><th></th></tr></thead>
     <tbody>
       ${list.map(r => `<tr${r.raffleId===raffleViewingRoundId?' style="background:#eff6ff;"':''}>
         <td style="font-size:12px;">${esc(r.raffleName)}<br><span style="color:#94a3b8;font-size:11px;">${esc(r.raffleId)}</span></td>
         <td style="font-size:12px;">${esc(raffleDateTypeLabel(r.targetDateType))} / ${esc(raffleUserTypeLabel(r.targetUserType))}</td>
+        <td style="font-size:12px;white-space:nowrap">${esc(r.totalMatchedCount)||'-'} / ${esc(r.dedupedCandidateCount)||'-'}</td>
         <td style="font-size:12px;">${esc(r.targetCount)}명 / ${esc(r.duplicateCount)}건</td>
+        <td style="font-size:12px;white-space:nowrap">${esc(r.prizeTotalCount)||'-'}개 (${esc(r.tier1Count)||0}·${esc(r.tier2Count)||0}·${esc(r.tier3Count)||0})</td>
+        <td style="font-size:12px;white-space:nowrap">${esc(r.participationCount)||0} / ${esc(r.unassignedCount)||0} / ${esc(r.leftoverPrizeCount)||0}</td>
         <td>${r.status==='executed' ? '<span class="badge badge-green">실행됨</span>' : '<span class="badge badge-gray">'+esc(r.status)+'</span>'}</td>
         <td style="font-size:12px;white-space:nowrap">${esc(r.drawnAt)}</td>
         <td>${r.revealEnabled==='TRUE' ? '<span class="badge badge-green">공개중</span>' : '<span class="badge badge-gray">비공개</span>'}</td>
         <td><button class="btn-raffle-action" style="background:#f1f5f9;color:#374151;padding:5px 10px;font-size:12px;" onclick="raffleViewRound('${esc(r.raffleId)}')">보기</button></td>
       </tr>`).join('')}
     </tbody>
-  </table>`;
+  </table></div>`;
 }
 
 function formatPhoneDisplay(phone) {
@@ -1800,16 +2024,20 @@ function formatPhoneDisplay(phone) {
 
 // ── 추첨 실행 ──
 function openRaffleRunModal() {
-  if (!raffleLastPreview) { alert('먼저 대상자 미리보기를 실행해주세요.'); return; }
-  const p = raffleLastPreview;
-  document.getElementById('raffle-run-eligible-count').textContent = p.targetCount;
+  const { cfg, selectedCount, blocking } = raffleValidationState();
+  if (blocking.length) { alert(blocking[0]); return; }
+
+  const alloc = computeRaffleAllocation(selectedCount, cfg.prizeTotal, cfg.tier1, cfg.tier2, cfg.tier3);
+  const nameLabel = document.getElementById('raffle-f-name').value.trim() || '(자동 생성)';
   const summaryEl = document.getElementById('raffle-run-summary');
-  const nameLabel = p.filters.raffleName || '(자동 생성)';
   summaryEl.innerHTML = `
     회차명: <strong>${esc(nameLabel)}</strong><br>
-    조건: ${esc(raffleDateTypeLabel(p.filters.dateType))} / ${esc(raffleUserTypeLabel(p.filters.userType))}<br>
-    전체 응답 ${p.totalMatched}명 → 대상 ${p.targetCount}명 (중복 ${p.duplicateCount}건)
+    최종 추첨 대상: <strong>${selectedCount}명</strong><br>
+    총 경품 수량: <strong>${cfg.prizeTotal}개</strong><br>
+    1등: <strong>${alloc.tier1}명</strong> · 2등: <strong>${alloc.tier2}명</strong> · 3등: <strong>${alloc.tier3}명</strong><br>
+    참가상: <strong>${alloc.participation}명</strong> · 미당첨: <strong>${alloc.unassigned}명</strong> · 남는 경품: <strong>${alloc.leftover}개</strong>
   `;
+  document.getElementById('raffle-run-eligible-count').textContent = selectedCount;
   document.getElementById('raffle-run-status').textContent = '';
   document.getElementById('raffle-run-confirm-btn').disabled = false;
   document.getElementById('raffle-run-confirm-btn').textContent = '추첨 실행';
@@ -1819,8 +2047,11 @@ function closeRaffleRunModal() {
   document.getElementById('raffle-run-modal').style.display = 'none';
 }
 async function confirmRaffleRun() {
-  if (!raffleLastPreview) return;
-  const f = raffleLastPreview.filters;
+  const cfg = getRafflePrizeConfig();
+  const meta = raffleCandidatesMeta;
+  if (!meta) return;
+  const f = meta.filters;
+  const selected = raffleSelectedCandidates().map(c => c.phone);
   const btn = document.getElementById('raffle-run-confirm-btn');
   const statusEl = document.getElementById('raffle-run-status');
   btn.disabled = true; btn.textContent = '실행 중...';
@@ -1829,19 +2060,22 @@ async function confirmRaffleRun() {
     const res = await fetch(SCRIPT_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
       body: JSON.stringify({
         action:'rafflerun', password: adminPassword,
-        raffleName: f.raffleName, dateType: f.dateType, startDate: f.startDate, endDate: f.endDate, userType: f.userType
+        raffleName: f.raffleName, dateType: f.dateType, startDate: f.startDate, endDate: f.endDate, userType: f.userType,
+        selectedPhones: selected,
+        prizeTotalCount: cfg.prizeTotal, tier1Count: cfg.tier1, tier2Count: cfg.tier2, tier3Count: cfg.tier3
       }) });
     const json = await res.json();
     if (json.success) {
       statusEl.style.color = '#16a34a';
       statusEl.textContent = `추첨 완료! (${(json.summary||[]).map(t=>`${t.tier} ${t.drawn}/${t.planned}`).join(', ')})`;
-      raffleLastPreview = null;
+      raffleCandidatesData = [];
+      raffleCandidatesMeta = null;
       raffleViewingRoundId = json.raffleId || '';
       document.getElementById('raffle-preview-area').innerHTML = '';
       setTimeout(() => { closeRaffleRunModal(); renderRaffle(); }, 1500);
     } else {
-      const msg = json.error === 'NO_TARGET' ? '선택한 조건에 해당하는 대상자가 없습니다.' : ('오류: ' + (json.error||'알 수 없는 오류'));
-      statusEl.style.color = '#dc2626'; statusEl.textContent = msg;
+      statusEl.style.color = '#dc2626';
+      statusEl.textContent = json.message || ('오류: ' + (json.error || '알 수 없는 오류'));
       btn.disabled = false; btn.textContent = '추첨 실행';
     }
   } catch (e) {
