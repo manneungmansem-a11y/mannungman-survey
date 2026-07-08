@@ -2226,10 +2226,24 @@ async function submitRaffleCheck() {
     return;
   }
 
-  // 백엔드가 판정한 4가지 상태 — status 값 기준으로만 분기 (프론트에서 자체 판단하지 않음)
+  console.log('[raffle] checkRaffleResult 응답 —', json);
+
+  // 백엔드가 판정한 상태 — status 값 기준으로만 분기 (프론트에서 자체 판단하지 않음)
   if (json.status === 'NO_HISTORY') {
     raffleRequestInFlight = false;
     showRaffleInfoMsg('error', '입력하신 휴대폰 번호로 확인되는 설문 참여 내역이 없습니다. 설문에 참여하신 휴대폰 번호를 다시 확인해주세요.');
+    btn.disabled = false;
+    btn.textContent = '확인하기';
+    return;
+  }
+
+  // 공개 대상 회차 자체가 없는 경우(관리자가 회차를 초기화했거나 삭제한 경우) — "아직 공개 전"과는
+  // 별개의 안내 문구를 보여준다.
+  if (json.status === 'NO_ACTIVE_ROUND') {
+    raffleRequestInFlight = false;
+    raffleStatusCache.revealEnabled = false;
+    updateRaffleButtonUI();
+    showRaffleInfoMsg('warn', '현재 공개 중인 추첨 회차가 없습니다. 추첨 결과 공개 후 다시 확인해주세요.');
     btn.disabled = false;
     btn.textContent = '확인하기';
     return;

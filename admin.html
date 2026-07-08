@@ -543,6 +543,26 @@
   </div>
 </div>
 
+<!-- 추첨 회차 삭제 확인 모달 -->
+<div id="raffle-delete-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:300;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:14px;width:100%;max-width:460px;margin:24px;box-shadow:0 8px 40px rgba(0,0,0,.25);overflow:hidden;">
+    <div style="background:#fef2f2;padding:18px 24px;border-bottom:1px solid #fecaca;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:20px;">🗑️</span>
+      <h3 style="font-size:15px;font-weight:700;color:#b91c1c;">추첨 회차 삭제</h3>
+    </div>
+    <div style="padding:22px 24px;">
+      <p id="raffle-delete-modal-message" style="font-size:13.5px;color:#374151;line-height:1.75;margin-bottom:12px;white-space:pre-line;"></p>
+      <div id="raffle-delete-modal-public-warning" style="display:none;background:#fffbeb;border:1.5px solid #fde68a;color:#92400e;border-radius:8px;padding:12px 14px;font-size:12.5px;line-height:1.7;margin-bottom:12px;white-space:pre-line;"></div>
+      <p style="font-size:11.5px;color:#94a3b8;margin-bottom:14px;">⚠ 이 작업은 되돌릴 수 없습니다. 원본 설문 응답 데이터(responses 시트)는 삭제되지 않습니다.</p>
+      <div style="display:flex;gap:10px;">
+        <button id="raffle-delete-cancel-btn" onclick="closeRaffleDeleteModal()" style="flex:1;padding:11px;background:#f1f5f9;color:#374151;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;">취소</button>
+        <button id="raffle-delete-confirm-btn" onclick="confirmRaffleDelete()" style="flex:1;padding:11px;background:#dc2626;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;">삭제</button>
+      </div>
+      <div id="raffle-delete-status" style="margin-top:10px;font-size:13px;min-height:18px;"></div>
+    </div>
+  </div>
+</div>
+
 <!-- 상세 보기 모달 -->
 <div id="detail-modal">
   <div class="modal-box">
@@ -1555,6 +1575,10 @@ let raffleWinnerTierFilter = '';
 let raffleWinnerConfirmedFilter = '';
 let raffleWinnerShowAll = false; // false: 당첨자만, true: 선택 대상 전체(미당첨 포함)
 
+// 추첨 회차 이력 — 삭제를 위해 관리자가 선택한 raffleId 집합 (회차명이 아닌 raffleId 기준으로만 관리)
+let raffleSelectedRoundIds = new Set();
+let raffleDeleteTargetIds = []; // 삭제 확인 모달에 표시 중인, 실제 삭제될 raffleId 목록
+
 // 대상자 미리보기 — 조건 조회 결과 후보자 목록(관리자가 체크박스로 최종 확정)
 let raffleCandidatesData = [];     // [{ phone, name, participantType, submittedAt, responseId, isDuplicate, checked }]
 let raffleCandidatesMeta = null;   // { totalMatched, duplicateCount, dedupedCandidateCount, filters }
@@ -1659,6 +1683,10 @@ async function raffleRunPreview() {
       totalMatched: json.totalMatched, duplicateCount: json.duplicateCount,
       dedupedCandidateCount: json.dedupedCandidateCount, filters
     };
+    console.log('[raffle] 대상자 미리보기 —', {
+      totalMatched: json.totalMatched, dedupedCandidateCount: json.dedupedCandidateCount,
+      duplicateCount: json.duplicateCount
+    });
     renderRafflePreviewArea();
   } catch (e) {
     area.innerHTML = `<div class="raffle-warning-banner">서버 연결 오류로 미리보기를 불러오지 못했습니다.</div>`;
@@ -1848,6 +1876,8 @@ async function renderRaffle() {
     if (statusJson.success) raffleStatusData = statusJson;
     raffleRoundsData = (roundsJson.success && roundsJson.data) ? roundsJson.data : [];
     raffleCurrentRoundId = (roundsJson.success && roundsJson.currentRoundId) ? roundsJson.currentRoundId : '';
+    // 삭제 등으로 더 이상 존재하지 않는 회차의 선택 상태는 정리한다.
+    raffleSelectedRoundIds = new Set([...raffleSelectedRoundIds].filter(id => raffleRoundsData.some(r => r.raffleId === id)));
     if (!raffleViewingRoundId || !raffleRoundsData.some(r => r.raffleId === raffleViewingRoundId)) {
       raffleViewingRoundId = raffleCurrentRoundId;
     }
@@ -1858,6 +1888,7 @@ async function renderRaffle() {
       ]);
       raffleWinnersData    = (winnersJson.success && winnersJson.data) ? winnersJson.data : [];
       raffleDuplicatesData = (dupJson.success && dupJson.data) ? dupJson.data : [];
+      console.log('[raffle] getRaffleResults —', { raffleId: raffleViewingRoundId, count: raffleWinnersData.length });
     } else {
       raffleWinnersData = [];
       raffleDuplicatesData = [];
@@ -2024,12 +2055,28 @@ function renderRaffleDuplicatesTable(list) {
   </table>`;
 }
 
+function renderRaffleRoundsToolbar(list) {
+  const selectedCount = list.filter(r => raffleSelectedRoundIds.has(r.raffleId)).length;
+  return `<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+    <button type="button" class="btn-raffle-action" style="background:#f1f5f9;color:#374151;padding:6px 12px;font-size:12px;" onclick="raffleSelectAllRounds()">전체 선택</button>
+    <button type="button" class="btn-raffle-action" style="background:#f1f5f9;color:#374151;padding:6px 12px;font-size:12px;" onclick="raffleDeselectAllRounds()">전체 해제</button>
+    <span id="raffle-rounds-selected-count" style="font-size:12.5px;color:#475569;">선택된 회차 ${selectedCount}건</span>
+    <button type="button" id="raffle-rounds-delete-selected-btn" class="btn-raffle-action" style="background:#fff;color:#dc2626;border:1.5px solid #fecaca;padding:6px 12px;font-size:12px;" onclick="deleteSelectedRaffleRounds()" ${selectedCount===0?'disabled':''}>선택 회차 삭제</button>
+  </div>`;
+}
+
 function renderRaffleRoundsTable(list) {
   if (list.length===0) return '<div class="empty-state">아직 실행된 추첨 회차가 없습니다.</div>';
-  return `<div style="overflow-x:auto;"><table>
-    <thead><tr><th>회차</th><th>조건</th><th>후보(조회/중복제거)</th><th>최종선택/중복</th><th>경품(총/1·2·3등)</th><th>참가상/미당첨/남는경품</th><th>상태</th><th>추첨일시</th><th>공개</th><th></th></tr></thead>
+  const selectedCount = list.filter(r => raffleSelectedRoundIds.has(r.raffleId)).length;
+  const allSelected = selectedCount === list.length;
+  return `${renderRaffleRoundsToolbar(list)}<div style="overflow-x:auto;"><table>
+    <thead><tr>
+      <th style="width:30px;"><input type="checkbox" id="raffle-rounds-select-all-checkbox" ${allSelected?'checked':''} onchange="raffleToggleAllRoundsCheckbox(this.checked)"></th>
+      <th>회차</th><th>조건</th><th>후보(조회/중복제거)</th><th>최종선택/중복</th><th>경품(총/1·2·3등)</th><th>참가상/미당첨/남는경품</th><th>상태</th><th>추첨일시</th><th>공개</th><th></th>
+    </tr></thead>
     <tbody>
       ${list.map(r => `<tr${r.raffleId===raffleViewingRoundId?' style="background:#eff6ff;"':''}>
+        <td><input type="checkbox" class="raffle-round-checkbox" ${raffleSelectedRoundIds.has(r.raffleId)?'checked':''} onchange="raffleToggleRoundSelect('${esc(r.raffleId)}', this.checked)"></td>
         <td style="font-size:12px;">${esc(r.raffleName)}<br><span style="color:#94a3b8;font-size:11px;">${esc(r.raffleId)}</span></td>
         <td style="font-size:12px;">${esc(raffleDateTypeLabel(r.targetDateType))} / ${esc(raffleUserTypeLabel(r.targetUserType))}</td>
         <td style="font-size:12px;white-space:nowrap">${esc(r.totalMatchedCount)||'-'} / ${esc(r.dedupedCandidateCount)||'-'}</td>
@@ -2044,10 +2091,28 @@ function renderRaffleRoundsTable(list) {
           ${r.revealEnabled==='TRUE'
             ? `<button class="btn-raffle-action" style="background:#fff;color:#dc2626;border:1px solid #fecaca;padding:5px 10px;font-size:12px;" onclick="toggleRaffleReveal(false, '${esc(r.raffleId)}')">비공개 전환</button>`
             : `<button class="btn-raffle-action" style="background:#16a34a;color:#fff;padding:5px 10px;font-size:12px;" onclick="toggleRaffleReveal(true, '${esc(r.raffleId)}')">공개하기</button>`}
+          <button class="btn-raffle-action" style="background:#fff;color:#dc2626;border:1px solid #fee2e2;padding:5px 9px;font-size:11.5px;" onclick="deleteSingleRaffleRound('${esc(r.raffleId)}')" title="이 회차 삭제">삭제</button>
         </td>
       </tr>`).join('')}
     </tbody>
   </table></div>`;
+}
+
+// ── 회차 선택(체크박스) 관리 — raffleId 기준으로만 선택 상태를 추적한다 ──
+function raffleToggleRoundSelect(raffleId, checked) {
+  if (checked) raffleSelectedRoundIds.add(raffleId); else raffleSelectedRoundIds.delete(raffleId);
+  renderRaffleContent();
+}
+function raffleSelectAllRounds() {
+  raffleRoundsData.forEach(r => raffleSelectedRoundIds.add(r.raffleId));
+  renderRaffleContent();
+}
+function raffleDeselectAllRounds() {
+  raffleSelectedRoundIds.clear();
+  renderRaffleContent();
+}
+function raffleToggleAllRoundsCheckbox(checked) {
+  if (checked) raffleSelectAllRounds(); else raffleDeselectAllRounds();
 }
 
 function formatPhoneDisplay(phone) {
@@ -2087,15 +2152,20 @@ async function confirmRaffleRun() {
   const meta = raffleCandidatesMeta;
   if (!meta) return;
   const f = meta.filters;
-  const selected = raffleSelectedCandidates().map(c => c.phone);
+  // 화면 표시용 마스킹 번호가 아니라 원본 설문 responseId 목록을 서버로 보낸다.
+  // 서버는 이 responseId만으로 원본 응답 시트를 다시 조회해 대상자를 구성한다.
+  const selectedResponseIds = raffleSelectedCandidates().map(c => c.responseId);
   const btn = document.getElementById('raffle-run-confirm-btn');
   const statusEl = document.getElementById('raffle-run-status');
 
-  // 추첨 실행 직전 확정 대상자 배열 검증 — 콘솔에서 selectedTargets가 비어있지 않은지 확인 가능
-  console.log('[raffle] 추첨 실행 직전 selectedTargets:', selected.length, '명', selected);
-  if (selected.length === 0) {
+  // 추첨 실행 직전 확정 대상자 배열 검증 — 콘솔에서 selectedResponseIds가 비어있지 않은지 확인 가능
+  console.log('[raffle] 추첨 실행 payload 확인 —', {
+    raffleName: f.raffleName, selectedResponseIds, selectedCount: selectedResponseIds.length,
+    prizeConfig: cfg
+  });
+  if (selectedResponseIds.length === 0) {
     statusEl.style.color = '#dc2626';
-    statusEl.textContent = '추첨 대상자가 없습니다. 목록에서 추첨할 사람을 선택해주세요.';
+    statusEl.textContent = '추첨 대상자가 없습니다. 대상자 목록에서 추첨할 사람을 선택해주세요.';
     return;
   }
 
@@ -2106,10 +2176,11 @@ async function confirmRaffleRun() {
       body: JSON.stringify({
         action:'rafflerun', password: adminPassword,
         raffleName: f.raffleName, dateType: f.dateType, startDate: f.startDate, endDate: f.endDate, userType: f.userType,
-        selectedPhones: selected,
+        selectedResponseIds,
         prizeTotalCount: cfg.prizeTotal, tier1Count: cfg.tier1, tier2Count: cfg.tier2, tier3Count: cfg.tier3
       }) });
     const json = await res.json();
+    console.log('[raffle] 추첨 실행 응답 —', json);
     if (json.success) {
       statusEl.style.color = '#16a34a';
       statusEl.textContent = `${json.raffleName} 회차 추첨이 완료되었습니다. 총 ${json.targetCount}명의 결과가 저장되었습니다.`;
@@ -2189,6 +2260,115 @@ document.getElementById('raffle-run-modal').addEventListener('click', function(e
 });
 document.getElementById('raffle-reset-modal').addEventListener('click', function(e) {
   if (e.target === this) closeRaffleResetModal();
+});
+
+// ── 추첨 회차 삭제 (raffle_id 기준 — 회차명 기준 삭제는 절대 하지 않는다) ──
+// deleteSingleRaffleRound: 회차 행의 "삭제" 버튼에서 호출
+// deleteSelectedRaffleRounds: 체크박스로 선택한 회차들의 "선택 회차 삭제" 버튼에서 호출
+// 두 경우 모두 openRaffleDeleteModal()로 확인 팝업을 먼저 띄우고, 실제 삭제는 confirmRaffleDelete()에서만 수행한다.
+function deleteSingleRaffleRound(raffleId) {
+  openRaffleDeleteModal([raffleId]);
+}
+function deleteSelectedRaffleRounds() {
+  if (raffleSelectedRoundIds.size === 0) return;
+  openRaffleDeleteModal(Array.from(raffleSelectedRoundIds));
+}
+
+function openRaffleDeleteModal(targetIds) {
+  if (!targetIds || targetIds.length === 0) return;
+  raffleDeleteTargetIds = targetIds;
+
+  const msgEl = document.getElementById('raffle-delete-modal-message');
+  const warnEl = document.getElementById('raffle-delete-modal-public-warning');
+  const btn = document.getElementById('raffle-delete-confirm-btn');
+  const cancelBtn = document.getElementById('raffle-delete-cancel-btn');
+  const statusEl = document.getElementById('raffle-delete-status');
+  statusEl.textContent = '';
+  btn.disabled = false;
+  cancelBtn.disabled = false;
+
+  if (targetIds.length === 1) {
+    const round = raffleRoundsData.find(r => r.raffleId === targetIds[0]);
+    msgEl.textContent =
+`선택한 추첨 회차를 삭제하시겠습니까?
+
+회차명: ${round ? round.raffleName : '(알 수 없음)'}
+raffle_id: ${targetIds[0]}
+
+이 작업은 추첨 회차와 해당 회차의 당첨 결과를 삭제합니다.
+단, 원본 설문 응답 데이터는 삭제되지 않습니다.`;
+    btn.textContent = '삭제';
+  } else {
+    msgEl.textContent =
+`선택한 ${targetIds.length}개의 추첨 회차를 삭제하시겠습니까?
+
+이 작업은 선택한 회차와 해당 회차의 당첨 결과를 삭제합니다.
+단, 원본 설문 응답 데이터는 삭제되지 않습니다.`;
+    btn.textContent = '선택 회차 삭제';
+  }
+
+  const includesCurrentPublic = !!raffleCurrentRoundId && targetIds.includes(raffleCurrentRoundId);
+  if (includesCurrentPublic) {
+    warnEl.style.display = 'block';
+    warnEl.textContent =
+`현재 공개 중인 추첨 회차입니다.
+삭제하면 설문페이지에서 더 이상 해당 회차의 당첨확인을 할 수 없습니다.
+정말 삭제하시겠습니까?`;
+  } else {
+    warnEl.style.display = 'none';
+    warnEl.textContent = '';
+  }
+
+  document.getElementById('raffle-delete-modal').style.display = 'flex';
+}
+
+function closeRaffleDeleteModal() {
+  document.getElementById('raffle-delete-modal').style.display = 'none';
+  raffleDeleteTargetIds = [];
+}
+
+async function confirmRaffleDelete() {
+  const ids = raffleDeleteTargetIds;
+  if (!ids || ids.length === 0) return;
+
+  const btn = document.getElementById('raffle-delete-confirm-btn');
+  const cancelBtn = document.getElementById('raffle-delete-cancel-btn');
+  const statusEl = document.getElementById('raffle-delete-status');
+  const prevText = btn.textContent;
+  btn.disabled = true;
+  cancelBtn.disabled = true;
+  btn.textContent = '삭제 중...';
+  statusEl.style.color = '#64748b';
+  statusEl.textContent = '추첨 회차를 삭제하는 중입니다...';
+
+  try {
+    const res = await fetch(SCRIPT_URL, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'},
+      body: JSON.stringify({ action:'raffledeleterounds', password: adminPassword, raffleIds: ids }) });
+    const json = await res.json();
+    if (json.success) {
+      const deletedCurrentPublic = !!raffleCurrentRoundId && ids.includes(raffleCurrentRoundId);
+      ids.forEach(id => raffleSelectedRoundIds.delete(id));
+      statusEl.style.color = '#16a34a';
+      statusEl.textContent = deletedCurrentPublic
+        ? '현재 공개 중이던 추첨 회차가 삭제되어 당첨확인이 비공개 처리되었습니다.'
+        : '선택한 추첨 회차가 삭제되었습니다.';
+      setTimeout(() => { closeRaffleDeleteModal(); renderRaffle(); }, 1200);
+    } else {
+      statusEl.style.color = '#dc2626';
+      statusEl.textContent = json.message || ('추첨 회차 삭제 중 오류가 발생했습니다: ' + (json.error || '알 수 없는 오류'));
+      btn.disabled = false; btn.textContent = prevText;
+      cancelBtn.disabled = false;
+    }
+  } catch (e) {
+    statusEl.style.color = '#dc2626';
+    statusEl.textContent = '서버 연결 오류로 삭제하지 못했습니다. 잠시 후 다시 시도해주세요.';
+    btn.disabled = false; btn.textContent = prevText;
+    cancelBtn.disabled = false;
+  }
+}
+
+document.getElementById('raffle-delete-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeRaffleDeleteModal();
 });
 
 // ════════════════════════════════════════════════════════

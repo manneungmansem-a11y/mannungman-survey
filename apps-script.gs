@@ -108,6 +108,7 @@ function doPost(e) {
     if (action === 'raffletogglereveal') return raffleToggleReveal(data);
     if (action === 'rafflecheck')        return raffleCheck(data);
     if (action === 'rafflepreview')      return rafflePreview(data);
+    if (action === 'raffledeleterounds') return raffleDeleteRounds(data);
 
     // ── 설문 응답 저장 ──
     var participantType = String(data.participantType || '').trim();
@@ -674,6 +675,57 @@ function rafflePhoneHasHistory(ss, phone) {
   return false;
 }
 
+// selectedResponseIds(원본 설문 responseId 목록)를 받아 원본 응답 시트에서 해당 행을 다시 조회해
+// 추첨 대상 정보를 구성한다. 화면 표시용 마스킹 번호는 여기서 전혀 사용하지 않으며, 오직
+// responseId만으로 원본 데이터를 다시 찾아온다. { responseId → {responseId, phone, name, participantType, submittedAt} }
+function raffleGetResponsesByIds(ss, responseIds) {
+  var wanted = {};
+  responseIds.forEach(function(id) {
+    var key = String(id || '').trim();
+    if (key) wanted[key] = true;
+  });
+  var result = {};
+  var sheet = ss.getSheetByName(SHEET_RESPONSES);
+  if (!sheet || Object.keys(wanted).length === 0) return result;
+  var lastRow = sheet.getLastRow();
+  var lastCol = sheet.getLastColumn();
+  if (lastRow < 2) return result;
+
+  var headers  = sheet.getRange(1, 1, 1, lastCol).getValues()[0];
+  var idCol    = headers.indexOf('responseId');
+  var phoneCol = headers.indexOf('respondentPhone');
+  var atCol    = headers.indexOf('submittedAt');
+  var typeCol  = headers.indexOf('participantType');
+  var nameCol  = headers.indexOf('respondentName');
+  if (idCol < 0 || phoneCol < 0) return result;
+
+  var values = sheet.getRange(2, 1, lastRow - 1, lastCol).getValues();
+  // 휴대폰 번호는 표시값 기준으로 읽어 숫자 변환에 의한 손실을 막는다 (raffleGetEligibleEntries와 동일 원칙).
+  var phoneDisplay = sheet.getRange(2, phoneCol + 1, lastRow - 1, 1).getDisplayValues();
+
+  for (var i = 0; i < values.length; i++) {
+    var rid = String(values[i][idCol] || '').trim();
+    if (!rid || !wanted[rid]) continue;
+
+    var rawPhone = (phoneDisplay[i] && phoneDisplay[i][0]) ? phoneDisplay[i][0] : values[i][phoneCol];
+    var norm = raffleNormalizePhone(rawPhone);
+
+    var atRaw = atCol >= 0 ? values[i][atCol] : '';
+    var atStr = (atRaw instanceof Date)
+      ? Utilities.formatDate(atRaw, 'Asia/Seoul', 'yyyy-MM-dd HH:mm:ss')
+      : String(atRaw);
+
+    result[rid] = {
+      responseId: rid,
+      phone: norm,
+      name: nameCol >= 0 ? String(values[i][nameCol] || '').trim() : '',
+      participantType: typeCol >= 0 ? String(values[i][typeCol] || '') : '',
+      submittedAt: atStr
+    };
+  }
+  return result;
+}
+
 function raffleFindRound(ss, raffleId) {
   if (!raffleId) return null;
   var rows = sheetToObjects(ss, RAFFLE_SHEET_ROUNDS);
@@ -704,7 +756,7 @@ function rafflePreview(params) {
   var duplicatesMap = eligible.duplicatesMap;
 
   // 관리자가 직접 체크해 최종 추첨 대상을 고를 수 있도록 후보자 상세 목록을 반환한다.
-  // (조건/유형만으로 자동 확정하지 않음 — 실제 확정은 rafflerun 호출 시 selectedPhones로만 이뤄진다)
+  // (조건/유형만으로 자동 확정하지 않음 — 실제 확정은 rafflerun 호출 시 selectedResponseIds로만 이뤄진다)
   var entries = eligible.entries.map(function(e) {
     return {
       phone: e.phone, name: e.name || '', participantType: e.participantType || '',
@@ -761,18 +813,48 @@ function raffleRun(data) {
     raffleName = Utilities.formatDate(new Date(), 'Asia/Seoul', 'yyyy-MM-dd') + ' 설문 경품 추첨';
   }
 
-  // ── 대상자 확정: 조건에 맞는 정본 후보 목록을 다시 조회한 뒤, 관리자가 체크한
-  // 번호(selectedPhones)만으로 필터링한다 — 클라이언트가 조건에 없던 번호를 보내도 무시된다.
-  var eligible = raffleGetEligibleEntries(ss, filters);
-  var selectedPhones = Array.isArray(data.selectedPhones) ? data.selectedPhones : [];
-  var selectedSet = {};
-  selectedPhones.forEach(function(p) { selectedSet[raffleNormalizePhone(p)] = true; });
-  var pool = eligible.entries.filter(function(e) { return selectedSet[e.phone]; });
+  // ── 대상자 확정: 화면 표시용 마스킹 번호가 아니라, 관리자가 체크한 "원본 설문 responseId
+  // 목록"(selectedResponseIds)을 기준으로 원본 응답 시트에서 해당 행을 다시 조회해 대상자를
+  // 구성한다. filters/eligible은 회차 메타데이터(전체 매칭 수 등) 산출용 참고 정보일 뿐이며,
+  // 실제 추첨 대상 확정 권한은 오직 selectedResponseIds에만 있다.
+  var eligible = raffleGetEligibleEntries(ss, filters); // 회차 메타데이터(totalMatched 등) 산출용
+  var selectedResponseIds = Array.isArray(data.selectedResponseIds)
+    ? data.selectedResponseIds.map(String).filter(Boolean) : [];
+
+  Logger.log('[raffleRun] selectedResponseIds 수신 ' + selectedResponseIds.length + '건: ' + JSON.stringify(selectedResponseIds));
+
+  if (selectedResponseIds.length === 0) {
+    return makeResponse({
+      success: false, error: 'NO_TARGET',
+      message: '추첨 대상자가 없습니다. 대상자 목록에서 추첨할 사람을 선택해주세요.'
+    });
+  }
+
+  var responsesById = raffleGetResponsesByIds(ss, selectedResponseIds);
+
+  // 같은 휴대폰 번호가 이번 선택 범위 안에 여러 번 있으면(정상적으로는 미리보기 단계에서 이미
+  // 번호당 1건으로 걸러진 상태라 거의 발생하지 않지만, 방어적으로) 가장 최근 제출 1건만 남긴다.
+  // 이 중복 제거는 "이번 회차 선택 범위 내"에서만 적용되며, 다른 회차의 이력과는 전혀 무관하다.
+  var byPhone = {};
+  var notFoundIds = [];
+  selectedResponseIds.forEach(function(rid) {
+    var t = responsesById[rid];
+    if (!t) { notFoundIds.push(rid); return; }
+    if (!t.phone) return; // 연락처 없는 레거시 응답은 추첨 대상에서 제외
+    var existing = byPhone[t.phone];
+    var tMs = Date.parse((t.submittedAt || '').replace(' ', 'T')) || 0;
+    var eMs = existing ? (Date.parse((existing.submittedAt || '').replace(' ', 'T')) || 0) : -1;
+    if (!existing || tMs > eMs) byPhone[t.phone] = t;
+  });
+  var pool = Object.keys(byPhone).map(function(p) { return byPhone[p]; });
+
+  Logger.log('[raffleRun] 원본 시트 재조회 완료 — 확정 대상 ' + pool.length + '명 / 조회 실패 ' + notFoundIds.length + '건' +
+    (notFoundIds.length ? (' (' + JSON.stringify(notFoundIds) + ')') : ''));
 
   if (pool.length === 0) {
     return makeResponse({
       success: false, error: 'NO_TARGET',
-      message: '추첨 대상자가 없습니다. 대상 조건 또는 선택 인원을 확인해주세요.'
+      message: '선택한 대상자를 원본 설문 응답에서 찾을 수 없습니다. 대상자 미리보기를 다시 실행해주세요.'
     });
   }
 
@@ -783,8 +865,10 @@ function raffleRun(data) {
   }
 
   var now = new Date();
-  var raffleId = 'RAFFLE_' + Utilities.formatDate(now, 'Asia/Seoul', 'yyyyMMdd_HHmmss');
+  var raffleId = 'RAFFLE_' + Utilities.formatDate(now, 'Asia/Seoul', 'yyyyMMdd_HHmmss') +
+    '_' + Utilities.getUuid().slice(0, 6); // 초 단위 타임스탬프만으로는 연속 실행 시 충돌 가능하므로 짧은 난수를 덧붙임
   var drawnAt = Utilities.formatDate(now, 'Asia/Seoul', 'yyyy-MM-dd HH:mm:ss');
+  Logger.log('[raffleRun] raffleId 생성: ' + raffleId);
 
   var tierDefs = [
     { tier: '1등',   count: tier1Count,         prize: RAFFLE_PRIZE_LABELS[0].prize },
@@ -820,6 +904,7 @@ function raffleRun(data) {
   resultsSheet.getRange(resultsSheet.getLastRow() + 1, 1, rowsToWrite.length, RAFFLE_RESULTS_HEADERS.length)
     .setValues(rowsToWrite);
   resultsSheet.getRange('B:B').setNumberFormat('@');
+  Logger.log('[raffleRun] raffle_results 저장 완료 — raffleId=' + raffleId + ' / 저장 건수=' + rowsToWrite.length);
 
   var duplicateCount = Object.keys(eligible.duplicatesMap).length;
   var roundsSheet = getOrCreateSheet(ss, RAFFLE_SHEET_ROUNDS, RAFFLE_ROUNDS_HEADERS);
@@ -831,6 +916,7 @@ function raffleRun(data) {
     tier1Count, tier2Count, tier3Count, participationCount,
     unassignedCount, leftoverPrizeCount
   ]);
+  Logger.log('[raffleRun] raffle_rounds 저장 완료 — raffleId=' + raffleId + ' / raffleName=' + raffleName);
 
   // 새 회차는 기본 비공개 상태로 생성되며, raffle_config.currentRoundId(공개 대상 회차)는
   // 관리자가 명시적으로 "공개하기"를 눌러야만 이 회차로 바뀐다 (raffleToggleReveal 참고).
@@ -995,7 +1081,13 @@ function raffleCheck(data) {
   var revealEnabled = raffleIsTrue(configMap.revealEnabled);
   var round = raffleId ? raffleFindRound(ss, raffleId) : null;
 
-  if (!round || !revealEnabled) {
+  // round가 없는 경우(공개 대상 회차 자체가 없음 — 초기화 또는 회차 삭제로 인한 상태)와
+  // round는 있으나 아직 공개 전인 경우를 구분해, 설문페이지에서 서로 다른 안내 문구를 보여준다.
+  if (!round) {
+    raffleWriteLog(ss, raffleId, 'CHECK_NO_ACTIVE_ROUND', raffleMaskPhone(phone));
+    return makeResponse({ success: true, status: 'NO_ACTIVE_ROUND' });
+  }
+  if (!revealEnabled) {
     raffleWriteLog(ss, raffleId, 'CHECK_NOT_REVEALED', raffleMaskPhone(phone));
     return makeResponse({ success: true, status: 'NOT_REVEALED' });
   }
@@ -1008,6 +1100,8 @@ function raffleCheck(data) {
       row = rows[i]; idx = i; break;
     }
   }
+
+  Logger.log('[raffleCheck] raffleId=' + raffleId + ' phone=' + raffleMaskPhone(phone) + ' 매칭행=' + (row ? 'FOUND' : 'NONE'));
 
   if (!row) {
     raffleWriteLog(ss, raffleId, 'CHECK_NOT_TARGET', raffleMaskPhone(phone));
@@ -1079,6 +1173,7 @@ function raffleWinners(params) {
       r.confirmed = raffleIsTrue(r.confirmed) ? 'TRUE' : 'FALSE';
       return r;
     });
+  Logger.log('[raffleWinners] raffleId=' + raffleId + ' 조회 건수=' + rows.length);
   return makeResponse({ success: true, raffleId: raffleId, data: rows });
 }
 
@@ -1101,6 +1196,129 @@ function raffleDuplicates(params) {
     return { phone: phone, count: eligible.duplicatesMap[phone].length, entries: eligible.duplicatesMap[phone] };
   });
   return makeResponse({ success: true, raffleId: raffleId, data: list });
+}
+
+// ── 회차 삭제 (관리자 전용) ──────────────────────────────────────────
+// raffle_id 기준으로만 삭제한다 (회차명 기준 삭제 금지 — 동명 회차 존재 시 오삭제 위험).
+// 삭제 대상은 raffle_rounds/raffle_results/raffle_config(공개 연결)뿐이며,
+// responses/settings/logs 등 원본 설문 데이터에는 어떤 쓰기도 하지 않는다.
+function raffleDeleteRounds(data) {
+  if (!isValidPassword(data.password || '')) return makeResponse({ success: false, error: 'UNAUTHORIZED' });
+
+  var raffleIds = Array.isArray(data.raffleIds) ? data.raffleIds.map(String).filter(Boolean) : [];
+  if (raffleIds.length === 0) {
+    return makeResponse({ success: false, error: 'NO_TARGET', message: '삭제할 추첨 회차를 선택해주세요.' });
+  }
+
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  raffleEnsureSheets(ss);
+
+  var results = raffleIds.map(function(raffleId) { return deleteRaffleRoundById(ss, raffleId); });
+  var succeeded = results.filter(function(r) { return r.success; });
+  var failed = results.filter(function(r) { return !r.success; });
+
+  if (succeeded.length === 0) {
+    return makeResponse({
+      success: false, error: 'DELETE_FAILED',
+      message: failed[0] ? failed[0].message : '추첨 회차 삭제 중 오류가 발생했습니다.',
+      results: results
+    });
+  }
+
+  return makeResponse({
+    success: true,
+    deletedCount: succeeded.length,
+    failedCount: failed.length,
+    anyPublicDeleted: succeeded.some(function(r) { return r.wasPublic; }),
+    results: results
+  });
+}
+
+// 단일 회차 삭제 — raffle_rounds 행, raffle_results 결과, (필요 시) 공개 연결까지 정리하고 로그를 남긴다.
+function deleteRaffleRoundById(ss, raffleId) {
+  raffleId = String(raffleId || '');
+  if (!raffleId) return { success: false, raffleId: raffleId, message: 'raffle_id가 없습니다.' };
+
+  try {
+    var round = raffleFindRound(ss, raffleId);
+    if (!round) {
+      return { success: false, raffleId: raffleId, message: '해당 추첨 회차를 찾을 수 없습니다 (raffle_rounds).' };
+    }
+
+    var configMap = raffleGetConfigMap(ss);
+    var wasPublic = configMap.currentRoundId === raffleId;
+
+    var deletedResultsCount = removeRaffleResultsByRaffleId(ss, raffleId);
+
+    var roundRemoved = removeRaffleRoundRow(ss, raffleId);
+    if (!roundRemoved) {
+      return { success: false, raffleId: raffleId, message: 'raffle_rounds 삭제 중 오류가 발생했습니다. raffle_rounds 삭제 여부를 확인해주세요.' };
+    }
+
+    if (wasPublic) clearPublicRaffleIfDeleted(ss, raffleId);
+
+    writeRaffleDeleteLog(ss, raffleId, round.raffleName || '', deletedResultsCount, wasPublic);
+
+    return {
+      success: true, raffleId: raffleId, raffleName: round.raffleName || '',
+      deletedResultsCount: deletedResultsCount, wasPublic: wasPublic
+    };
+  } catch (err) {
+    var errDetail = err && err.message ? err.message : String(err);
+    raffleWriteLog(ss, raffleId, 'DELETE_ERROR', errDetail);
+    return { success: false, raffleId: raffleId, message: '추첨 회차 삭제 중 오류가 발생했습니다: ' + errDetail };
+  }
+}
+
+// raffle_rounds에서 해당 raffleId 행 1건만 삭제. responses/settings/logs 시트는 전혀 건드리지 않는다.
+function removeRaffleRoundRow(ss, raffleId) {
+  var sheet = ss.getSheetByName(RAFFLE_SHEET_ROUNDS);
+  if (!sheet) return false;
+  var values = sheet.getDataRange().getValues();
+  var headers = values[0];
+  var idCol = headers.indexOf('raffleId');
+  if (idCol < 0) return false;
+  for (var i = 1; i < values.length; i++) {
+    if (String(values[i][idCol]) === raffleId) {
+      sheet.deleteRow(i + 1);
+      return true;
+    }
+  }
+  return false;
+}
+
+// raffle_results에서 해당 raffleId의 결과 행만 전부 삭제(다른 회차의 결과는 절대 건드리지 않음).
+// 아래에서 위로 순회하며 삭제해 행 삭제로 인한 인덱스 밀림 문제를 피한다.
+function removeRaffleResultsByRaffleId(ss, raffleId) {
+  var sheet = ss.getSheetByName(RAFFLE_SHEET_RESULTS);
+  if (!sheet) return 0;
+  var values = sheet.getDataRange().getValues();
+  if (values.length < 2) return 0;
+  var headers = values[0];
+  var idCol = headers.indexOf('raffleId');
+  if (idCol < 0) return 0;
+  var deleted = 0;
+  for (var i = values.length - 1; i >= 1; i--) {
+    if (String(values[i][idCol]) === raffleId) {
+      sheet.deleteRow(i + 1);
+      deleted++;
+    }
+  }
+  return deleted;
+}
+
+// 삭제하는 회차가 현재 공개 대상 회차였다면 raffle_config의 공개 연결을 해제한다.
+function clearPublicRaffleIfDeleted(ss, raffleId) {
+  var configMap = raffleGetConfigMap(ss);
+  if (configMap.currentRoundId !== raffleId) return;
+  var configSheet = ss.getSheetByName(RAFFLE_SHEET_CONFIG);
+  raffleSetConfigValue(ss, configSheet, 'currentRoundId', '');
+  raffleSetConfigValue(ss, configSheet, 'revealEnabled', 'FALSE');
+}
+
+function writeRaffleDeleteLog(ss, raffleId, raffleName, deletedResultsCount, wasPublic) {
+  var detail = (raffleName || '(이름없음)') + ' / 결과 ' + deletedResultsCount + '건 삭제 / 공개중 회차 여부 ' + (wasPublic ? 'true' : 'false');
+  raffleWriteLog(ss, raffleId, 'DELETE_RAFFLE_ROUND', detail);
 }
 
 // ════════════════════════════════════════════════════════════════════
