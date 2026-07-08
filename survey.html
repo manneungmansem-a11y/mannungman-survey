@@ -718,7 +718,7 @@
 <div id="banner-popup-overlay">
   <div class="banner-popup-box">
     <button class="banner-popup-close" onclick="closeBannerPopup()" aria-label="닫기">✕</button>
-    <img src="배너/준비.png" alt="만능맨 베타테스트 피드백 설문" class="banner-popup-img">
+    <img src="배너/룰렛.png" alt="만능맨 베타테스트 피드백 설문" class="banner-popup-img">
     <div class="banner-popup-footer">
       <button class="btn-banner-confirm" onclick="closeBannerPopup()">확인했습니다</button>
     </div>
@@ -1296,10 +1296,8 @@ let consentTimestamp = null;
 // ════════════════════════════════════════════════════════
 function init() {
   showEntry();
-  // 같은 세션에서 최초 1회만 배너 팝업 표시
-  if (!sessionStorage.getItem('bannerSeen')) {
-    document.getElementById('banner-popup-overlay').classList.add('visible');
-  }
+  // 새로고침/재접속할 때마다 매번 표시 (닫기는 현재 화면에서만 유효, 저장하지 않음)
+  document.getElementById('banner-popup-overlay').classList.add('visible');
   refreshRaffleStatus();
 }
 
@@ -1314,7 +1312,6 @@ function showEntry() {
 // ════════════════════════════════════════════════════════
 function closeBannerPopup() {
   document.getElementById('banner-popup-overlay').classList.remove('visible');
-  sessionStorage.setItem('bannerSeen', '1');
 }
 
 // ════════════════════════════════════════════════════════
