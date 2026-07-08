@@ -1163,8 +1163,19 @@ function raffleCheck(data) {
 
   raffleWriteLog(ss, raffleId, won ? 'CHECK_WIN' : 'CHECK_LOSE', raffleMaskPhone(phone) + (won ? (' ' + row.tier) : ''));
 
+  // 이름 표시 우선순위: 1) raffle_results에 저장된 name  2) 없으면 responseId로 원본 설문 응답 시트에서 재조회
+  // 3) 그래도 없으면 빈 문자열(프론트에서 기존 공통 문구로 대체). 현재 조회한 본인 결과의 responseId만
+  // 사용하므로 다른 사람 이름이 섞여 나올 가능성은 없다.
+  var name = String(row.name || '').trim();
+  if (!name && row.responseId) {
+    var respMap = raffleGetResponsesByIds(ss, [row.responseId]);
+    var resp = respMap[String(row.responseId).trim()];
+    if (resp && resp.name) name = String(resp.name).trim();
+  }
+
   return makeResponse({
     success: true, status: 'RESULT', won: won,
+    name: name,
     tier: won ? row.tier : '', prize: won ? row.prize : '',
     confirmedAt: row.firstConfirmedAt || nowStr
   });

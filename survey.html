@@ -597,6 +597,7 @@
     .raffle-info-msg { display: none; margin-top: 16px; padding: 14px 16px; border-radius: 10px; font-size: 13.5px; line-height: 1.7; text-align: left; }
     .raffle-info-msg.warn  { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
     .raffle-info-msg.error { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+    .raffle-info-msg.success { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; text-align: center; }
 
     /* ── 룰렛 ── */
     #raffle-roulette-section { display: none; margin-top: 6px; }
@@ -2265,10 +2266,26 @@ async function submitRaffleCheck() {
   }
 
   // status === 'RESULT' — 정상 추첨 대상자. 실제 결과는 이미 서버에 고정 저장되어 있고,
-  // 여기서는 연출용 룰렛 애니메이션 후 그 결과를 그대로 표시한다 (프론트에서 재추첨하지 않음).
+  // 여기서는 이름 확인 문구를 짧게 보여준 뒤 연출용 룰렛 애니메이션 후 그 결과를 그대로 표시한다
+  // (프론트에서 재추첨하지 않음).
+  const mySession = raffleSessionId;
   document.getElementById('raffle-input-section').style.display = 'none';
-  await playRouletteAndReveal(json);
+  await showRaffleConfirmedMsg(json.name);
+  if (mySession === raffleSessionId) {
+    await playRouletteAndReveal(json);
+  }
   raffleRequestInFlight = false;
+}
+
+// 번호 조회 성공 직후 "OO 님 확인되었습니다" 문구를 짧게 보여준 뒤 룰렛으로 넘어간다.
+async function showRaffleConfirmedMsg(name) {
+  const label = String(name || '').trim();
+  const msg = label
+    ? `${label} 님 확인되었습니다. 행운룰렛으로 이동합니다.`
+    : '설문 참여 내역이 확인되었습니다. 행운룰렛으로 이동합니다.';
+  showRaffleInfoMsg('success', msg);
+  await raffleSleep(1000);
+  document.getElementById('raffle-info-msg').style.display = 'none';
 }
 
 function buildRouletteTrack(finalType) {
@@ -2300,12 +2317,16 @@ function raffleSleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-const RAFFLE_ROULETTE_CAPTIONS = [
-  '행운의 룰렛이 돌아가고 있어요…',
-  '두근두근, 결과를 확인하는 중…',
-  '곧 결과가 공개됩니다…',
-  '마지막까지 기대해주세요…'
-];
+// 룰렛 상단 문구 — 당첨확인 대상자의 이름이 있으면 이름을 붙여 표시하고, 없으면 기존 공통 문구를 사용한다.
+function raffleCaption(name, phase) {
+  const label = String(name || '').trim();
+  const prefix = label ? `${label} 님, ` : '';
+  if (phase === 'spinning') return `${prefix}행운룰렛이 돌아가고 있습니다!`;
+  if (phase === 'settling') return `${prefix}곧 결과가 공개됩니다!`;
+  if (phase === 'win')      return `${prefix}축하합니다!`;
+  if (phase === 'lose')     return `${prefix}참여해주셔서 감사합니다.`;
+  return '';
+}
 
 function setRouletteCaption(text) {
   const el = document.getElementById('raffle-roulette-caption');
@@ -2338,12 +2359,13 @@ function raffleAnimateStep(track, xPx, durationMs, easing) {
 async function playRouletteAndReveal(json) {
   const mySession = raffleSessionId;
   const won = !!json.won;
+  const name = String(json.name || '').trim();
   const canonicalTier = won ? raffleNormalizeTier(json.tier) : '꽝';
   const finalType = RAFFLE_ROULETTE_TYPES.includes(canonicalTier) ? canonicalTier : '꽝';
 
   const section = document.getElementById('raffle-roulette-section');
   section.classList.add('active');
-  setRouletteCaption(RAFFLE_ROULETTE_CAPTIONS[0]);
+  setRouletteCaption(raffleCaption(name, 'spinning'));
 
   const { track, targetIndex } = buildRouletteTrack(finalType);
 
@@ -2372,14 +2394,12 @@ async function playRouletteAndReveal(json) {
   if (mySession !== raffleSessionId) return;
 
   // 2단계 — 점점 감속
-  setRouletteCaption(RAFFLE_ROULETTE_CAPTIONS[1]);
   await raffleAnimateStep(track, finalOffsetX + segWidth * creepSteps, decelMs, 'cubic-bezier(.2,.6,.35,1)');
   if (mySession !== raffleSessionId) return;
 
   // 3단계 — 마지막 몇 칸(1등/2등/3등/참가상/꽝)을 한 칸씩 천천히, 긴장감 있게
-  setRouletteCaption(RAFFLE_ROULETTE_CAPTIONS[2]);
   for (let i = creepSteps; i >= 1; i--) {
-    if (i === 2) setRouletteCaption(RAFFLE_ROULETTE_CAPTIONS[3]);
+    if (i === 2) setRouletteCaption(raffleCaption(name, 'settling'));
     const stepMs = Math.round(creepEachMs * (1 + (creepSteps - i) * 0.2)); // 뒤로 갈수록 더 느리게
     await raffleAnimateStep(track, finalOffsetX + segWidth * (i - 1), stepMs, 'cubic-bezier(.3,0,.4,1)');
     if (mySession !== raffleSessionId) return;
@@ -2393,6 +2413,7 @@ async function playRouletteAndReveal(json) {
 
   await raffleSleep(150);
   if (mySession !== raffleSessionId) return; // 모달을 닫았다 다시 연 경우 — 이전 세션 결과를 뒤늦게 표시하지 않음
+  setRouletteCaption(raffleCaption(name, won ? 'win' : 'lose'));
   revealRaffleResult(json);
 }
 
@@ -2408,6 +2429,8 @@ function revealRaffleResult(json) {
   imageEl.removeAttribute('src');
   imageEl.onerror = null;
   iconEl.style.display = '';
+
+  const name = String(json.name || '').trim();
 
   if (json.won) {
     const imgSrc = raffleResolvePrizeImage(json.tier);
@@ -2426,13 +2449,17 @@ function revealRaffleResult(json) {
     iconEl.textContent = '🎉';
     titleEl.className = 'raffle-result-title win';
     titleEl.textContent = `${json.tier} 당첨 — ${json.prize}`;
-    descEl.textContent = '축하합니다! 경품 지급 안내는 별도로 연락드릴 예정입니다.';
+    descEl.textContent = name
+      ? `${name} 님, 축하합니다! 경품 지급 안내는 별도로 연락드릴 예정입니다.`
+      : '축하합니다! 경품 지급 안내는 별도로 연락드릴 예정입니다.';
     metaEl.textContent = json.confirmedAt ? `최초 확인 시각: ${json.confirmedAt}` : '';
   } else {
     iconEl.textContent = '🙏';
     titleEl.className = 'raffle-result-title lose';
     titleEl.textContent = '아쉽지만 당첨되지 않았습니다';
-    descEl.textContent = '소중한 참여에 진심으로 감사드립니다.';
+    descEl.textContent = name
+      ? `${name} 님, 아쉽지만 이번 추첨에는 당첨되지 않았습니다. 소중한 설문 참여에 감사드립니다.`
+      : '소중한 참여에 진심으로 감사드립니다.';
     metaEl.textContent = '';
   }
   panel.classList.add('active');
