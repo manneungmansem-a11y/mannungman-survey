@@ -485,6 +485,31 @@ function raffleSetupSheets() {
   Logger.log('raffleSetupSheets 완료 — raffle_config / raffle_rounds / raffle_results / raffle_logs 시트 준비됨');
 }
 
+// ── (수동 1회 실행용) raffle_* 시트 완전 초기화 — 컬럼 순서 꼬임 복구 ──────────
+// 과거 여러 차례의 추첨 기능 개편으로 raffle_rounds/raffle_results 헤더 배열
+// (RAFFLE_ROUNDS_HEADERS/RAFFLE_RESULTS_HEADERS)의 순서/컬럼 구성이 여러 번 바뀌었다.
+// ensureSheetHeaders는 "누락된 헤더 이름"만 시트 맨 뒤에 추가할 뿐 기존 컬럼 순서를
+// 절대 바꾸지 않기 때문에, 예전 코드로 이미 만들어진 raffle_rounds/raffle_results
+// 시트는 실제 물리적 컬럼 순서가 현재 헤더 배열 순서와 어긋나 있을 수 있다.
+// 이 상태에서는 raffleId로 재조회해도 당첨자 목록이 항상 0건으로 보이는 등
+// 회차 삭제 후 재실행을 반복해도 해결되지 않는 문제가 발생한다.
+// (현재 코드의 raffleRun 저장 로직은 이미 헤더 "이름" 기준으로 값을 배치하도록
+// 수정되어 이 문제가 재발하지 않지만, 과거에 이미 꼬여버린 시트 자체를 고치려면
+// 아래처럼 raffle_config/raffle_rounds/raffle_results/raffle_logs 4개 시트를
+// 통째로 삭제하고 현재 코드 기준 헤더로 새로 만드는 것이 가장 확실하다.
+// 이 4개 시트는 추첨 기능 전용 자동 생성 시트이며, 설문 원본 응답(responses)/
+// 설정(settings)/설문 로그(logs) 시트는 이 함수가 절대 건드리지 않는다.
+// Apps Script 편집기에서 함수 선택 → raffleHardResetSheets → 실행으로 1회만 돌리면 된다.
+function raffleHardResetSheets() {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  [RAFFLE_SHEET_CONFIG, RAFFLE_SHEET_ROUNDS, RAFFLE_SHEET_RESULTS, RAFFLE_SHEET_LOGS].forEach(function(name) {
+    var sheet = ss.getSheetByName(name);
+    if (sheet) ss.deleteSheet(sheet);
+  });
+  raffleEnsureSheets(ss);
+  Logger.log('raffleHardResetSheets 완료 — raffle_config/raffle_rounds/raffle_results/raffle_logs를 현재 코드 기준 헤더로 재생성했습니다. (기존 추첨 회차/결과 이력은 전부 삭제됨. responses/settings/logs는 전혀 변경되지 않음)');
+}
+
 // ── 과거 버그로 남은 잘못된 공개 상태 정리 (수동 1회 실행용) ──
 // 예전 코드는 "현재 회차 초기화" 시 그 회차의 raffle_rounds.revealEnabled 값을
 // 지우지 않아, 이미 초기화된 옛 회차가 이력 표에서 계속 "공개중"으로 잘못
@@ -892,30 +917,35 @@ function raffleRun(data) {
   var leftoverPrizeCount = prizeTotalCount - assignedCount; // 남는 경품
 
   // 대상자 전원(당첨자 + 낙첨자)을 raffle_results에 기록 — 낙첨자는 tier='NONE'
+  // 반드시 헤더 "이름" 기준으로 값을 배치한다 (raffleEnsureSheets에서 이미 모든 헤더가
+  // 존재하도록 보장했지만, 과거 스키마 개편으로 물리적 컬럼 순서가 RAFFLE_RESULTS_HEADERS
+  // 배열 순서와 다를 수 있어 위치 기준 저장은 위험하다 — appendRowObjectsByHeaderName 참고).
   var resultsSheet = getOrCreateSheet(ss, RAFFLE_SHEET_RESULTS, RAFFLE_RESULTS_HEADERS);
-  var rowsToWrite = pool.map(function(entry) {
+  var resultRowObjects = pool.map(function(entry) {
     var win = tierByPhone[entry.phone];
-    return [
-      raffleId, entry.phone, win ? win.tier : 'NONE', win ? win.prize : '', drawnAt,
-      'FALSE', '', '', '0', entry.responseId,
-      entry.name || '', entry.participantType || '', entry.submittedAt || ''
-    ];
+    return {
+      raffleId: raffleId, phone: entry.phone, tier: win ? win.tier : 'NONE', prize: win ? win.prize : '',
+      drawnAt: drawnAt, confirmed: 'FALSE', firstConfirmedAt: '', lastConfirmedAt: '', confirmedCount: '0',
+      responseId: entry.responseId, name: entry.name || '', userType: entry.participantType || '',
+      submittedAt: entry.submittedAt || ''
+    };
   });
-  resultsSheet.getRange(resultsSheet.getLastRow() + 1, 1, rowsToWrite.length, RAFFLE_RESULTS_HEADERS.length)
-    .setValues(rowsToWrite);
+  appendRowObjectsByHeaderName(resultsSheet, resultRowObjects);
   resultsSheet.getRange('B:B').setNumberFormat('@');
-  Logger.log('[raffleRun] raffle_results 저장 완료 — raffleId=' + raffleId + ' / 저장 건수=' + rowsToWrite.length);
+  Logger.log('[raffleRun] raffle_results 저장 완료 — raffleId=' + raffleId + ' / 저장 건수=' + resultRowObjects.length);
 
   var duplicateCount = Object.keys(eligible.duplicatesMap).length;
   var roundsSheet = getOrCreateSheet(ss, RAFFLE_SHEET_ROUNDS, RAFFLE_ROUNDS_HEADERS);
   ensureSheetHeaders(roundsSheet, RAFFLE_ROUNDS_HEADERS);
-  roundsSheet.appendRow([
-    raffleId, raffleName, filters.dateType, filters.startDate, filters.endDate, filters.userType,
-    pool.length, duplicateCount, 'executed', drawnAt, 'FALSE', drawnAt,
-    eligible.totalMatched, eligible.entries.length, prizeTotalCount,
-    tier1Count, tier2Count, tier3Count, participationCount,
-    unassignedCount, leftoverPrizeCount
-  ]);
+  appendRowObjectByHeaderName(roundsSheet, {
+    raffleId: raffleId, raffleName: raffleName, targetDateType: filters.dateType,
+    targetStartDate: filters.startDate, targetEndDate: filters.endDate, targetUserType: filters.userType,
+    targetCount: pool.length, duplicateCount: duplicateCount, status: 'executed', drawnAt: drawnAt,
+    revealEnabled: 'FALSE', createdAt: drawnAt,
+    totalMatchedCount: eligible.totalMatched, dedupedCandidateCount: eligible.entries.length,
+    prizeTotalCount: prizeTotalCount, tier1Count: tier1Count, tier2Count: tier2Count, tier3Count: tier3Count,
+    participationCount: participationCount, unassignedCount: unassignedCount, leftoverPrizeCount: leftoverPrizeCount
+  });
   Logger.log('[raffleRun] raffle_rounds 저장 완료 — raffleId=' + raffleId + ' / raffleName=' + raffleName);
 
   // 새 회차는 기본 비공개 상태로 생성되며, raffle_config.currentRoundId(공개 대상 회차)는
@@ -1462,6 +1492,31 @@ function ensureSheetHeaders(sheet, headers) {
       headerRow.push(h);
     }
   });
+}
+
+// ── 헤더 "이름" 기준 행 추가 (raffle_rounds/raffle_results 전용) ──────────────
+// ensureSheetHeaders는 기존 시트의 물리적 컬럼 순서를 절대 바꾸지 않고 누락된 헤더만
+// 맨 뒤에 추가하기 때문에, 과거 스키마 개편으로 헤더 배열(RAFFLE_*_HEADERS)의 순서가
+// 실제 시트의 물리적 컬럼 순서와 달라졌을 수 있다. 이 상태에서 값을 "위치" 기준으로
+// appendRow/setValues 하면 값이 엉뚱한 컬럼(예: raffleId 값이 phone 컬럼에 저장)에
+// 들어가 raffleId로 재조회했을 때 결과가 0건으로 보이는 문제가 생긴다.
+// 따라서 반드시 실제 헤더 "이름"을 기준으로 값을 배치해 어떤 물리적 순서에서도
+// 항상 올바른 컬럼에 저장되도록 한다. rowObjects의 각 값은 헤더명을 key로 갖는 객체.
+function appendRowObjectsByHeaderName(sheet, rowObjects) {
+  if (!rowObjects || !rowObjects.length) return;
+  var lastCol = sheet.getLastColumn();
+  var actualHeaders = sheet.getRange(1, 1, 1, lastCol).getValues()[0].map(String);
+  var startRow = sheet.getLastRow() + 1;
+  var values = rowObjects.map(function(obj) {
+    return actualHeaders.map(function(h) {
+      var v = obj[h];
+      return (v !== undefined && v !== null) ? v : '';
+    });
+  });
+  sheet.getRange(startRow, 1, values.length, lastCol).setValues(values);
+}
+function appendRowObjectByHeaderName(sheet, rowObject) {
+  appendRowObjectsByHeaderName(sheet, [rowObject]);
 }
 
 function getOrCreateSheet(ss, name, headers) {
