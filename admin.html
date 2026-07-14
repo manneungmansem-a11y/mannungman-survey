@@ -370,7 +370,7 @@
           <div class="table-card">
             <h4>엑셀 다운로드</h4>
             <p style="font-size:13px;color:#64748b;margin-bottom:4px;">SheetJS 기반 멀티시트 엑셀 파일입니다.</p>
-            <p style="font-size:12px;color:#94a3b8;margin-bottom:16px;">전체응답 / 일반사용자 / 임직원 / 파트너 / 질문별통계 / 주관식의견 / 리워드후보 — 7개 시트</p>
+            <p style="font-size:12px;color:#94a3b8;margin-bottom:16px;">전체응답 / 일반사용자 / 임직원 / 파트너_신규V2 / 파트너_기존 / 질문별통계 / 주관식의견 / 리워드후보 — 8개 시트</p>
             <div class="csv-group">
               <div class="csv-btn-card" onclick="downloadExcel('all')">
                 <div class="csv-icon">📊</div>
@@ -653,38 +653,159 @@ const QUESTION_CONFIG = {
     { id:'employee_Q24', colKey:'임직원_Q24', title:'오픈베타 전 가장 우선적으로 수정해야 할 3가지를 적어주세요.', type:'textarea' },
     { id:'employee_Q25', colKey:'임직원_Q25', title:'종합 의견을 자유롭게 작성해주세요.', type:'textarea' }
   ],
+  // ────── 파트너 v3 (신규, Q1~Q24 + 조건부 추가질문) — colKey는 구글시트 한글 헤더명(파트너V3_ 접두) ──────
+  // id는 survey.html의 QUESTION_CONFIG.partner와 동일 문자열 사용 (condition.parentId 매칭 기준)
   partner: [
-    { id:'partner_Q3',  colKey:'파트너_Q3',  title:'업체명 또는 상호명을 입력해주세요.', type:'text' },
-    { id:'partner_Q4',  colKey:'파트너_Q4',  title:'주로 활동하는 지역을 입력해주세요.', type:'text' },
-    { id:'partner_Q5',  colKey:'파트너_Q5',  title:'주요 작업 분야를 선택해주세요.', type:'checkbox', options:['수도/배관','누수','욕실','싱크대','보일러','전기','도배/장판','문/창문','철거/청소','기타'] },
-    { id:'partner_Q6',  colKey:'파트너_Q6',  title:'만능맨 파트너 서비스 구조를 이해하기 쉬웠나요?', type:'scale', scaleMin:1, scaleMax:5, scaleMinLabel:'매우 어려움', scaleMaxLabel:'매우 쉬움' },
-    { id:'partner_Q7',  colKey:'파트너_Q7',  title:'고객 의뢰를 받고 견적을 보내는 흐름이 실제 업무에 적합하다고 느꼈나요?', type:'radio', options:['매우 적합함','대체로 적합함','일부 불편할 것 같음','실제 업무와 맞지 않음','판단 어려움'] },
-    { id:'partner_Q8',  colKey:'파트너_Q8',  title:'견적을 보내기 위해 필요한 정보가 충분하다고 느꼈나요?', type:'scale', scaleMin:1, scaleMax:5, scaleMinLabel:'전혀 충분하지 않음', scaleMaxLabel:'매우 충분함' },
-    { id:'partner_Q9',  colKey:'파트너_Q9',  title:'견적 작성 시 추가로 꼭 필요하다고 생각하는 정보는 무엇인가요?', type:'checkbox', options:['현장 사진','주소/지역','건물 유형','작업 희망일','고객 예산','문제 발생 시점','상세 증상','전화 상담 가능 여부','기타'] },
-    { id:'partner_Q10', colKey:'파트너_Q10', title:'고객과 채팅 또는 상담하는 방식이 편리하다고 느꼈나요?', type:'scale', scaleMin:1, scaleMax:5, scaleMinLabel:'매우 불편함', scaleMaxLabel:'매우 편리함' },
-    { id:'partner_Q11', colKey:'파트너_Q11', title:'고객이 여러 전문가의 견적을 비교하는 구조에 대해 어떻게 생각하나요?', type:'radio', options:['자연스럽고 괜찮음','경쟁이 있지만 수용 가능','가격 경쟁이 심해질 것 같아 우려됨','방식 설명이 더 필요함','부정적으로 느껴짐'] },
-    { id:'partner_Q12', colKey:'파트너_Q12', title:'수수료가 발생하는 구조에 대해 어느 정도 수용 가능하다고 느끼나요?', type:'radio', options:['충분히 수용 가능','조건이 좋으면 수용 가능','수수료가 낮아야 가능','무료가 아니면 부담됨','판단 어려움'] },
-    { id:'partner_Q13', colKey:'파트너_Q13', title:'파트너 입장에서 가장 걱정되는 부분은 무엇인가요?', type:'checkbox', options:['고객의 허위 의뢰','견적만 받고 연락 두절','과도한 가격 경쟁','수수료 부담','정산 지연','악성 리뷰','현장 정보 부족','고객과의 분쟁','기타'] },
-    { id:'partner_Q14', colKey:'파트너_Q14', title:'파트너 프로필에 반드시 보여야 한다고 생각하는 정보는 무엇인가요?', type:'checkbox', options:['경력','자격증','작업 가능 지역','작업 분야','실제 시공 사진','고객 후기','평점','사업자 정보','긴급출동 가능 여부','기타'] },
-    { id:'partner_Q15', colKey:'파트너_Q15', title:'공인만능맨, 인증 파트너 같은 배지가 있다면 신뢰도나 참여 의향에 도움이 될까요?', type:'radio', options:['매우 도움됨','어느 정도 도움됨','큰 차이 없음','오히려 부담됨','설명을 더 봐야 판단 가능'] },
-    { id:'partner_Q16', colKey:'파트너_Q16', title:'파트너로 참여한다면 어떤 혜택이 가장 중요하다고 생각하나요?', type:'checkbox', options:['초기 수수료 무료','광고비 없음','입점비 없음','지역 고객 연결','정산 안정성','본사 인증 표시','프로필 홍보','우선 노출','기타'] },
-    { id:'partner_Q17', colKey:'파트너_Q17', title:'실제로 만능맨 파트너로 참여할 의향이 있나요?', type:'radio', options:['바로 참여 의향 있음','조건 확인 후 참여 가능','조금 더 지켜보고 결정','참여 의향 낮음','참여하지 않음'] },
-    { id:'partner_Q18', colKey:'파트너_Q18', title:'파트너 가입 과정에서 어렵거나 불편할 것 같은 부분을 적어주세요.', type:'textarea' },
-    { id:'partner_Q19', colKey:'파트너_Q19', title:'파트너 입장에서 반드시 개선되었으면 하는 기능을 적어주세요.', type:'textarea' },
-    { id:'partner_Q20', colKey:'파트너_Q20', title:'만능맨 파트너 서비스에 대한 종합 의견을 자유롭게 작성해주세요.', type:'textarea' },
-    { id:'partner_Q21', colKey:'파트너_Q21', title:'플랫폼 이용 시 적정하다고 생각하는 수수료 부담 수준은 어느 정도인가요?', type:'radio', options:['1% 이하','2%','3%','4%','5%','6% 이상','고정 수수료 방식이 더 적절하다고 생각함','아직 판단하기 어려움'] },
-    { id:'partner_Q22', colKey:'파트너_Q22', title:'수수료와 관련해 의견이 있다면 자유롭게 작성해주세요.', type:'textarea' },
-    // ── 파트너 추가 질문 — colKey는 구글시트 한글 헤더명, etcColKey는 기타 의견 컬럼 ──
-    { id:'partner_settlement_priority', colKey:'정산 방식에서 가장 중요하게 생각하는 부분', etcColKey:'정산 방식 기타 의견', title:'정산 방식에서 가장 중요하게 생각하는 부분은 무엇인가요?', type:'radio', options:['작업 완료 후 빠른 정산','정산 기준의 명확성','정산 내역 확인의 편리함','고객 결제 완료 보장 / 미수금 방지','수수료 및 공제 내역의 투명성','기타'] },
-    { id:'partner_fee_burden_type', colKey:'수수료 구조에서 부담되는 방식', etcColKey:'수수료 구조 기타 의견', title:'수수료 구조에서 부담되는 방식은 무엇인가요?', type:'checkbox', options:['월 고정 이용료','건당 고정 수수료','결제 금액 비율 수수료','광고비 / 상위노출 비용','정산·결제 수수료 별도 부담','초기 입점비 / 가입비','기타'] },
-    { id:'partner_required_support', colKey:'입점 시 가장 필요한 지원', etcColKey:'입점 지원 기타 의견', title:'만능맨에 입점한다면 가장 필요한 지원은 무엇인가요?', type:'checkbox', options:['고객 의뢰 / 견적 요청 노출','초기 앱 사용법 교육','견적 작성 가이드','적정 시공 단가 안내','고객 응대 / CS 지원','광고 / 홍보 지원','정산 및 세금 관련 안내','분쟁 / 환불 대응 지원','프로필 / 리뷰 관리 지원','기타'] },
-    { id:'partner_must_not_be_inconvenient', colKey:'입점사 입장에서 절대 불편하면 안 되는 부분', title:'입점사 입장에서 절대 불편하면 안 되는 부분은 무엇인가요?', type:'textarea' }
+    { id:'partner_v3_company_name', colKey:'파트너V3_업체명', section:'1. 업체 기본정보', title:'업체명 또는 상호명을 입력해주세요.', type:'text' },
+    { id:'partner_v3_service_area', colKey:'파트너V3_활동지역', section:'1. 업체 기본정보', title:'주로 활동하는 지역을 입력해주세요.', type:'text' },
+    { id:'partner_v3_service_category', colKey:'파트너V3_주요작업분야', etcColKey:'파트너V3_주요작업분야_기타', section:'1. 업체 기본정보', title:'주로 하는 작업 분야를 선택해주세요.', type:'checkbox', options:['수도·배관','누수','욕실','싱크대','보일러·난방','전기·조명','도배·장판','문·창호','인테리어','철거','청소','각종 설치·수리','기타'] },
+
+    { id:'partner_v3_service_understanding', colKey:'파트너V3_서비스이해도', section:'2. 만능맨 사용 경험', title:'만능맨이 고객과 업체를 어떻게 연결하는 플랫폼인지 쉽게 이해되었나요?', type:'radio', options:['바로 이해되었다','설명을 들으니 이해되었다','일부 헷갈리는 부분이 있었다','전체적인 구조가 잘 이해되지 않았다'] },
+    { id:'partner_v3_service_confusion_detail', colKey:'파트너V3_이해어려운부분', etcColKey:'파트너V3_이해어려운부분_기타', section:'2. 만능맨 사용 경험', title:'어떤 부분이 가장 이해하기 어려웠나요?', type:'checkbox', options:['고객 요청이 들어오는 방식','견적서를 보내는 방식','고객이 업체를 선택하는 방식','고객과 상담하는 방식','결제 및 정산 방식','수수료 발생 방식','작업 완료 및 보증 방식','파트너·일반 사용자 화면 전환','기타'],
+      condition:{ parentId:'partner_v3_service_understanding', values:['일부 헷갈리는 부분이 있었다','전체적인 구조가 잘 이해되지 않았다'] } },
+    { id:'partner_v3_quote_flow', colKey:'파트너V3_견적흐름', section:'2. 만능맨 사용 경험', title:'고객 요청을 확인하고 견적서를 보내는 과정은 어땠나요?', type:'radio', options:['매우 편리했다','대체로 편리했다','조금 불편했지만 사용할 수 있다','많이 불편했다','실제 업무방식과 맞지 않는 것 같다'] },
+    { id:'partner_v3_quote_flow_inconvenience', colKey:'파트너V3_견적흐름_불편과정', etcColKey:'파트너V3_견적흐름_불편과정_기타', section:'2. 만능맨 사용 경험', title:'어느 과정이 가장 불편했나요?', type:'checkbox', options:['고객 요청 찾기','요청내용 확인','현장사진 확인','견적금액 입력','작업내용 작성','방문 가능일 입력','견적 최종 제출','제출 견적 재확인','고객 채팅·상담','기타'],
+      condition:{ parentId:'partner_v3_quote_flow', values:['조금 불편했지만 사용할 수 있다','많이 불편했다','실제 업무방식과 맞지 않는 것 같다'] } },
+    { id:'partner_v3_request_information', colKey:'파트너V3_요청정보충분성', section:'2. 만능맨 사용 경험', title:'견적서를 작성할 때 고객이 입력한 정보가 충분했나요?', type:'radio', options:['견적을 작성하기에 충분했다','간단한 작업은 충분하지만 큰 공사는 부족하다','고객에게 추가로 물어봐야 할 정보가 많다','현재 정보만으로는 견적 작성이 어렵다'] },
+    { id:'partner_v3_additional_request_information', colKey:'파트너V3_추가필요정보', etcColKey:'파트너V3_추가필요정보_기타', section:'2. 만능맨 사용 경험', title:'어떤 정보가 더 필요하다고 생각하나요?', type:'checkbox', options:['현장 전체 사진','문제 부분 근접 사진','동영상','정확한 작업 주소','건물 종류','층수·현장 위치','엘리베이터 유무','주차·출입 정보','문제 발생 시점','이전 수리·공사 이력','고객이 원하는 작업 범위','자재·제품 정보','고객 예상 예산','희망 방문일','긴급 여부','전화 상담 가능 여부','현장 방문 후 견적 가능 여부','기타'],
+      condition:{ parentId:'partner_v3_request_information', values:['간단한 작업은 충분하지만 큰 공사는 부족하다','고객에게 추가로 물어봐야 할 정보가 많다','현재 정보만으로는 견적 작성이 어렵다'] } },
+    { id:'partner_v3_priority_request_information', colKey:'파트너V3_우선확인정보', etcColKey:'파트너V3_우선확인정보_기타', section:'2. 만능맨 사용 경험', title:'견적을 보내기 전에 가장 먼저 확인하고 싶은 정보는 무엇인가요?', type:'checkbox', options:['현장 사진·동영상','자세한 증상','작업 주소·이동 거리','건물 종류','고객 예상 예산','희망 방문일','긴급 여부','문제 발생 시점','전화 상담 가능 여부','주차·출입 정보','이전 수리·공사 이력','다른 업체 견적 제출 여부','현장 방문 후 견적 가능 여부','기타'] },
+    { id:'partner_v3_expected_useful_features', colKey:'파트너V3_유용할것같은기능', etcColKey:'파트너V3_유용할것같은기능_기타', section:'2. 만능맨 사용 경험', title:'실제로 이용한다면 가장 자주 사용할 것 같은 기능은 무엇인가요?', type:'checkbox', options:['내 지역 요청만 확인','내 작업 분야 요청만 확인','실시간 요청 알림','요청내용·사진 확인','빠른 견적 작성','자주 쓰는 견적 저장','고객 채팅·전화상담','작업 일정 관리','결제·정산내역','프로필·시공사례 홍보','후기 관리','기타'] },
+    { id:'partner_v3_main_concerns', colKey:'파트너V3_주요우려사항', etcColKey:'파트너V3_주요우려사항_기타', section:'2. 만능맨 사용 경험', title:'실제 이용 시 가장 걱정되는 부분은 무엇인가요?', type:'checkbox', options:['허위·장난 요청','중복 요청','견적 후 연락 두절','과도한 가격 경쟁','현장정보 부족','견적 제출 이용료','무리한 가격 요구','작업범위 변경','현장 추가금액','정산 지연','하자·환불 분쟁','악성 후기','앱 사용 불편','특별히 걱정되는 부분 없음','기타'] },
+    { id:'partner_v3_concern_solution', colKey:'파트너V3_우려해결방법', section:'2. 만능맨 사용 경험', title:'걱정사항을 줄이기 위해 만능맨이 어떤 조치를 해주면 좋을까요?', type:'textarea',
+      condition:{ parentId:'partner_v3_main_concerns', values:['허위·장난 요청','중복 요청','견적 후 연락 두절','과도한 가격 경쟁','현장정보 부족','견적 제출 이용료','무리한 가격 요구','작업범위 변경','현장 추가금액','정산 지연','하자·환불 분쟁','악성 후기','앱 사용 불편','기타'] } },
+
+    { id:'partner_v3_competitor_experience', colKey:'파트너V3_타플랫폼경험', section:'3. 다른 플랫폼과 비교', title:'숨고, 당근, 네이버 등 다른 방법으로 고객을 구해본 경험이 있나요?', type:'radio', options:['현재 이용 중','과거 이용 경험 있음','가입했지만 거의 이용하지 않음','이용 경험 없음'] },
+    { id:'partner_v3_competitor_services', colKey:'파트너V3_이용서비스', etcColKey:'파트너V3_이용서비스_기타', section:'3. 다른 플랫폼과 비교', title:'이용해본 서비스 또는 고객 모집 방법은 무엇인가요?', type:'checkbox', options:['숨고','당근','네이버 검색·플레이스','블로그·카페','인스타그램·SNS','지역 커뮤니티','다른 중개 플랫폼','전단지·지역광고','소개·지인 추천','기타'],
+      condition:{ parentId:'partner_v3_competitor_experience', values:['현재 이용 중','과거 이용 경험 있음','가입했지만 거의 이용하지 않음'] } },
+    { id:'partner_v3_competitive_strength', colKey:'파트너V3_경쟁력강점', etcColKey:'파트너V3_경쟁력강점_기타', section:'3. 다른 플랫폼과 비교', title:'다른 플랫폼과 비교했을 때 만능맨의 좋은 점은 무엇인가요?', type:'checkbox', options:['집수리 분야 전문성','고객 요청 확인 편리','견적 작성 편리','지역·분야 요청 찾기 편리','삼양발브 본사 운영 신뢰','파트너 인증 신뢰','안전한 결제·정산','분쟁 지원 기대','프로필·시공사례 홍보','차이를 느끼지 못함','다른 플랫폼보다 불편함','기타'] },
+    { id:'partner_v3_competitive_weakness', colKey:'파트너V3_경쟁력약점', etcColKey:'파트너V3_경쟁력약점_기타', section:'3. 다른 플랫폼과 비교', title:'다른 플랫폼보다 부족하다고 느낀 부분은 무엇인가요?', type:'checkbox', options:['고객 요청 수','지역 요청 검색','고객 정보','견적 과정','고객 상담','업체 홍보','앱 사용법','비용 장점','결제·정산','차별점 부족','기타'],
+      condition:{ parentId:'partner_v3_competitive_strength', values:['차이를 느끼지 못함','다른 플랫폼보다 불편함'] } },
+    { id:'partner_v3_competitive_priority', colKey:'파트너V3_경쟁력우선순위', etcColKey:'파트너V3_경쟁력우선순위_기타', section:'3. 다른 플랫폼과 비교', title:'만능맨이 다른 플랫폼보다 반드시 더 잘해야 하는 부분은 무엇인가요?', type:'checkbox', options:['실제 작업 가능성이 높은 요청','허위·중복 차단','정확한 현장정보','합리적인 견적 비용','경쟁 업체 수 제한','지역·분야 필터','빠른 정산','미수금 방지','파트너 인증','분쟁 지원','작업 보증','쉬운 앱','업체 홍보','기타'] },
+
+    { id:'partner_v3_fee_method', colKey:'파트너V3_이용료방식', etcColKey:'파트너V3_이용료방식_기타', section:'4. 견적 제출 이용료', title:'가장 합리적인 견적 제출 이용료 방식은 무엇인가요?', type:'radio', options:['모든 요청 동일 금액','예상 작업금액별 차등','작업 분야별 차등','금액과 분야 함께 고려','견적 무료·성사 시 수수료','월 이용료','유료면 이용 어려움','아직 모름','기타'] },
+    { id:'partner_v3_fee_under_300k_evaluation', colKey:'파트너V3_이용료_30만원미만평가', section:'4. 견적 제출 이용료', title:'30만 원 미만 요청의 견적 제출비가 500원이라면 어떻게 생각하나요?', type:'radio', options:['저렴하다','적당하다','조금 비싸다','많이 비싸다','무료여야 한다'] },
+    { id:'partner_v3_fee_under_300k_acceptable', colKey:'파트너V3_이용료_30만원미만_수용금액', section:'4. 견적 제출 이용료', title:'어느 금액이면 견적을 보낼 의향이 있나요?', type:'radio', options:['무료','100원','300원','500원 미만 다른 금액','성사됐을 때만 비용 지불'],
+      condition:{ parentId:'partner_v3_fee_under_300k_evaluation', values:['조금 비싸다','많이 비싸다','무료여야 한다'] } },
+    { id:'partner_v3_fee_300k_1m_evaluation', colKey:'파트너V3_이용료_30만~100만원평가', section:'4. 견적 제출 이용료', title:'30만~100만 원 요청의 견적 제출비가 1,000원이라면 어떻게 생각하나요?', type:'radio', options:['저렴하다','적당하다','조금 비싸다','많이 비싸다','무료여야 한다'] },
+    { id:'partner_v3_fee_300k_1m_acceptable', colKey:'파트너V3_이용료_30만~100만원_수용금액', section:'4. 견적 제출 이용료', title:'어느 금액이면 견적을 보낼 의향이 있나요?', type:'radio', options:['무료','300원','500원','700원','성사됐을 때만 비용 지불'],
+      condition:{ parentId:'partner_v3_fee_300k_1m_evaluation', values:['조금 비싸다','많이 비싸다','무료여야 한다'] } },
+    { id:'partner_v3_fee_over_1m_evaluation', colKey:'파트너V3_이용료_100만원이상평가', section:'4. 견적 제출 이용료', title:'100만 원 이상 요청의 견적 제출비가 2,000~3,000원이라면 어떻게 생각하나요?', type:'radio', options:['저렴하다','적당하다','조금 비싸다','많이 비싸다','무료여야 한다'] },
+    { id:'partner_v3_fee_over_1m_acceptable', colKey:'파트너V3_이용료_100만원이상_수용금액', section:'4. 견적 제출 이용료', title:'어느 금액이면 견적을 보낼 의향이 있나요?', type:'radio', options:['무료','500원','1,000원','1,500원','2,000원','성사됐을 때만 비용 지불'],
+      condition:{ parentId:'partner_v3_fee_over_1m_evaluation', values:['조금 비싸다','많이 비싸다','무료여야 한다'] } },
+    { id:'partner_v3_fee_scenario_intent', colKey:'파트너V3_이용료시나리오의향', section:'4. 견적 제출 이용료', title:'아래 조건이라면 1,000원을 내고 견적서를 보내시겠습니까?', type:'radio', options:['적극적으로 보냄','내용·거리 확인 후 결정','더 저렴하면 보냄','성사 시에만 비용 지불','보내지 않음'] },
+    { id:'partner_v3_fee_scenario_rejection_reason', colKey:'파트너V3_이용료시나리오_거절이유', etcColKey:'파트너V3_이용료시나리오_거절이유_기타', section:'4. 견적 제출 이용료', title:'견적을 보내기 어려운 가장 큰 이유는 무엇인가요?', type:'radio', options:['성사 가능성이 낮음','업체 경쟁 부담','고객 정보 부족','연락 가능 여부 불확실','이동 거리·출장비','제출비 부담','수익 부족','미성사에도 비용 발생','플랫폼 신뢰 부족','기타'],
+      condition:{ parentId:'partner_v3_fee_scenario_intent', values:['더 저렴하면 보냄','성사 시에만 비용 지불','보내지 않음'] } },
+    { id:'partner_v3_fee_protection', colKey:'파트너V3_이용료보호정책', etcColKey:'파트너V3_이용료보호정책_기타', section:'4. 견적 제출 이용료', title:'견적 제출 이용료가 있다면 꼭 필요한 보호정책은 무엇인가요?', type:'checkbox', options:['허위 요청 환급','중복 요청 환급','연락처 오류 환급','고객 즉시 취소 환급','제출 전 금액 표시','견적 업체 수 제한','신규 파트너 무료 견적권','월 사용 한도','고객 본인인증','고객 견적 확인 여부 표시','간편한 환급 신청','기타'] },
+
+    { id:'partner_v3_safe_payment_evaluation', colKey:'파트너V3_안전결제평가', section:'5. 결제·정산과 보증', title:'고객 선결제 후 작업 완료 시 정산되는 방식은 어떻게 생각하나요?', type:'radio', options:['미수금 걱정이 줄어 매우 좋음','정산이 빠르면 이용 가능','추가금액 처리가 명확하면 괜찮음','고객 확인 지연 우려','분쟁으로 정산 보류 우려','직접 현장결제 선호','판단 어려움'] },
+    { id:'partner_v3_required_payment_conditions', colKey:'파트너V3_결제이용필요조건', etcColKey:'파트너V3_결제이용필요조건_기타', section:'5. 결제·정산과 보증', title:'어떤 조건이면 만능맨 결제·정산 방식을 이용할 수 있나요?', type:'checkbox', options:['일정 기간 후 자동 정산','고객 확인과 관계없이 정해진 날짜 정산','분쟁 없는 금액 먼저 정산','추가금액 앱 승인','정산 예정일 표시','보류 사유·처리과정 확인','소명자료 제출','직접결제 선택 가능','기타'],
+      condition:{ parentId:'partner_v3_safe_payment_evaluation', values:['고객 확인 지연 우려','분쟁으로 정산 보류 우려','직접 현장결제 선호'] } },
+    { id:'partner_v3_platform_protection_role', colKey:'파트너V3_플랫폼보호역할', etcColKey:'파트너V3_플랫폼보호역할_기타', section:'5. 결제·정산과 보증', title:'파트너가 안심하고 이용하려면 만능맨이 어떤 역할을 해야 하나요?', type:'checkbox', options:['고객 본인인증','악성 고객 제한','요청 변경 이력','견적·작업범위 기록','결제금 안전보관','빠른 정산','작업 전후 사진','채팅내역 보관','분쟁 상담','양쪽 의견 확인','파트너 소명 기회','무리한 환불 방지','보험 연계','기타'] },
+    { id:'partner_v3_guarantee_intent', colKey:'파트너V3_보증제도의향', section:'5. 결제·정산과 보증', title:'작업 보증 또는 분쟁조정 제도가 이용 의향에 도움이 될까요?', type:'radio', options:['크게 도움','어느 정도 도움','조건 확인 후 판단','큰 차이 없음','파트너 책임만 커질까 우려'] },
+    { id:'partner_v3_guarantee_required_clarity', colKey:'파트너V3_보증명확화필요사항', etcColKey:'파트너V3_보증명확화필요사항_기타', section:'5. 결제·정산과 보증', title:'보증·분쟁정책에서 가장 명확해야 하는 내용은 무엇인가요?', type:'checkbox', options:['보증 대상 작업','보증 기간','보증 금액','고객·파트너 과실 구분','노후시설·기존 하자 구분','추가 작업 구분','환불 조건','소명자료 제출','처리기간','정산 보류 조건','악성 민원 방지','기타'],
+      condition:{ parentId:'partner_v3_guarantee_intent', values:['조건 확인 후 판단','파트너 책임만 커질까 우려'] } },
+
+    { id:'partner_v3_participation_intent', colKey:'파트너V3_참여의향', section:'6. 참여 의향과 최종 의견', title:'오늘 사용해본 기준으로 파트너 활동 의향이 있나요?', type:'radio', options:['오픈하면 바로 이용','무료 체험 후 결정','이용료·정책 확인 후 결정','기능 개선 후 이용','참여 의향 낮음','참여하지 않음'] },
+    { id:'partner_v3_participation_requirement', colKey:'파트너V3_참여필요조건', etcColKey:'파트너V3_참여필요조건_기타', section:'6. 참여 의향과 최종 의견', title:'참여를 위해 먼저 개선되거나 확인되어야 할 것은 무엇인가요?', type:'checkbox', options:['고객 요청 수','고객 요청 품질','이용료','허위·중복 차단','경쟁 업체 수 제한','안전결제','빠른 정산','공정한 보증·분쟁정책','책임 범위','쉬운 앱','업체 홍보','기타'],
+      condition:{ parentId:'partner_v3_participation_intent', values:['기능 개선 후 이용','참여 의향 낮음','참여하지 않음'] } },
+    { id:'partner_v3_most_important_improvement', colKey:'파트너V3_가장중요한개선점', section:'6. 참여 의향과 최종 의견', title:'오늘 사용하면서 가장 불편했거나 꼭 고쳐졌으면 하는 한 가지를 적어주세요.', type:'textarea' },
+    { id:'partner_v3_additional_suggestion', colKey:'파트너V3_추가제안', section:'6. 참여 의향과 최종 의견', title:'새롭게 제공했으면 하는 기능이나 정책을 자유롭게 적어주세요.', type:'textarea' }
   ]
 };
+
+// ────── 파트너 v2 (화면에서는 폐기됨 — 과거 응답 조회·통계 보관 전용, 삭제 금지) ──────
+// surveyVersion이 'partner_v2'인 응답을 상세보기/통계/주관식/엑셀에서 계속 볼 수 있도록 유지한다.
+const PARTNER_V2_LEGACY_CONFIG = [
+    { id:'partner_v2_company_name', colKey:'파트너V2_업체명', section:'1. 업체 기본정보', title:'업체명 또는 상호명을 입력해주세요.', type:'text' },
+    { id:'partner_v2_service_area', colKey:'파트너V2_활동지역', section:'1. 업체 기본정보', title:'주로 활동하는 지역을 입력해주세요.', type:'text' },
+    { id:'partner_v2_service_category', colKey:'파트너V2_주요작업분야', etcColKey:'파트너V2_주요작업분야_기타', section:'1. 업체 기본정보', title:'주로 하는 작업 분야를 선택해주세요.', type:'checkbox', options:['수도·배관','누수','욕실','싱크대','보일러·난방','전기·조명','도배·장판','문·창호','인테리어','철거','청소','각종 설치·수리','기타'] },
+
+    { id:'partner_v2_service_understanding', colKey:'파트너V2_서비스이해도', section:'2. 만능맨 사용 경험', title:'만능맨이 고객과 업체를 어떻게 연결하는 플랫폼인지 쉽게 이해되었나요?', type:'radio', options:['바로 이해되었다','설명을 들으니 이해되었다','일부 헷갈리는 부분이 있었다','전체적인 구조가 잘 이해되지 않았다'] },
+    { id:'partner_v2_quote_flow', colKey:'파트너V2_견적흐름', section:'2. 만능맨 사용 경험', title:'고객 요청을 확인하고 견적서를 보내는 과정은 어땠나요?', type:'radio', options:['매우 편리했다','대체로 편리했다','조금 불편했지만 사용할 수 있다','많이 불편했다','실제 업무방식과 맞지 않는 것 같다'] },
+    { id:'partner_v2_request_information', colKey:'파트너V2_요청정보충분성', section:'2. 만능맨 사용 경험', title:'견적서를 작성할 때 고객이 입력한 정보가 충분했나요?', type:'radio', options:['견적을 작성하기에 충분했다','간단한 작업은 충분하지만 큰 공사는 부족하다','고객에게 추가로 물어봐야 할 정보가 많다','현재 정보만으로는 견적 작성이 어렵다'] },
+    { id:'partner_v2_required_request_info', colKey:'파트너V2_필요요청정보', etcColKey:'파트너V2_필요요청정보_기타', section:'2. 만능맨 사용 경험', title:'견적을 보내기 전에 꼭 확인할 수 있어야 하는 정보는 무엇인가요?', type:'checkbox', options:['현장 사진','자세한 작업 내용','작업 주소 또는 지역','건물 종류','고객 예상 예산','희망 방문일','긴급 작업 여부','문제 발생 시점','전화 상담 가능 여부','주차 및 현장 출입 정보','기존 수리 또는 공사 이력','기타'] },
+    { id:'partner_v2_expected_useful_features', colKey:'파트너V2_유용할것같은기능', etcColKey:'파트너V2_유용할것같은기능_기타', section:'2. 만능맨 사용 경험', title:'만능맨을 실제로 이용할 때 가장 편리할 것 같은 기능은 무엇인가요?', type:'checkbox', options:['내 지역의 고객 요청만 확인','내 작업 분야의 요청만 확인','새로운 요청 실시간 알림','빠른 견적서 작성','자주 쓰는 견적 내용 저장','고객과 채팅·전화상담','작업 일정 관리','결제 및 정산내역 확인','업체 프로필과 시공사례 홍보','고객 후기 관리','기타'] },
+    { id:'partner_v2_main_concerns', colKey:'파트너V2_주요우려사항', etcColKey:'파트너V2_주요우려사항_기타', section:'2. 만능맨 사용 경험', title:'실제로 이용할 때 가장 걱정되는 부분은 무엇인가요?', type:'checkbox', options:['허위 또는 장난 요청','견적만 받고 연락이 끊기는 고객','너무 많은 업체와의 가격 경쟁','현장 정보 부족','견적 제출 비용','정산 지연','고객의 무리한 요구','작업 후 하자 또는 환불 분쟁','악성 후기','앱 사용의 불편함','특별히 걱정되는 부분 없음','기타'] },
+
+    { id:'partner_v2_competitor_experience', colKey:'파트너V2_타플랫폼경험', section:'3. 다른 플랫폼과 비교', title:'숨고, 당근, 네이버 등 다른 방법으로 고객을 구해본 경험이 있나요?', type:'radio', options:['현재 이용하고 있다','과거에 이용해본 적이 있다','가입했지만 거의 이용하지 않았다','이용해본 적이 없다'] },
+    { id:'partner_v2_competitive_strength', colKey:'파트너V2_경쟁력강점', etcColKey:'파트너V2_경쟁력강점_기타', section:'3. 다른 플랫폼과 비교', title:'다른 플랫폼과 비교했을 때 만능맨의 좋은 점은 무엇이라고 느꼈나요?', type:'checkbox', options:['설비·수리·집수리 분야에 더 전문적으로 느껴진다','고객 요청내용을 확인하기 편하다','견적을 작성하고 보내는 과정이 편하다','본사에서 운영해 신뢰가 간다','파트너 인증제도가 믿음이 간다','결제와 정산이 안전할 것 같다','분쟁이 생겼을 때 도움을 받을 수 있을 것 같다','업체 프로필과 시공사례를 홍보하기 좋다','아직 특별한 차이를 느끼지 못했다','다른 플랫폼보다 불편했다','기타'] },
+    { id:'partner_v2_competitive_priority', colKey:'파트너V2_경쟁력우선순위', etcColKey:'파트너V2_경쟁력우선순위_기타', section:'3. 다른 플랫폼과 비교', title:'다른 플랫폼보다 만능맨이 반드시 더 잘해야 하는 부분은 무엇이라고 생각하나요?', type:'checkbox', options:['실제 작업으로 이어질 가능성이 높은 고객 요청','허위·중복 요청 차단','낮고 합리적인 견적 제출 비용','견적 경쟁 업체 수 제한','빠르고 안정적인 정산','현장정보를 자세하게 제공','파트너 검증과 고객 신뢰 확보','고객과의 분쟁 해결 지원','작업 후 보증제도','쉬운 앱 사용법','파트너 업체 홍보 지원','기타'] },
+
+    { id:'partner_v2_fee_method', colKey:'파트너V2_이용료방식', etcColKey:'파트너V2_이용료방식_기타', section:'4. 견적 제출 이용료', title:'어떤 견적 제출 이용료 방식이 가장 합리적이라고 생각하나요?', type:'radio', options:['모든 요청에 동일한 금액을 부과하는 방식','예상 작업금액에 따라 다르게 부과하는 방식','작업 분야에 따라 다르게 부과하는 방식','작업금액과 작업 분야를 함께 고려하는 방식','견적 제출은 무료이고 작업이 성사되면 수수료를 내는 방식','월 이용료를 내고 자유롭게 견적을 보내는 방식','유료라면 이용하기 어렵다','아직 잘 모르겠다','기타'] },
+    { id:'partner_v2_fee_under_300k', colKey:'파트너V2_이용료_30만원미만', section:'4. 견적 제출 이용료', title:'예상 작업금액 30만 원 미만인 요청에 견적 제출 이용료가 500원이라면 어떻게 생각하나요?', type:'radio', options:['저렴하다','적당하다','조금 비싸다','많이 비싸다','무료여야 한다'] },
+    { id:'partner_v2_fee_300k_1m', colKey:'파트너V2_이용료_30만원~100만원', section:'4. 견적 제출 이용료', title:'예상 작업금액 30만 원 이상~100만 원 미만인 요청에 견적 제출 이용료가 1,000원이라면 어떻게 생각하나요?', type:'radio', options:['저렴하다','적당하다','조금 비싸다','많이 비싸다','무료여야 한다'] },
+    { id:'partner_v2_fee_over_1m', colKey:'파트너V2_이용료_100만원이상', section:'4. 견적 제출 이용료', title:'예상 작업금액 100만 원 이상인 요청에 견적 제출 이용료가 2,000원~3,000원이라면 어떻게 생각하나요?', type:'radio', options:['저렴하다','적당하다','조금 비싸다','많이 비싸다','무료여야 한다'] },
+    { id:'partner_v2_fee_scenario_intent', colKey:'파트너V2_이용료시나리오의향', section:'4. 견적 제출 이용료', title:'다음 조건의 고객 요청이 있다면 견적 제출 이용료 1,000원을 내고 견적서를 보내시겠습니까?', type:'radio', options:['적극적으로 견적을 보내겠다','작업내용과 거리를 보고 결정하겠다','이용료가 조금 더 낮으면 보내겠다','작업이 성사됐을 때만 비용을 내고 싶다','견적을 보내지 않을 것 같다'] },
+    { id:'partner_v2_fee_protection', colKey:'파트너V2_이용료보호정책', etcColKey:'파트너V2_이용료보호정책_기타', section:'4. 견적 제출 이용료', title:'견적 제출 이용료가 있다면 꼭 필요한 정책은 무엇인가요?', type:'checkbox', options:['허위 요청이면 이용료 반환','중복 요청이면 이용료 반환','고객 연락처가 잘못되면 이용료 반환','고객이 바로 취소하면 이용료 반환','견적을 보내기 전에 이용료 금액 표시','고객 요청 1건당 견적 업체 수 제한','신규 파트너에게 무료 견적권 제공','월별 이용금액 한도 설정','고객 본인인증 강화','이용료 반환 신청을 간편하게 제공','기타'] },
+
+    { id:'partner_v2_safe_payment', colKey:'파트너V2_안전결제', section:'5. 결제·정산과 만능맨 보증', title:'고객이 만능맨을 통해 먼저 결제하고, 작업 완료 후 파트너에게 정산되는 방식은 어떻게 생각하나요?', type:'radio', options:['미수금 걱정이 줄어들어 매우 좋다','정산이 빠르다면 이용할 수 있다','현장에서 발생한 추가금액 처리가 명확하면 괜찮다','고객이 작업 완료를 늦게 확인할까 걱정된다','직접 현장에서 결제받는 방식이 더 좋다','아직 판단하기 어렵다'] },
+    { id:'partner_v2_platform_protection_role', colKey:'파트너V2_플랫폼보호역할', etcColKey:'파트너V2_플랫폼보호역할_기타', section:'5. 결제·정산과 만능맨 보증', title:'파트너가 안심하고 이용하려면 만능맨이 어떤 역할을 해야 한다고 생각하나요?', type:'checkbox', options:['고객 본인인증','허위·악성 고객 이용 제한','견적내용과 작업범위 기록','고객 결제금 안전보관','작업 완료 후 빠른 정산','작업 전후 사진 보관','고객과의 채팅내역 보관','분쟁 발생 시 담당자 상담','고객과 파트너 양쪽 의견 확인','파트너가 충분히 설명할 수 있는 기회 제공','무리한 환불 또는 하자 요구 방지','배상책임보험 또는 보험 연계','기타'] },
+    { id:'partner_v2_guarantee_intent', colKey:'파트너V2_보증제도의향', section:'5. 결제·정산과 만능맨 보증', title:'만능맨의 작업 보증 또는 분쟁조정 제도가 있다면 이용 의향에 도움이 될까요?', type:'radio', options:['크게 도움이 된다','어느 정도 도움이 된다','조건을 확인한 뒤 판단하겠다','큰 차이는 없을 것 같다','파트너의 책임만 커질까 걱정된다'] },
+
+    { id:'partner_v2_participation_intent', colKey:'파트너V2_참여의향', section:'6. 실제 참여 의향', title:'오늘 사용해본 기준으로 만능맨 파트너로 활동할 의향이 있나요?', type:'radio', options:['정식 오픈하면 바로 이용해보고 싶다','무료 체험 후 결정하고 싶다','이용료와 운영정책을 확인한 뒤 결정하겠다','기능이 조금 더 개선되면 이용하고 싶다','아직 참여 의향이 낮다','참여할 생각이 없다'] },
+    { id:'partner_v2_most_important_improvement', colKey:'파트너V2_가장중요한개선점', section:'6. 실제 참여 의향', title:'오늘 사용하면서 가장 불편했거나 꼭 고쳐졌으면 하는 한 가지를 적어주세요.', type:'textarea' },
+    { id:'partner_v2_additional_suggestion', colKey:'파트너V2_추가제안', section:'6. 실제 참여 의향', title:'만능맨이 파트너를 위해 새롭게 제공했으면 하는 기능이나 정책이 있다면 자유롭게 적어주세요.', type:'textarea' }
+];
+
+// ────── 파트너 기존 설문 (화면에서는 폐기됨 — 과거 응답 보관·조회 전용, 삭제 금지) ──────
+// surveyVersion이 'partner_v2'가 아닌 기존 파트너 응답을 상세보기/주관식/엑셀에서 계속 볼 수 있도록 유지한다.
+const PARTNER_LEGACY_CONFIG = [
+  { id:'partner_Q3',  colKey:'파트너_Q3',  title:'업체명 또는 상호명을 입력해주세요.', type:'text' },
+  { id:'partner_Q4',  colKey:'파트너_Q4',  title:'주로 활동하는 지역을 입력해주세요.', type:'text' },
+  { id:'partner_Q5',  colKey:'파트너_Q5',  title:'주요 작업 분야를 선택해주세요.', type:'checkbox', options:['수도/배관','누수','욕실','싱크대','보일러','전기','도배/장판','문/창문','철거/청소','기타'] },
+  { id:'partner_Q6',  colKey:'파트너_Q6',  title:'만능맨 파트너 서비스 구조를 이해하기 쉬웠나요?', type:'scale', scaleMin:1, scaleMax:5, scaleMinLabel:'매우 어려움', scaleMaxLabel:'매우 쉬움' },
+  { id:'partner_Q7',  colKey:'파트너_Q7',  title:'고객 의뢰를 받고 견적을 보내는 흐름이 실제 업무에 적합하다고 느꼈나요?', type:'radio', options:['매우 적합함','대체로 적합함','일부 불편할 것 같음','실제 업무와 맞지 않음','판단 어려움'] },
+  { id:'partner_Q8',  colKey:'파트너_Q8',  title:'견적을 보내기 위해 필요한 정보가 충분하다고 느꼈나요?', type:'scale', scaleMin:1, scaleMax:5, scaleMinLabel:'전혀 충분하지 않음', scaleMaxLabel:'매우 충분함' },
+  { id:'partner_Q9',  colKey:'파트너_Q9',  title:'견적 작성 시 추가로 꼭 필요하다고 생각하는 정보는 무엇인가요?', type:'checkbox', options:['현장 사진','주소/지역','건물 유형','작업 희망일','고객 예산','문제 발생 시점','상세 증상','전화 상담 가능 여부','기타'] },
+  { id:'partner_Q10', colKey:'파트너_Q10', title:'고객과 채팅 또는 상담하는 방식이 편리하다고 느꼈나요?', type:'scale', scaleMin:1, scaleMax:5, scaleMinLabel:'매우 불편함', scaleMaxLabel:'매우 편리함' },
+  { id:'partner_Q11', colKey:'파트너_Q11', title:'고객이 여러 전문가의 견적을 비교하는 구조에 대해 어떻게 생각하나요?', type:'radio', options:['자연스럽고 괜찮음','경쟁이 있지만 수용 가능','가격 경쟁이 심해질 것 같아 우려됨','방식 설명이 더 필요함','부정적으로 느껴짐'] },
+  { id:'partner_Q12', colKey:'파트너_Q12', title:'수수료가 발생하는 구조에 대해 어느 정도 수용 가능하다고 느끼나요?', type:'radio', options:['충분히 수용 가능','조건이 좋으면 수용 가능','수수료가 낮아야 가능','무료가 아니면 부담됨','판단 어려움'] },
+  { id:'partner_Q13', colKey:'파트너_Q13', title:'파트너 입장에서 가장 걱정되는 부분은 무엇인가요?', type:'checkbox', options:['고객의 허위 의뢰','견적만 받고 연락 두절','과도한 가격 경쟁','수수료 부담','정산 지연','악성 리뷰','현장 정보 부족','고객과의 분쟁','기타'] },
+  { id:'partner_Q14', colKey:'파트너_Q14', title:'파트너 프로필에 반드시 보여야 한다고 생각하는 정보는 무엇인가요?', type:'checkbox', options:['경력','자격증','작업 가능 지역','작업 분야','실제 시공 사진','고객 후기','평점','사업자 정보','긴급출동 가능 여부','기타'] },
+  { id:'partner_Q15', colKey:'파트너_Q15', title:'공인만능맨, 인증 파트너 같은 배지가 있다면 신뢰도나 참여 의향에 도움이 될까요?', type:'radio', options:['매우 도움됨','어느 정도 도움됨','큰 차이 없음','오히려 부담됨','설명을 더 봐야 판단 가능'] },
+  { id:'partner_Q16', colKey:'파트너_Q16', title:'파트너로 참여한다면 어떤 혜택이 가장 중요하다고 생각하나요?', type:'checkbox', options:['초기 수수료 무료','광고비 없음','입점비 없음','지역 고객 연결','정산 안정성','본사 인증 표시','프로필 홍보','우선 노출','기타'] },
+  { id:'partner_Q17', colKey:'파트너_Q17', title:'실제로 만능맨 파트너로 참여할 의향이 있나요?', type:'radio', options:['바로 참여 의향 있음','조건 확인 후 참여 가능','조금 더 지켜보고 결정','참여 의향 낮음','참여하지 않음'] },
+  { id:'partner_Q18', colKey:'파트너_Q18', title:'파트너 가입 과정에서 어렵거나 불편할 것 같은 부분을 적어주세요.', type:'textarea' },
+  { id:'partner_Q19', colKey:'파트너_Q19', title:'파트너 입장에서 반드시 개선되었으면 하는 기능을 적어주세요.', type:'textarea' },
+  { id:'partner_Q20', colKey:'파트너_Q20', title:'만능맨 파트너 서비스에 대한 종합 의견을 자유롭게 작성해주세요.', type:'textarea' },
+  { id:'partner_Q21', colKey:'파트너_Q21', title:'플랫폼 이용 시 적정하다고 생각하는 수수료 부담 수준은 어느 정도인가요?', type:'radio', options:['1% 이하','2%','3%','4%','5%','6% 이상','고정 수수료 방식이 더 적절하다고 생각함','아직 판단하기 어려움'] },
+  { id:'partner_Q22', colKey:'파트너_Q22', title:'수수료와 관련해 의견이 있다면 자유롭게 작성해주세요.', type:'textarea' },
+  { id:'partner_settlement_priority', colKey:'정산 방식에서 가장 중요하게 생각하는 부분', etcColKey:'정산 방식 기타 의견', title:'정산 방식에서 가장 중요하게 생각하는 부분은 무엇인가요?', type:'radio', options:['작업 완료 후 빠른 정산','정산 기준의 명확성','정산 내역 확인의 편리함','고객 결제 완료 보장 / 미수금 방지','수수료 및 공제 내역의 투명성','기타'] },
+  { id:'partner_fee_burden_type', colKey:'수수료 구조에서 부담되는 방식', etcColKey:'수수료 구조 기타 의견', title:'수수료 구조에서 부담되는 방식은 무엇인가요?', type:'checkbox', options:['월 고정 이용료','건당 고정 수수료','결제 금액 비율 수수료','광고비 / 상위노출 비용','정산·결제 수수료 별도 부담','초기 입점비 / 가입비','기타'] },
+  { id:'partner_required_support', colKey:'입점 시 가장 필요한 지원', etcColKey:'입점 지원 기타 의견', title:'만능맨에 입점한다면 가장 필요한 지원은 무엇인가요?', type:'checkbox', options:['고객 의뢰 / 견적 요청 노출','초기 앱 사용법 교육','견적 작성 가이드','적정 시공 단가 안내','고객 응대 / CS 지원','광고 / 홍보 지원','정산 및 세금 관련 안내','분쟁 / 환불 대응 지원','프로필 / 리뷰 관리 지원','기타'] },
+  { id:'partner_must_not_be_inconvenient', colKey:'입점사 입장에서 절대 불편하면 안 되는 부분', title:'입점사 입장에서 절대 불편하면 안 되는 부분은 무엇인가요?', type:'textarea' }
+];
 
 // 유형 → config 키 매핑
 const TYPE_TO_CONFIG = { '일반사용자':'general', '임직원':'employee', '파트너':'partner' };
 const CONFIG_TO_TYPE = { general:'일반사용자', employee:'임직원', partner:'파트너' };
+
+// 응답 1건에 맞는 질문 설정을 반환 — 파트너는 surveyVersion에 따라 신규(V3)/V2(보관)/기존(레거시) 설문지를 구분한다.
+function questionsForResponse(r) {
+  if (!r) return [];
+  if (r.participantType === '파트너') {
+    if (r.surveyVersion === 'partner_v3') return QUESTION_CONFIG.partner;
+    if (r.surveyVersion === 'partner_v2') return PARTNER_V2_LEGACY_CONFIG;
+    return PARTNER_LEGACY_CONFIG;
+  }
+  const configKey = TYPE_TO_CONFIG[r.participantType];
+  return configKey ? QUESTION_CONFIG[configKey] : [];
+}
+
+// 조건부 질문(q.condition)의 분모를 "조건을 충족한 응답자만"으로 제한한다.
+// 조건이 없는 질문은 원본 responses를 그대로 반환한다.
+function filterResponsesForQuestion(responses, q, questions) {
+  if (!q.condition) return responses;
+  const parent = (questions || []).find(x => x.id === q.condition.parentId);
+  if (!parent) return responses;
+  return responses.filter(r => {
+    const parentVal = String(r[parent.colKey] || '').trim();
+    if (!parentVal) return false;
+    const parentVals = parentVal.split(',').map(v => v.trim());
+    return q.condition.values.some(v => parentVals.includes(v));
+  });
+}
 
 // ════════════════════════════════════════════════════════
 // 전역 상태
@@ -695,6 +816,8 @@ let currentView = 'summary';
 let adminPassword = '';
 let chartInstances = {};
 let statsCurrentTab = '일반사용자';
+let statsPartnerSubTab = 'v3'; // '파트너' 탭 내부 하위탭 — 'v3'(신규) | 'v2'(보관용) | 'legacy'(기존, 보관용)
+let partnerV3FilterState = { dateFrom:'', dateTo:'', participation:'', feeEval:'' };
 
 const VIEW_TITLES = {
   summary:'전체 요약', list:'개별 응답 목록', stats:'통계 분석',
@@ -921,26 +1044,29 @@ function renderStats() {
   const allData    = allResponses;
   const genData    = allData.filter(r => r.participantType==='일반사용자');
   const empData    = allData.filter(r => r.participantType==='임직원');
-  const partData   = allData.filter(r => r.participantType==='파트너');
+  const partAllData    = allData.filter(r => r.participantType==='파트너');
+  const partV3Data     = partAllData.filter(r => r.surveyVersion==='partner_v3');
+  const partV2Data     = partAllData.filter(r => r.surveyVersion==='partner_v2');
+  const partLegacyData = partAllData.filter(r => r.surveyVersion!=='partner_v3' && r.surveyVersion!=='partner_v2');
 
   const typeInfo = {
-    '일반사용자': { data:genData,  configKey:'general',  icon:'👤', tabCls:'tab-general'  },
-    '임직원':     { data:empData,  configKey:'employee', icon:'🏢', tabCls:'tab-employee' },
-    '파트너':     { data:partData, configKey:'partner',  icon:'🔧', tabCls:'tab-partner'  }
+    '일반사용자': { data:genData,     configKey:'general',  icon:'👤', tabCls:'tab-general'  },
+    '임직원':     { data:empData,     configKey:'employee', icon:'🏢', tabCls:'tab-employee' },
+    '파트너':     { data:partAllData, configKey:'partner',  icon:'🔧', tabCls:'tab-partner'  }
   };
 
-  const curInfo  = typeInfo[statsCurrentTab];
-  const curData  = curInfo.data;
-  const curKey   = curInfo.configKey;
-
   destroyAllCharts();
+
+  const bodyHtml = statsCurrentTab === '파트너'
+    ? renderPartnerStatsPanel(partV3Data, partV2Data, partLegacyData)
+    : `<div id="stats-questions-area">${renderTypeStatCards(typeInfo[statsCurrentTab].data, QUESTION_CONFIG[typeInfo[statsCurrentTab].configKey], statsCurrentTab)}</div>`;
 
   document.getElementById('stats-content').innerHTML = `
     <div class="summary-grid" style="margin-bottom:20px;">
       <div class="stat-card blue"><div class="sc-label">총 응답</div><div class="sc-value">${allData.length}</div></div>
       <div class="stat-card"><div class="sc-label">일반사용자</div><div class="sc-value">${genData.length}</div></div>
       <div class="stat-card green"><div class="sc-label">임직원</div><div class="sc-value">${empData.length}</div></div>
-      <div class="stat-card purple"><div class="sc-label">파트너</div><div class="sc-value">${partData.length}</div></div>
+      <div class="stat-card purple"><div class="sc-label">파트너</div><div class="sc-value">${partAllData.length}</div><div class="sc-sub">신규V3 ${partV3Data.length}명 · V2 ${partV2Data.length}명 · 기존 ${partLegacyData.length}명</div></div>
     </div>
 
     <div class="stats-tabs">
@@ -953,14 +1079,151 @@ function renderStats() {
       }).join('')}
     </div>
 
-    <div id="stats-questions-area">
-      ${renderTypeStatCards(curData, QUESTION_CONFIG[curKey], statsCurrentTab)}
-    </div>`;
+    ${bodyHtml}`;
 }
 
 function setStatsTab(type) {
   statsCurrentTab = type;
   renderStats();
+}
+
+function setStatsPartnerSubTab(tab) {
+  statsPartnerSubTab = tab;
+  renderStats();
+}
+
+// ════════════════════════════════════════════════════════
+// 파트너 통계 — 신규 설문 V3(기본) / V2(보관용) / 기존 설문(보관용, 조회 전용) 하위탭
+// ════════════════════════════════════════════════════════
+function renderPartnerStatsPanel(partV3Data, partV2Data, partLegacyData) {
+  const subTabsHtml = `
+    <div class="stats-tabs" style="margin-bottom:16px;">
+      <button class="stats-tab tab-partner${statsPartnerSubTab==='v3'?' active':''}" onclick="setStatsPartnerSubTab('v3')">🆕 파트너 신규 설문 V3 <span class="tab-count">(${partV3Data.length}명)</span></button>
+      <button class="stats-tab tab-partner${statsPartnerSubTab==='v2'?' active':''}" onclick="setStatsPartnerSubTab('v2')">🗄 파트너 V2(보관용) <span class="tab-count">(${partV2Data.length}명)</span></button>
+      <button class="stats-tab tab-partner${statsPartnerSubTab==='legacy'?' active':''}" onclick="setStatsPartnerSubTab('legacy')">🗄 파트너 기존 설문(보관용) <span class="tab-count">(${partLegacyData.length}명)</span></button>
+    </div>`;
+
+  if (statsPartnerSubTab === 'legacy') {
+    return subTabsHtml + `
+      <div style="font-size:12.5px;color:#94a3b8;margin-bottom:12px;">
+        ※ 화면에서는 폐기된 기존 파트너 설문 문항입니다. 과거 응답 조회용으로만 보관되며, 신규 응답은 더 이상 여기에 쌓이지 않습니다.
+      </div>
+      <div id="stats-questions-area">${renderTypeStatCards(partLegacyData, PARTNER_LEGACY_CONFIG, '파트너')}</div>`;
+  }
+
+  if (statsPartnerSubTab === 'v2') {
+    return subTabsHtml + `
+      <div style="font-size:12.5px;color:#94a3b8;margin-bottom:12px;">
+        ※ 화면에서는 폐기된 파트너 설문 V2 문항입니다. 과거 응답 조회용으로만 보관되며, 신규 응답은 더 이상 여기에 쌓이지 않습니다.
+      </div>
+      <div id="stats-questions-area">${renderTypeStatCards(partV2Data, PARTNER_V2_LEGACY_CONFIG, '파트너')}</div>`;
+  }
+
+  const filtered = applyPartnerV3FilterToData(partV3Data);
+  return subTabsHtml +
+    renderPartnerV3FilterBar() +
+    renderPartnerV3Summary(filtered) +
+    `<div id="stats-questions-area">${renderTypeStatCards(filtered, QUESTION_CONFIG.partner, '파트너')}</div>`;
+}
+
+// ── 파트너 v3 요약 지표 ──
+function computeChoiceCounts(data, colKey, isCheckbox) {
+  const counts = {};
+  let answered = 0;
+  data.forEach(r => {
+    const val = r[colKey];
+    if (!val || !String(val).trim()) return;
+    answered++;
+    if (isCheckbox) {
+      String(val).split(',').map(v=>v.trim()).filter(Boolean).forEach(opt => { counts[opt] = (counts[opt]||0) + 1; });
+    } else {
+      const k = String(val).trim();
+      counts[k] = (counts[k]||0) + 1;
+    }
+  });
+  return { counts, answered };
+}
+
+function topChoice(data, colKey, isCheckbox) {
+  const { counts, answered } = computeChoiceCounts(data, colKey, isCheckbox);
+  let best = null, bestCnt = -1;
+  Object.entries(counts).forEach(([k, c]) => { if (c > bestCnt) { best = k; bestCnt = c; } });
+  if (!best) return { label:'-', count:0, pct:0 };
+  return { label:best, count:bestCnt, pct: answered>0 ? (bestCnt/answered*100) : 0 };
+}
+
+function renderPartnerV3Summary(data) {
+  const total = data.length;
+  const dates = data.map(r=>r.submittedAt).filter(Boolean).slice().sort();
+  const dateRange = dates.length ? `${fmt(dates[0]).slice(0,10)} ~ ${fmt(dates[dates.length-1]).slice(0,10)}` : '-';
+
+  const topCategory = topChoice(data, '파트너V3_주요작업분야', true);
+  const topIntent    = topChoice(data, '파트너V3_참여의향', false);
+
+  // 유료 견적 제출 이용료 수용 가능 비율 — "1,000원 시나리오(Q17)"에서 '보내지 않음'을 제외한 응답 비율
+  const feeScenario = computeChoiceCounts(data, '파트너V3_이용료시나리오의향', false);
+  const feeAcceptCount = Object.entries(feeScenario.counts).filter(([k]) => k !== '보내지 않음').reduce((a,[,c]) => a+c, 0);
+  const feeAcceptPct = feeScenario.answered > 0 ? (feeAcceptCount / feeScenario.answered * 100) : 0;
+
+  // 보증·분쟁조정 긍정 응답 비율 — '크게 도움' + '어느 정도 도움'
+  const guarantee = computeChoiceCounts(data, '파트너V3_보증제도의향', false);
+  const positiveKeys = ['크게 도움', '어느 정도 도움'];
+  const guaranteePositiveCount = Object.entries(guarantee.counts).filter(([k]) => positiveKeys.includes(k)).reduce((a,[,c]) => a+c, 0);
+  const guaranteePositivePct = guarantee.answered > 0 ? (guaranteePositiveCount / guarantee.answered * 100) : 0;
+
+  return `<div class="summary-grid" style="margin-bottom:18px;">
+    <div class="stat-card purple"><div class="sc-label">신규 설문 응답자 수</div><div class="sc-value">${total}</div></div>
+    <div class="stat-card"><div class="sc-label">응답 기간</div><div class="sc-value" style="font-size:14px;">${esc(dateRange)}</div></div>
+    <div class="stat-card"><div class="sc-label">주요 작업 분야</div><div class="sc-value" style="font-size:15px;">${esc(topCategory.label)}</div><div class="sc-sub">${topCategory.count}명 · ${topCategory.pct.toFixed(1)}%</div></div>
+    <div class="stat-card"><div class="sc-label">실제 참여 의향 (최다응답)</div><div class="sc-value" style="font-size:14px;">${esc(topIntent.label)}</div><div class="sc-sub">${topIntent.count}명 · ${topIntent.pct.toFixed(1)}%</div></div>
+    <div class="stat-card orange"><div class="sc-label">유료 견적 제출 수용 가능</div><div class="sc-value" style="font-size:22px;">${feeAcceptPct.toFixed(1)}%</div><div class="sc-sub">1,000원 시나리오(Q17) 기준</div></div>
+    <div class="stat-card green"><div class="sc-label">보증·분쟁조정 긍정 응답</div><div class="sc-value" style="font-size:22px;">${guaranteePositivePct.toFixed(1)}%</div><div class="sc-sub">"도움된다" 응답 비율</div></div>
+  </div>`;
+}
+
+// ── 파트너 v3 통계 필터 (1차 필수: 응답 기간 / 참여 의향 / 견적 제출 이용료 평가) ──
+function renderPartnerV3FilterBar() {
+  const participationOptions = ['오픈하면 바로 이용','무료 체험 후 결정','이용료·정책 확인 후 결정','기능 개선 후 이용','참여 의향 낮음','참여하지 않음'];
+  const feeEvalOptions = ['저렴하다','적당하다','조금 비싸다','많이 비싸다','무료여야 한다'];
+  return `<div class="filter-bar">
+    <label>응답 기간:</label>
+    <input type="date" id="pv3-filter-date-from" value="${partnerV3FilterState.dateFrom}">
+    <span style="font-size:12px;color:#64748b">~</span>
+    <input type="date" id="pv3-filter-date-to" value="${partnerV3FilterState.dateTo}">
+    <select id="pv3-filter-intent">
+      <option value="">참여 의향 전체</option>
+      ${participationOptions.map(o=>`<option value="${esc(o)}"${partnerV3FilterState.participation===o?' selected':''}>${esc(o)}</option>`).join('')}
+    </select>
+    <select id="pv3-filter-fee">
+      <option value="">이용료 평가(30만~100만원 구간) 전체</option>
+      ${feeEvalOptions.map(o=>`<option value="${esc(o)}"${partnerV3FilterState.feeEval===o?' selected':''}>${esc(o)}</option>`).join('')}
+    </select>
+    <button class="btn-primary btn-sm" onclick="applyPartnerV3Filters()">적용</button>
+    <button class="btn-outline btn-sm" onclick="resetPartnerV3Filters()">초기화</button>
+  </div>`;
+}
+
+function applyPartnerV3Filters() {
+  partnerV3FilterState.dateFrom      = document.getElementById('pv3-filter-date-from').value;
+  partnerV3FilterState.dateTo        = document.getElementById('pv3-filter-date-to').value;
+  partnerV3FilterState.participation = document.getElementById('pv3-filter-intent').value;
+  partnerV3FilterState.feeEval       = document.getElementById('pv3-filter-fee').value;
+  renderStats();
+}
+
+function resetPartnerV3Filters() {
+  partnerV3FilterState = { dateFrom:'', dateTo:'', participation:'', feeEval:'' };
+  renderStats();
+}
+
+function applyPartnerV3FilterToData(data) {
+  return data.filter(r => {
+    if (partnerV3FilterState.dateFrom && r.submittedAt && r.submittedAt < partnerV3FilterState.dateFrom) return false;
+    if (partnerV3FilterState.dateTo && r.submittedAt && r.submittedAt > partnerV3FilterState.dateTo+'T23:59:59') return false;
+    if (partnerV3FilterState.participation && r['파트너V3_참여의향'] !== partnerV3FilterState.participation) return false;
+    if (partnerV3FilterState.feeEval && r['파트너V3_이용료_30만~100만원평가'] !== partnerV3FilterState.feeEval) return false;
+    return true;
+  });
 }
 
 function renderTypeStatCards(responses, questions, typeName) {
@@ -975,13 +1238,23 @@ function renderTypeStatCards(responses, questions, typeName) {
 
   return questions.map((q, idx) => {
     const displayNum = idx + 1;
+    // 조건부 질문은 조건을 충족한 응답자만 분모로 계산 (전체 응답자 기준으로 섞지 않음)
+    const scopedResponses = filterResponsesForQuestion(responses, q, questions);
+    const conditionNote = q.condition
+      ? `<div class="q-cond-note" style="font-size:11.5px;color:#7c3aed;background:#f3e8ff;display:inline-block;padding:2px 8px;border-radius:6px;margin-bottom:8px;">조건부 질문 · 해당 조건 응답자 ${scopedResponses.length}명 기준</div>`
+      : '';
+    let cardHtml;
     if (q.type === 'text' || q.type === 'textarea') {
-      return renderTextStatCard(q, displayNum, responses, badgeCls);
+      cardHtml = renderTextStatCard(q, displayNum, scopedResponses, badgeCls);
     } else if (q.type === 'scale') {
-      return renderScaleStatCard(q, displayNum, responses, badgeCls);
+      cardHtml = renderScaleStatCard(q, displayNum, scopedResponses, badgeCls);
     } else {
-      return renderChoiceStatCard(q, displayNum, responses, badgeCls);
+      cardHtml = renderChoiceStatCard(q, displayNum, scopedResponses, badgeCls);
     }
+    if (conditionNote) {
+      cardHtml = cardHtml.replace('<div class="q-stat-meta">', conditionNote + '<div class="q-stat-meta">');
+    }
+    return cardHtml;
   }).join('');
 }
 
@@ -1187,19 +1460,13 @@ function renderOpinions() {
   let totalItems = 0;
   let html = '';
 
-  typesToShow.forEach(typeName => {
-    const typeResponses = allResponses.filter(r => r.participantType===typeName);
-    if (typeResponses.length===0) return;
-
-    const configKey = TYPE_TO_CONFIG[typeName];
-    const questions = QUESTION_CONFIG[configKey];
-    const color = typeColors[typeName];
-
+  function buildGroupHtml(label, responses, questions, color) {
+    if (responses.length===0) return '';
     let typeHtml = '';
     questions.forEach((q, idx) => {
       if (q.type!=='textarea' && q.type!=='text') return;
       const displayNum = idx + 1;
-      const answers = typeResponses.map(r => ({
+      const answers = responses.map(r => ({
         date: r.submittedAt,
         name: r.respondentName,
         text: (r[q.colKey]||'').trim()
@@ -1226,14 +1493,29 @@ function renderOpinions() {
       </div>`;
     });
 
-    if (typeHtml) {
-      html += `<div class="opinions-type-section">
-        <div class="opinions-type-header" style="color:${color};border-bottom-color:${color}33;">
-          ${typeName} (${typeResponses.length}명)
-        </div>
-        ${typeHtml}
-      </div>`;
+    if (!typeHtml) return '';
+    return `<div class="opinions-type-section">
+      <div class="opinions-type-header" style="color:${color};border-bottom-color:${color}33;">
+        ${esc(label)} (${responses.length}명)
+      </div>
+      ${typeHtml}
+    </div>`;
+  }
+
+  typesToShow.forEach(typeName => {
+    if (typeName === '파트너') {
+      const partAll = allResponses.filter(r => r.participantType==='파트너');
+      const partV3 = partAll.filter(r => r.surveyVersion==='partner_v3');
+      const partV2 = partAll.filter(r => r.surveyVersion==='partner_v2');
+      const partLegacy = partAll.filter(r => r.surveyVersion!=='partner_v3' && r.surveyVersion!=='partner_v2');
+      html += buildGroupHtml('파트너 — 신규 설문 V3', partV3, QUESTION_CONFIG.partner, typeColors['파트너']);
+      html += buildGroupHtml('파트너 — V2(보관용)', partV2, PARTNER_V2_LEGACY_CONFIG, '#a855f7');
+      html += buildGroupHtml('파트너 — 기존 설문(보관용)', partLegacy, PARTNER_LEGACY_CONFIG, '#9333ea');
+      return;
     }
+    const typeResponses = allResponses.filter(r => r.participantType===typeName);
+    const configKey = TYPE_TO_CONFIG[typeName];
+    html += buildGroupHtml(typeName, typeResponses, QUESTION_CONFIG[configKey], typeColors[typeName]);
   });
 
   if (!html) {
@@ -1290,8 +1572,9 @@ function openDetail(responseId) {
 
   document.getElementById('modal-title').textContent = `응답 상세 — ${r.respondentName||r.responseId}`;
 
-  const configKey = TYPE_TO_CONFIG[r.participantType];
-  const questions = configKey ? QUESTION_CONFIG[configKey] : [];
+  const questions = questionsForResponse(r);
+  const isPartnerArchived = r.participantType === '파트너' && r.surveyVersion !== 'partner_v3';
+  const partnerArchiveLabel = r.surveyVersion === 'partner_v2' ? ' (V2 설문 · 보관용)' : ' (기존 설문 · 보관용)';
   const typeColor = {'일반사용자':'#1a56db','임직원':'#16a34a','파트너':'#7c3aed'}[r.participantType] || '#64748b';
 
   let html = `
@@ -1340,7 +1623,7 @@ function openDetail(responseId) {
     </div>
 
     <div class="detail-section">
-      <div class="detail-section-title">${esc(r.participantType)} 설문 답변 — ${questions.length}문항</div>
+      <div class="detail-section-title">${esc(r.participantType)} 설문 답변${isPartnerArchived?esc(partnerArchiveLabel):''} — ${questions.length}문항</div>
       ${questions.map((q, idx) => {
         const displayNum = idx + 1;
         const rawVal = r[q.colKey] || '';
@@ -1401,15 +1684,15 @@ function downloadExcel(mode) {
   const commonBase = ['submittedAt','participantType','responseId','respondentName','respondentPhone','개인정보동의','처리상태','관리자메모'];
 
   if (mode==='opinions') {
-    const rows = [['제출일시','응답ID','참여자유형','이름','Q번호','질문','답변내용']];
+    const rows = [['제출일시','응답ID','참여자유형','설문버전','이름','Q번호','질문','답변내용']];
     data.forEach(r => {
-      const configKey = TYPE_TO_CONFIG[r.participantType];
-      if (!configKey) return;
-      QUESTION_CONFIG[configKey].forEach((q, idx) => {
+      const questions = questionsForResponse(r);
+      if (!questions.length) return;
+      questions.forEach((q, idx) => {
         if (q.type!=='textarea'&&q.type!=='text') return;
         const val = (r[q.colKey]||'').trim();
         if (!val) return;
-        rows.push([r.submittedAt,r.responseId,r.participantType,r.respondentName||'',`Q${idx+1}`,q.title,val]);
+        rows.push([r.submittedAt,r.responseId,r.participantType,r.surveyVersion||'',r.respondentName||'',`Q${idx+1}`,q.title,val]);
       });
     });
     exportXlsxSingle(`만능맨_주관식의견_${ts}.xlsx`, '주관식의견', rows);
@@ -1423,13 +1706,14 @@ function downloadExcel(mode) {
 
   const wb = XLSX.utils.book_new();
 
-  // 유형별 데이터
-  const genData  = data.filter(r=>r.participantType==='일반사용자');
-  const empData  = data.filter(r=>r.participantType==='임직원');
-  const partData = data.filter(r=>r.participantType==='파트너');
+  // 유형별 데이터 — 파트너는 신규 설문(V3)/V2(보관용)/기존 설문(보관용)으로 분리
+  const genData        = data.filter(r=>r.participantType==='일반사용자');
+  const empData        = data.filter(r=>r.participantType==='임직원');
+  const partV3Data     = data.filter(r=>r.participantType==='파트너' && r.surveyVersion==='partner_v3');
+  const partV2Data     = data.filter(r=>r.participantType==='파트너' && r.surveyVersion==='partner_v2');
+  const partLegacyData = data.filter(r=>r.participantType==='파트너' && r.surveyVersion!=='partner_v3' && r.surveyVersion!=='partner_v2');
 
-  function makeTypeSheet(typeData, configKey) {
-    const qs = QUESTION_CONFIG[configKey];
+  function makeTypeSheet(typeData, qs) {
     const qHeaders = [];
     const qKeys    = [];
     qs.forEach((q,i) => {
@@ -1447,31 +1731,46 @@ function downloadExcel(mode) {
     return ws;
   }
 
-  // 전체응답
+  // 전체응답 — 파트너는 신규(V3)/V2(보관)/기존 컬럼을 모두 포함 (해당하지 않는 응답은 빈 값으로 표시됨)
   const allHeaders = [...commonBase,
     ...QUESTION_CONFIG.general.map((q,i)=>`일반Q${i+1}.${q.title.slice(0,20)}`),
     ...QUESTION_CONFIG.employee.map((q,i)=>`임직원Q${i+1}.${q.title.slice(0,20)}`),
     ...QUESTION_CONFIG.partner.flatMap((q,i)=> q.etcColKey
-      ? [`파트너Q${i+1}.${q.title.slice(0,20)}`, `파트너Q${i+1}.기타의견`]
-      : [`파트너Q${i+1}.${q.title.slice(0,20)}`])
+      ? [`파트너V3_Q${i+1}.${q.title.slice(0,20)}`, `파트너V3_Q${i+1}.기타의견`]
+      : [`파트너V3_Q${i+1}.${q.title.slice(0,20)}`]),
+    ...PARTNER_V2_LEGACY_CONFIG.flatMap((q,i)=> q.etcColKey
+      ? [`파트너V2_Q${i+1}.${q.title.slice(0,20)}`, `파트너V2_Q${i+1}.기타의견`]
+      : [`파트너V2_Q${i+1}.${q.title.slice(0,20)}`]),
+    ...PARTNER_LEGACY_CONFIG.flatMap((q,i)=> q.etcColKey
+      ? [`파트너기존_Q${i+1}.${q.title.slice(0,20)}`, `파트너기존_Q${i+1}.기타의견`]
+      : [`파트너기존_Q${i+1}.${q.title.slice(0,20)}`])
   ];
   const allCols = [...commonBase,
     ...QUESTION_CONFIG.general.map(q=>q.colKey),
     ...QUESTION_CONFIG.employee.map(q=>q.colKey),
-    ...QUESTION_CONFIG.partner.flatMap(q=> q.etcColKey ? [q.colKey, q.etcColKey] : [q.colKey])
+    ...QUESTION_CONFIG.partner.flatMap(q=> q.etcColKey ? [q.colKey, q.etcColKey] : [q.colKey]),
+    ...PARTNER_V2_LEGACY_CONFIG.flatMap(q=> q.etcColKey ? [q.colKey, q.etcColKey] : [q.colKey]),
+    ...PARTNER_LEGACY_CONFIG.flatMap(q=> q.etcColKey ? [q.colKey, q.etcColKey] : [q.colKey])
   ];
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([allHeaders,...data.map(r=>allCols.map(k=>r[k]||''))]), '전체응답');
-  XLSX.utils.book_append_sheet(wb, makeTypeSheet(genData, 'general'),   '일반사용자');
-  XLSX.utils.book_append_sheet(wb, makeTypeSheet(empData, 'employee'),  '임직원');
-  XLSX.utils.book_append_sheet(wb, makeTypeSheet(partData,'partner'),   '파트너');
+  XLSX.utils.book_append_sheet(wb, makeTypeSheet(genData,        QUESTION_CONFIG.general),  '일반사용자');
+  XLSX.utils.book_append_sheet(wb, makeTypeSheet(empData,        QUESTION_CONFIG.employee), '임직원');
+  XLSX.utils.book_append_sheet(wb, makeTypeSheet(partV3Data,     QUESTION_CONFIG.partner),  '파트너_신규V3');
+  XLSX.utils.book_append_sheet(wb, makeTypeSheet(partV2Data,     PARTNER_V2_LEGACY_CONFIG), '파트너_V2');
+  XLSX.utils.book_append_sheet(wb, makeTypeSheet(partLegacyData, PARTNER_LEGACY_CONFIG),    '파트너_기존');
 
   // 질문별 통계 시트
   const statRows = [['유형','Q번호','질문','유형','선택지','응답수','비율(%)','응답자수']];
-  ['general','employee','partner'].forEach(configKey => {
-    const typeName = CONFIG_TO_TYPE[configKey];
-    const typeData = data.filter(r=>r.participantType===typeName);
-    const total    = typeData.length;
-    QUESTION_CONFIG[configKey].forEach((q, idx) => {
+  const statGroups = [
+    { label:'일반사용자',      data:genData,        qs:QUESTION_CONFIG.general },
+    { label:'임직원',          data:empData,        qs:QUESTION_CONFIG.employee },
+    { label:'파트너(신규V3)',  data:partV3Data,     qs:QUESTION_CONFIG.partner },
+    { label:'파트너(V2)',      data:partV2Data,     qs:PARTNER_V2_LEGACY_CONFIG },
+    { label:'파트너(기존)',    data:partLegacyData, qs:PARTNER_LEGACY_CONFIG }
+  ];
+  statGroups.forEach(group => {
+    const typeData = group.data;
+    group.qs.forEach((q, idx) => {
       if (q.type==='text'||q.type==='textarea') return;
       const counts = {};
       let answered = 0;
@@ -1491,22 +1790,22 @@ function downloadExcel(mode) {
       opts.forEach(opt => {
         const cnt = counts[opt]||0;
         const pct = answered>0?((cnt/answered)*100).toFixed(1)+'%':'0%';
-        statRows.push([typeName,`Q${idx+1}`,q.title,{'radio':'단일선택','checkbox':'복수선택','scale':'척도'}[q.type]||'',opt,cnt,pct,answered]);
+        statRows.push([group.label,`Q${idx+1}`,q.title,{'radio':'단일선택','checkbox':'복수선택','scale':'척도'}[q.type]||'',opt,cnt,pct,answered]);
       });
     });
   });
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(statRows), '질문별통계');
 
   // 주관식
-  const opRows = [['제출일시','응답ID','참여자유형','이름','Q번호','질문','답변내용']];
+  const opRows = [['제출일시','응답ID','참여자유형','설문버전','이름','Q번호','질문','답변내용']];
   data.forEach(r => {
-    const configKey = TYPE_TO_CONFIG[r.participantType];
-    if (!configKey) return;
-    QUESTION_CONFIG[configKey].forEach((q,idx) => {
+    const questions = questionsForResponse(r);
+    if (!questions.length) return;
+    questions.forEach((q,idx) => {
       if (q.type!=='textarea'&&q.type!=='text') return;
       const val=(r[q.colKey]||'').trim();
       if (!val) return;
-      opRows.push([r.submittedAt,r.responseId,r.participantType,r.respondentName||'',`Q${idx+1}`,q.title,val]);
+      opRows.push([r.submittedAt,r.responseId,r.participantType,r.surveyVersion||'',r.respondentName||'',`Q${idx+1}`,q.title,val]);
     });
   });
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(opRows), '주관식의견');

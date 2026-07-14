@@ -26,7 +26,9 @@ var DEFAULT_CODE_EMPLOYEE = 'samyang';
 var DEFAULT_CODE_PARTNER  = '10000';
 
 // ── responses 시트 컬럼 (통합형) ──────────────────────────
-// 공통 5 + 일반 15 + 임직원 25 + 파트너 22 + 관리 2 + 동의 2 + 파트너추가 7 = 78컬럼
+// 공통 5 + 일반 15 + 임직원 25 + 파트너(구) 22 + 관리 2 + 동의 2 + 파트너추가 7
+// + 설문버전 1 + 파트너V2(구) 33 + 파트너V3(신규) 55 = 167컬럼
+// 파트너(구)/파트너추가/파트너V2 컬럼은 화면에서는 폐기되었지만 과거 응답 보존을 위해 그대로 유지된다.
 function buildGeneralCols() {
   var cols = [];
   for (var i = 1; i <= 15; i++) cols.push('일반_Q' + i);
@@ -72,7 +74,170 @@ var PARTNER_EXTRA_FIELD_MAP = {
   '입점사 입장에서 절대 불편하면 안 되는 부분': 'partner_must_not_be_inconvenient'
 };
 
-var RESPONSE_HEADERS = COMMON_COLS.concat(GENERAL_COLS).concat(EMPLOYEE_COLS).concat(PARTNER_COLS).concat(ADMIN_COLS).concat(CONSENT_COLS).concat(PARTNER_EXTRA_COLS);
+// ════════════════════════════════════════════════════════════
+// 파트너 설문 v2 — 기존 파트너_Q*/파트너 추가질문은 화면에서 폐기되었지만
+// 컬럼/데이터는 그대로 보존한다. 신규 24문항은 전부 partner_v2_ 접두 colKey를
+// 쓰며, 시트 헤더는 "맨 뒤"에 추가되어 기존 컬럼 순서에 영향을 주지 않는다.
+// ════════════════════════════════════════════════════════════
+var SURVEY_VERSION_COL = ['surveyVersion'];
+
+var PARTNER_V2_COLS = [
+  '파트너V2_업체명', '파트너V2_활동지역', '파트너V2_주요작업분야', '파트너V2_주요작업분야_기타',
+  '파트너V2_서비스이해도', '파트너V2_견적흐름', '파트너V2_요청정보충분성',
+  '파트너V2_필요요청정보', '파트너V2_필요요청정보_기타',
+  '파트너V2_유용할것같은기능', '파트너V2_유용할것같은기능_기타',
+  '파트너V2_주요우려사항', '파트너V2_주요우려사항_기타',
+  '파트너V2_타플랫폼경험',
+  '파트너V2_경쟁력강점', '파트너V2_경쟁력강점_기타',
+  '파트너V2_경쟁력우선순위', '파트너V2_경쟁력우선순위_기타',
+  '파트너V2_이용료방식', '파트너V2_이용료방식_기타',
+  '파트너V2_이용료_30만원미만', '파트너V2_이용료_30만원~100만원', '파트너V2_이용료_100만원이상',
+  '파트너V2_이용료시나리오의향',
+  '파트너V2_이용료보호정책', '파트너V2_이용료보호정책_기타',
+  '파트너V2_안전결제',
+  '파트너V2_플랫폼보호역할', '파트너V2_플랫폼보호역할_기타',
+  '파트너V2_보증제도의향',
+  '파트너V2_참여의향',
+  '파트너V2_가장중요한개선점',
+  '파트너V2_추가제안'
+];
+// 시트 헤더명(한글) ← 설문 페이지 제출 필드명(영문 partner_v2_* colKey) 매핑
+var PARTNER_V2_FIELD_MAP = {
+  '파트너V2_업체명':               'partner_v2_company_name',
+  '파트너V2_활동지역':             'partner_v2_service_area',
+  '파트너V2_주요작업분야':         'partner_v2_service_category',
+  '파트너V2_주요작업분야_기타':    'partner_v2_service_category_etc',
+  '파트너V2_서비스이해도':         'partner_v2_service_understanding',
+  '파트너V2_견적흐름':             'partner_v2_quote_flow',
+  '파트너V2_요청정보충분성':       'partner_v2_request_information',
+  '파트너V2_필요요청정보':         'partner_v2_required_request_info',
+  '파트너V2_필요요청정보_기타':    'partner_v2_required_request_info_etc',
+  '파트너V2_유용할것같은기능':      'partner_v2_expected_useful_features',
+  '파트너V2_유용할것같은기능_기타': 'partner_v2_expected_useful_features_etc',
+  '파트너V2_주요우려사항':         'partner_v2_main_concerns',
+  '파트너V2_주요우려사항_기타':    'partner_v2_main_concerns_etc',
+  '파트너V2_타플랫폼경험':         'partner_v2_competitor_experience',
+  '파트너V2_경쟁력강점':           'partner_v2_competitive_strength',
+  '파트너V2_경쟁력강점_기타':      'partner_v2_competitive_strength_etc',
+  '파트너V2_경쟁력우선순위':       'partner_v2_competitive_priority',
+  '파트너V2_경쟁력우선순위_기타':  'partner_v2_competitive_priority_etc',
+  '파트너V2_이용료방식':           'partner_v2_fee_method',
+  '파트너V2_이용료방식_기타':      'partner_v2_fee_method_etc',
+  '파트너V2_이용료_30만원미만':          'partner_v2_fee_under_300k',
+  '파트너V2_이용료_30만원~100만원':      'partner_v2_fee_300k_1m',
+  '파트너V2_이용료_100만원이상':         'partner_v2_fee_over_1m',
+  '파트너V2_이용료시나리오의향':   'partner_v2_fee_scenario_intent',
+  '파트너V2_이용료보호정책':       'partner_v2_fee_protection',
+  '파트너V2_이용료보호정책_기타':  'partner_v2_fee_protection_etc',
+  '파트너V2_안전결제':             'partner_v2_safe_payment',
+  '파트너V2_플랫폼보호역할':       'partner_v2_platform_protection_role',
+  '파트너V2_플랫폼보호역할_기타':  'partner_v2_platform_protection_role_etc',
+  '파트너V2_보증제도의향':         'partner_v2_guarantee_intent',
+  '파트너V2_참여의향':             'partner_v2_participation_intent',
+  '파트너V2_가장중요한개선점':     'partner_v2_most_important_improvement',
+  '파트너V2_추가제안':             'partner_v2_additional_suggestion'
+};
+
+// ════════════════════════════════════════════════════════════
+// 파트너 설문 v3 — 파트너v2 화면 설문도 폐기되었지만 컬럼/데이터는 그대로 보존한다.
+// 신규 Q1~Q24(+조건부 추가질문 13개)는 전부 partner_v3_ 접두 colKey를 쓰며,
+// 시트 헤더는 "맨 뒤"에 추가되어 기존 컬럼 순서에 영향을 주지 않는다.
+// ════════════════════════════════════════════════════════════
+var PARTNER_V3_COLS = [
+  '파트너V3_업체명', '파트너V3_활동지역',
+  '파트너V3_주요작업분야', '파트너V3_주요작업분야_기타',
+  '파트너V3_서비스이해도',
+  '파트너V3_이해어려운부분', '파트너V3_이해어려운부분_기타',
+  '파트너V3_견적흐름',
+  '파트너V3_견적흐름_불편과정', '파트너V3_견적흐름_불편과정_기타',
+  '파트너V3_요청정보충분성',
+  '파트너V3_추가필요정보', '파트너V3_추가필요정보_기타',
+  '파트너V3_우선확인정보', '파트너V3_우선확인정보_기타',
+  '파트너V3_유용할것같은기능', '파트너V3_유용할것같은기능_기타',
+  '파트너V3_주요우려사항', '파트너V3_주요우려사항_기타',
+  '파트너V3_우려해결방법',
+  '파트너V3_타플랫폼경험',
+  '파트너V3_이용서비스', '파트너V3_이용서비스_기타',
+  '파트너V3_경쟁력강점', '파트너V3_경쟁력강점_기타',
+  '파트너V3_경쟁력약점', '파트너V3_경쟁력약점_기타',
+  '파트너V3_경쟁력우선순위', '파트너V3_경쟁력우선순위_기타',
+  '파트너V3_이용료방식', '파트너V3_이용료방식_기타',
+  '파트너V3_이용료_30만원미만평가', '파트너V3_이용료_30만원미만_수용금액',
+  '파트너V3_이용료_30만~100만원평가', '파트너V3_이용료_30만~100만원_수용금액',
+  '파트너V3_이용료_100만원이상평가', '파트너V3_이용료_100만원이상_수용금액',
+  '파트너V3_이용료시나리오의향',
+  '파트너V3_이용료시나리오_거절이유', '파트너V3_이용료시나리오_거절이유_기타',
+  '파트너V3_이용료보호정책', '파트너V3_이용료보호정책_기타',
+  '파트너V3_안전결제평가',
+  '파트너V3_결제이용필요조건', '파트너V3_결제이용필요조건_기타',
+  '파트너V3_플랫폼보호역할', '파트너V3_플랫폼보호역할_기타',
+  '파트너V3_보증제도의향',
+  '파트너V3_보증명확화필요사항', '파트너V3_보증명확화필요사항_기타',
+  '파트너V3_참여의향',
+  '파트너V3_참여필요조건', '파트너V3_참여필요조건_기타',
+  '파트너V3_가장중요한개선점',
+  '파트너V3_추가제안'
+];
+// 시트 헤더명(한글) ← 설문 페이지 제출 필드명(영문 partner_v3_* colKey) 매핑
+var PARTNER_V3_FIELD_MAP = {
+  '파트너V3_업체명':               'partner_v3_company_name',
+  '파트너V3_활동지역':             'partner_v3_service_area',
+  '파트너V3_주요작업분야':         'partner_v3_service_category',
+  '파트너V3_주요작업분야_기타':    'partner_v3_service_category_etc',
+  '파트너V3_서비스이해도':         'partner_v3_service_understanding',
+  '파트너V3_이해어려운부분':       'partner_v3_service_confusion_detail',
+  '파트너V3_이해어려운부분_기타':  'partner_v3_service_confusion_detail_etc',
+  '파트너V3_견적흐름':             'partner_v3_quote_flow',
+  '파트너V3_견적흐름_불편과정':    'partner_v3_quote_flow_inconvenience',
+  '파트너V3_견적흐름_불편과정_기타': 'partner_v3_quote_flow_inconvenience_etc',
+  '파트너V3_요청정보충분성':       'partner_v3_request_information',
+  '파트너V3_추가필요정보':         'partner_v3_additional_request_information',
+  '파트너V3_추가필요정보_기타':    'partner_v3_additional_request_information_etc',
+  '파트너V3_우선확인정보':         'partner_v3_priority_request_information',
+  '파트너V3_우선확인정보_기타':    'partner_v3_priority_request_information_etc',
+  '파트너V3_유용할것같은기능':      'partner_v3_expected_useful_features',
+  '파트너V3_유용할것같은기능_기타': 'partner_v3_expected_useful_features_etc',
+  '파트너V3_주요우려사항':         'partner_v3_main_concerns',
+  '파트너V3_주요우려사항_기타':    'partner_v3_main_concerns_etc',
+  '파트너V3_우려해결방법':         'partner_v3_concern_solution',
+  '파트너V3_타플랫폼경험':         'partner_v3_competitor_experience',
+  '파트너V3_이용서비스':           'partner_v3_competitor_services',
+  '파트너V3_이용서비스_기타':      'partner_v3_competitor_services_etc',
+  '파트너V3_경쟁력강점':           'partner_v3_competitive_strength',
+  '파트너V3_경쟁력강점_기타':      'partner_v3_competitive_strength_etc',
+  '파트너V3_경쟁력약점':           'partner_v3_competitive_weakness',
+  '파트너V3_경쟁력약점_기타':      'partner_v3_competitive_weakness_etc',
+  '파트너V3_경쟁력우선순위':       'partner_v3_competitive_priority',
+  '파트너V3_경쟁력우선순위_기타':  'partner_v3_competitive_priority_etc',
+  '파트너V3_이용료방식':           'partner_v3_fee_method',
+  '파트너V3_이용료방식_기타':      'partner_v3_fee_method_etc',
+  '파트너V3_이용료_30만원미만평가':          'partner_v3_fee_under_300k_evaluation',
+  '파트너V3_이용료_30만원미만_수용금액':     'partner_v3_fee_under_300k_acceptable',
+  '파트너V3_이용료_30만~100만원평가':        'partner_v3_fee_300k_1m_evaluation',
+  '파트너V3_이용료_30만~100만원_수용금액':   'partner_v3_fee_300k_1m_acceptable',
+  '파트너V3_이용료_100만원이상평가':         'partner_v3_fee_over_1m_evaluation',
+  '파트너V3_이용료_100만원이상_수용금액':    'partner_v3_fee_over_1m_acceptable',
+  '파트너V3_이용료시나리오의향':   'partner_v3_fee_scenario_intent',
+  '파트너V3_이용료시나리오_거절이유':      'partner_v3_fee_scenario_rejection_reason',
+  '파트너V3_이용료시나리오_거절이유_기타': 'partner_v3_fee_scenario_rejection_reason_etc',
+  '파트너V3_이용료보호정책':       'partner_v3_fee_protection',
+  '파트너V3_이용료보호정책_기타':  'partner_v3_fee_protection_etc',
+  '파트너V3_안전결제평가':         'partner_v3_safe_payment_evaluation',
+  '파트너V3_결제이용필요조건':     'partner_v3_required_payment_conditions',
+  '파트너V3_결제이용필요조건_기타': 'partner_v3_required_payment_conditions_etc',
+  '파트너V3_플랫폼보호역할':       'partner_v3_platform_protection_role',
+  '파트너V3_플랫폼보호역할_기타':  'partner_v3_platform_protection_role_etc',
+  '파트너V3_보증제도의향':         'partner_v3_guarantee_intent',
+  '파트너V3_보증명확화필요사항':   'partner_v3_guarantee_required_clarity',
+  '파트너V3_보증명확화필요사항_기타': 'partner_v3_guarantee_required_clarity_etc',
+  '파트너V3_참여의향':             'partner_v3_participation_intent',
+  '파트너V3_참여필요조건':         'partner_v3_participation_requirement',
+  '파트너V3_참여필요조건_기타':    'partner_v3_participation_requirement_etc',
+  '파트너V3_가장중요한개선점':     'partner_v3_most_important_improvement',
+  '파트너V3_추가제안':             'partner_v3_additional_suggestion'
+};
+
+var RESPONSE_HEADERS = COMMON_COLS.concat(GENERAL_COLS).concat(EMPLOYEE_COLS).concat(PARTNER_COLS).concat(ADMIN_COLS).concat(CONSENT_COLS).concat(PARTNER_EXTRA_COLS).concat(SURVEY_VERSION_COL).concat(PARTNER_V2_COLS).concat(PARTNER_V3_COLS);
 var LOG_HEADERS      = ['loggedAt', 'type', 'message', 'detail'];
 var SETTINGS_HEADERS = ['key', 'value'];
 
@@ -136,6 +301,17 @@ function doPost(e) {
       if (PARTNER_EXTRA_FIELD_MAP[key] !== undefined) {
         var fieldKey = PARTNER_EXTRA_FIELD_MAP[key];
         return data[fieldKey] !== undefined ? String(data[fieldKey]) : '';
+      }
+      // 파트너 v2 신규 질문 — 한글 헤더(파트너V2_*)에 영문 필드명(partner_v2_*)으로 제출된 값을 매핑
+      if (PARTNER_V2_FIELD_MAP[key] !== undefined) {
+        var v2FieldKey = PARTNER_V2_FIELD_MAP[key];
+        return data[v2FieldKey] !== undefined ? String(data[v2FieldKey]) : '';
+      }
+      // 파트너 v3 신규 질문 — 한글 헤더(파트너V3_*)에 영문 필드명(partner_v3_*)으로 제출된 값을 매핑
+      // 조건부 질문이 화면에 표시되지 않은 경우 프론트에서 빈 문자열로 전송되며 그대로 빈값 저장됨
+      if (PARTNER_V3_FIELD_MAP[key] !== undefined) {
+        var v3FieldKey = PARTNER_V3_FIELD_MAP[key];
+        return data[v3FieldKey] !== undefined ? String(data[v3FieldKey]) : '';
       }
       return data[key] !== undefined ? String(data[key]) : '';
     });
@@ -370,6 +546,25 @@ function migrateToNewStructure() {
   Logger.log('migrateToNewStructure 완료');
   Logger.log('백업 시트: ' + backupName);
   Logger.log('새 responses 헤더 수: ' + RESPONSE_HEADERS.length);
+}
+
+// ════════════════════════════════════════════════════════════
+// 파트너 설문 v2 배포 전 안전 백업 — Apps Script 편집기에서 1회 수동 실행
+// responses 시트를 복사만 하고(원본은 그대로 유지) backup_responses_before_partner_v2_<시각>
+// 이름의 새 시트를 만든다. 삭제/수정 없이 순수 복사본만 추가한다.
+// ════════════════════════════════════════════════════════════
+function backupResponsesBeforePartnerV2() {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sheet = ss.getSheetByName(SHEET_RESPONSES);
+  if (!sheet) {
+    Logger.log('responses 시트가 없어 백업할 대상이 없습니다.');
+    return;
+  }
+  var now = new Date();
+  var timestamp = Utilities.formatDate(now, 'Asia/Seoul', 'yyyyMMdd_HHmmss');
+  var backupName = 'backup_responses_before_partner_v2_' + timestamp;
+  sheet.copyTo(ss).setName(backupName);
+  Logger.log('백업 완료: ' + backupName + ' (원본 responses 시트는 변경되지 않음)');
 }
 
 // ════════════════════════════════════════════════════════════
@@ -1428,6 +1623,147 @@ function testDoPost_partner() {
   testData['partner_must_not_be_inconvenient']  = '정산 지연이 절대 없어야 합니다.';
   var result = doPost({ postData: { contents: JSON.stringify(testData) }, parameter: testData });
   Logger.log('testDoPost_partner 결과: ' + result.getContent());
+}
+
+// 파트너 설문 v2(신규 24문항) 저장 테스트 — 기존 testDoPost_partner()와 별개로 유지
+function testDoPost_partner_v2() {
+  var testData = {
+    participantType: '파트너',
+    respondentName: '테스트 파트너V2',
+    respondentPhone: '010-7777-8888',
+    개인정보동의: '동의',
+    개인정보동의일시: '2026-07-14 12:00:00',
+    surveyVersion: 'partner_v2',
+
+    partner_v2_company_name: '테스트설비',
+    partner_v2_service_area: '서울 강서구',
+    partner_v2_service_category: '수도·배관,누수,기타',
+    partner_v2_service_category_etc: '하수구 뚫음',
+
+    partner_v2_service_understanding: '바로 이해되었다',
+    partner_v2_quote_flow: '매우 편리했다',
+    partner_v2_request_information: '견적을 작성하기에 충분했다',
+    partner_v2_required_request_info: '현장 사진,작업 주소 또는 지역,기타',
+    partner_v2_required_request_info_etc: '건물 층수',
+    partner_v2_expected_useful_features: '빠른 견적서 작성,새로운 요청 실시간 알림',
+    partner_v2_expected_useful_features_etc: '',
+    partner_v2_main_concerns: '특별히 걱정되는 부분 없음',
+    partner_v2_main_concerns_etc: '',
+
+    partner_v2_competitor_experience: '현재 이용하고 있다',
+    partner_v2_competitive_strength: '고객 요청내용을 확인하기 편하다,본사에서 운영해 신뢰가 간다',
+    partner_v2_competitive_strength_etc: '',
+    partner_v2_competitive_priority: '빠르고 안정적인 정산,파트너 검증과 고객 신뢰 확보',
+    partner_v2_competitive_priority_etc: '',
+
+    partner_v2_fee_method: '작업금액과 작업 분야를 함께 고려하는 방식',
+    partner_v2_fee_method_etc: '',
+    partner_v2_fee_under_300k: '적당하다',
+    partner_v2_fee_300k_1m: '적당하다',
+    partner_v2_fee_over_1m: '조금 비싸다',
+    partner_v2_fee_scenario_intent: '적극적으로 견적을 보내겠다',
+    partner_v2_fee_protection: '허위 요청이면 이용료 반환,고객 연락처가 잘못되면 이용료 반환',
+    partner_v2_fee_protection_etc: '',
+
+    partner_v2_safe_payment: '미수금 걱정이 줄어들어 매우 좋다',
+    partner_v2_platform_protection_role: '고객 본인인증,작업 완료 후 빠른 정산',
+    partner_v2_platform_protection_role_etc: '',
+    partner_v2_guarantee_intent: '크게 도움이 된다',
+
+    partner_v2_participation_intent: '정식 오픈하면 바로 이용해보고 싶다',
+    partner_v2_most_important_improvement: '견적 작성 화면에서 사진 첨부가 조금 느립니다.',
+    partner_v2_additional_suggestion: '자주 쓰는 견적 템플릿 저장 기능이 있으면 좋겠습니다.'
+  };
+  var result = doPost({ postData: { contents: JSON.stringify(testData) }, parameter: testData });
+  Logger.log('testDoPost_partner_v2 결과: ' + result.getContent());
+}
+
+// 파트너 설문 v3(Q1~Q24 + 조건부 추가질문) 저장 테스트 — 조건부 질문이 다수 노출된 케이스
+function testDoPost_partner_v3() {
+  var testData = {
+    participantType: '파트너',
+    respondentName: '테스트 파트너V3',
+    respondentPhone: '010-9999-1234',
+    개인정보동의: '동의',
+    개인정보동의일시: '2026-07-14 12:00:00',
+    surveyVersion: 'partner_v3',
+
+    partner_v3_company_name: '테스트설비V3',
+    partner_v3_service_area: '서울 강서구',
+    partner_v3_service_category: '수도·배관,누수,기타',
+    partner_v3_service_category_etc: '하수구 뚫음',
+
+    partner_v3_service_understanding: '전체적인 구조가 잘 이해되지 않았다',
+    partner_v3_service_confusion_detail: '수수료 발생 방식,결제 및 정산 방식',
+    partner_v3_service_confusion_detail_etc: '',
+
+    partner_v3_quote_flow: '많이 불편했다',
+    partner_v3_quote_flow_inconvenience: '고객 요청 찾기,견적금액 입력',
+    partner_v3_quote_flow_inconvenience_etc: '',
+
+    partner_v3_request_information: '고객에게 추가로 물어봐야 할 정보가 많다',
+    partner_v3_additional_request_information: '현장 전체 사진,정확한 작업 주소,고객 예상 예산',
+    partner_v3_additional_request_information_etc: '',
+
+    partner_v3_priority_request_information: '현장 사진·동영상,자세한 증상',
+    partner_v3_priority_request_information_etc: '',
+
+    partner_v3_expected_useful_features: '실시간 요청 알림,빠른 견적 작성',
+    partner_v3_expected_useful_features_etc: '',
+
+    partner_v3_main_concerns: '허위·장난 요청,정산 지연',
+    partner_v3_main_concerns_etc: '',
+    partner_v3_concern_solution: '본인인증과 빠른 정산이 필요합니다.',
+
+    partner_v3_competitor_experience: '현재 이용 중',
+    partner_v3_competitor_services: '숨고,당근',
+    partner_v3_competitor_services_etc: '',
+
+    partner_v3_competitive_strength: '차이를 느끼지 못함',
+    partner_v3_competitive_strength_etc: '',
+    partner_v3_competitive_weakness: '고객 요청 수,비용 장점',
+    partner_v3_competitive_weakness_etc: '',
+
+    partner_v3_competitive_priority: '허위·중복 차단,빠른 정산',
+    partner_v3_competitive_priority_etc: '',
+
+    partner_v3_fee_method: '금액과 분야 함께 고려',
+    partner_v3_fee_method_etc: '',
+
+    partner_v3_fee_under_300k_evaluation: '많이 비싸다',
+    partner_v3_fee_under_300k_acceptable: '100원',
+    partner_v3_fee_300k_1m_evaluation: '조금 비싸다',
+    partner_v3_fee_300k_1m_acceptable: '500원',
+    partner_v3_fee_over_1m_evaluation: '적당하다',
+    partner_v3_fee_over_1m_acceptable: '',
+
+    partner_v3_fee_scenario_intent: '보내지 않음',
+    partner_v3_fee_scenario_rejection_reason: '수익 부족',
+    partner_v3_fee_scenario_rejection_reason_etc: '',
+
+    partner_v3_fee_protection: '허위 요청 환급,연락처 오류 환급',
+    partner_v3_fee_protection_etc: '',
+
+    partner_v3_safe_payment_evaluation: '분쟁으로 정산 보류 우려',
+    partner_v3_required_payment_conditions: '분쟁 없는 금액 먼저 정산,정산 예정일 표시',
+    partner_v3_required_payment_conditions_etc: '',
+
+    partner_v3_platform_protection_role: '고객 본인인증,빠른 정산',
+    partner_v3_platform_protection_role_etc: '',
+
+    partner_v3_guarantee_intent: '파트너 책임만 커질까 우려',
+    partner_v3_guarantee_required_clarity: '고객·파트너 과실 구분,환불 조건',
+    partner_v3_guarantee_required_clarity_etc: '',
+
+    partner_v3_participation_intent: '기능 개선 후 이용',
+    partner_v3_participation_requirement: '고객 요청 품질,안전결제',
+    partner_v3_participation_requirement_etc: '',
+
+    partner_v3_most_important_improvement: '견적 제출 이용료 정책을 명확히 안내해주세요.',
+    partner_v3_additional_suggestion: '자주 쓰는 견적 템플릿 저장 기능이 있으면 좋겠습니다.'
+  };
+  var result = doPost({ postData: { contents: JSON.stringify(testData) }, parameter: testData });
+  Logger.log('testDoPost_partner_v3 결과: ' + result.getContent());
 }
 
 // ════════════════════════════════════════════════════════════
