@@ -27,8 +27,8 @@ var DEFAULT_CODE_PARTNER  = '10000';
 
 // ── responses 시트 컬럼 (통합형) ──────────────────────────
 // 공통 5 + 일반 15 + 임직원 25 + 파트너(구) 22 + 관리 2 + 동의 2 + 파트너추가 7
-// + 설문버전 1 + 파트너V2(구) 33 + 파트너V3(신규) 55 = 167컬럼
-// 파트너(구)/파트너추가/파트너V2 컬럼은 화면에서는 폐기되었지만 과거 응답 보존을 위해 그대로 유지된다.
+// + 설문버전 1 + 파트너V2(구) 33 + 파트너V3(구) 55 + 파트너간략(신규) 26 = 193컬럼
+// 파트너(구)/파트너추가/파트너V2/파트너V3 컬럼은 화면에서는 폐기되었지만 과거 응답 보존을 위해 그대로 유지된다.
 function buildGeneralCols() {
   var cols = [];
   for (var i = 1; i <= 15; i++) cols.push('일반_Q' + i);
@@ -237,7 +237,60 @@ var PARTNER_V3_FIELD_MAP = {
   '파트너V3_추가제안':             'partner_v3_additional_suggestion'
 };
 
-var RESPONSE_HEADERS = COMMON_COLS.concat(GENERAL_COLS).concat(EMPLOYEE_COLS).concat(PARTNER_COLS).concat(ADMIN_COLS).concat(CONSENT_COLS).concat(PARTNER_EXTRA_COLS).concat(SURVEY_VERSION_COL).concat(PARTNER_V2_COLS).concat(PARTNER_V3_COLS);
+// ════════════════════════════════════════════════════════════
+// 파트너 간략 설문 (partner_simplified_v1) — 파트너v3 화면 설문도 폐기되었지만
+// 컬럼/데이터는 그대로 보존한다. 신규 17문항은 전부 partner_simple_ 접두 colKey를 쓰며,
+// 시트 헤더는 "맨 뒤"에 추가되어 기존 컬럼 순서에 영향을 주지 않는다.
+// ════════════════════════════════════════════════════════════
+var PARTNER_SIMPLE_COLS = [
+  '파트너간략_업체명', '파트너간략_활동지역',
+  '파트너간략_주요작업분야', '파트너간략_주요작업분야_기타',
+  '파트너간략_서비스이해도',
+  '파트너간략_견적흐름',
+  '파트너간략_필요요청정보', '파트너간략_필요요청정보_기타',
+  '파트너간략_주요우려사항', '파트너간략_주요우려사항_기타',
+  '파트너간략_경쟁력우선순위', '파트너간략_경쟁력우선순위_기타',
+  '파트너간략_직접견적이용료의견', '파트너간략_직접견적이용료의견_기타',
+  '파트너간략_직접견적이용료방식', '파트너간략_직접견적이용료방식_기타',
+  '파트너간략_이용료적정수준', '파트너간략_이용료적정수준_기타',
+  '파트너간략_입찰과금방식의견', '파트너간략_입찰과금방식의견_기타',
+  '파트너간략_이용료보호정책', '파트너간략_이용료보호정책_기타',
+  '파트너간략_안전결제',
+  '파트너간략_참여의향',
+  '파트너간략_가장중요한개선점',
+  '파트너간략_추가제안'
+];
+// 시트 헤더명(한글) ← 설문 페이지 제출 필드명(영문 partner_simple_* colKey) 매핑
+var PARTNER_SIMPLE_FIELD_MAP = {
+  '파트너간략_업체명':                 'partner_simple_company_name',
+  '파트너간략_활동지역':               'partner_simple_service_area',
+  '파트너간략_주요작업분야':           'partner_simple_service_category',
+  '파트너간략_주요작업분야_기타':      'partner_simple_service_category_etc',
+  '파트너간략_서비스이해도':           'partner_simple_service_understanding',
+  '파트너간략_견적흐름':               'partner_simple_quote_flow',
+  '파트너간략_필요요청정보':           'partner_simple_required_request_info',
+  '파트너간략_필요요청정보_기타':      'partner_simple_required_request_info_etc',
+  '파트너간략_주요우려사항':           'partner_simple_main_concerns',
+  '파트너간략_주요우려사항_기타':      'partner_simple_main_concerns_etc',
+  '파트너간략_경쟁력우선순위':         'partner_simple_competitive_priority',
+  '파트너간략_경쟁력우선순위_기타':    'partner_simple_competitive_priority_etc',
+  '파트너간략_직접견적이용료의견':      'partner_simple_direct_fee_acceptance',
+  '파트너간략_직접견적이용료의견_기타': 'partner_simple_direct_fee_acceptance_etc',
+  '파트너간략_직접견적이용료방식':      'partner_simple_direct_fee_method',
+  '파트너간략_직접견적이용료방식_기타': 'partner_simple_direct_fee_method_etc',
+  '파트너간략_이용료적정수준':         'partner_simple_fee_level',
+  '파트너간략_이용료적정수준_기타':    'partner_simple_fee_level_etc',
+  '파트너간략_입찰과금방식의견':       'partner_simple_bid_fee_opinion',
+  '파트너간략_입찰과금방식의견_기타':  'partner_simple_bid_fee_opinion_etc',
+  '파트너간략_이용료보호정책':         'partner_simple_fee_protection',
+  '파트너간략_이용료보호정책_기타':    'partner_simple_fee_protection_etc',
+  '파트너간략_안전결제':               'partner_simple_safe_payment',
+  '파트너간략_참여의향':               'partner_simple_participation_intent',
+  '파트너간략_가장중요한개선점':       'partner_simple_most_important_improvement',
+  '파트너간략_추가제안':               'partner_simple_additional_suggestion'
+};
+
+var RESPONSE_HEADERS = COMMON_COLS.concat(GENERAL_COLS).concat(EMPLOYEE_COLS).concat(PARTNER_COLS).concat(ADMIN_COLS).concat(CONSENT_COLS).concat(PARTNER_EXTRA_COLS).concat(SURVEY_VERSION_COL).concat(PARTNER_V2_COLS).concat(PARTNER_V3_COLS).concat(PARTNER_SIMPLE_COLS);
 var LOG_HEADERS      = ['loggedAt', 'type', 'message', 'detail'];
 var SETTINGS_HEADERS = ['key', 'value'];
 
@@ -312,6 +365,12 @@ function doPost(e) {
       if (PARTNER_V3_FIELD_MAP[key] !== undefined) {
         var v3FieldKey = PARTNER_V3_FIELD_MAP[key];
         return data[v3FieldKey] !== undefined ? String(data[v3FieldKey]) : '';
+      }
+      // 파트너 간략 설문(partner_simplified_v1) — 한글 헤더(파트너간략_*)에 영문 필드명(partner_simple_*)으로 제출된 값을 매핑
+      // 미선택/미표시 값은 프론트에서 빈 문자열로 전송되며 그대로 빈값 저장됨. 체크박스는 쉼표 구분 문자열 그대로 저장.
+      if (PARTNER_SIMPLE_FIELD_MAP[key] !== undefined) {
+        var simpleFieldKey = PARTNER_SIMPLE_FIELD_MAP[key];
+        return data[simpleFieldKey] !== undefined ? String(data[simpleFieldKey]) : '';
       }
       return data[key] !== undefined ? String(data[key]) : '';
     });
@@ -563,6 +622,25 @@ function backupResponsesBeforePartnerV2() {
   var now = new Date();
   var timestamp = Utilities.formatDate(now, 'Asia/Seoul', 'yyyyMMdd_HHmmss');
   var backupName = 'backup_responses_before_partner_v2_' + timestamp;
+  sheet.copyTo(ss).setName(backupName);
+  Logger.log('백업 완료: ' + backupName + ' (원본 responses 시트는 변경되지 않음)');
+}
+
+// ════════════════════════════════════════════════════════════
+// 파트너 간략 설문(partner_simplified_v1) 배포 전 안전 백업 — Apps Script 편집기에서 1회 수동 실행
+// responses 시트를 복사만 하고(원본은 그대로 유지) backup_responses_before_partner_simplified_<시각>
+// 이름의 새 시트를 만든다. 삭제/수정 없이 순수 복사본만 추가한다.
+// ════════════════════════════════════════════════════════════
+function backupResponsesBeforePartnerSimplified() {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sheet = ss.getSheetByName(SHEET_RESPONSES);
+  if (!sheet) {
+    Logger.log('responses 시트가 없어 백업할 대상이 없습니다.');
+    return;
+  }
+  var now = new Date();
+  var timestamp = Utilities.formatDate(now, 'Asia/Seoul', 'yyyyMMdd_HHmmss');
+  var backupName = 'backup_responses_before_partner_simplified_' + timestamp;
   sheet.copyTo(ss).setName(backupName);
   Logger.log('백업 완료: ' + backupName + ' (원본 responses 시트는 변경되지 않음)');
 }
