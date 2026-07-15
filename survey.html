@@ -1203,272 +1203,134 @@ const QUESTION_CONFIG = {
     }
   ],
 
-  // ────── 파트너 v3 (기존 파트너/파트너v2 질문 전면 폐기 후 신규 24문항 + 조건부 추가질문으로 교체) ──────
-  // colKey는 모두 partner_v3_ 접두어 — 기존 파트너_Q* / partner_v2_* 응답과 절대 같은 컬럼에 섞이지 않음
+  // ────── 파트너 간략 설문 (기존 파트너/파트너v2/파트너v3 질문 전면 폐기 후 신규 17문항으로 교체) ──────
+  // colKey는 모두 partner_simple_ 접두어 — 기존 파트너_Q* / partner_v2_* / partner_v3_* 응답과 절대 같은 컬럼에 섞이지 않음
+  // surveyVersion: 'partner_simplified_v1' (collectFormData에서 저장)
   partner: [
     // ── 섹션 1. 업체 기본정보 ──
-    { id: 'partner_v3_company_name', colKey: 'partner_v3_company_name',
+    { id: 'partner_simple_company_name', colKey: 'partner_simple_company_name',
       section: '1. 업체 기본정보',
       title: '업체명 또는 상호명을 입력해주세요.',
       type: 'text', required: true,
       placeholder: '업체명 또는 상호명을 입력해주세요.'
     },
-    { id: 'partner_v3_service_area', colKey: 'partner_v3_service_area',
+    { id: 'partner_simple_service_area', colKey: 'partner_simple_service_area',
       section: '1. 업체 기본정보',
       title: '주로 활동하는 지역을 입력해주세요.',
       type: 'text', required: true,
       placeholder: '예: 서울 강서구, 인천 부평구, 경기 시흥시'
     },
-    { id: 'partner_v3_service_category', colKey: 'partner_v3_service_category',
+    { id: 'partner_simple_service_category', colKey: 'partner_simple_service_category',
       section: '1. 업체 기본정보',
       title: '주로 하는 작업 분야를 선택해주세요.',
       type: 'checkbox', required: true,
       options: ['수도·배관','누수','욕실','싱크대','보일러·난방','전기·조명','도배·장판','문·창호','인테리어','철거','청소','각종 설치·수리','기타'],
-      etcColKey: 'partner_v3_service_category_etc'
+      etcColKey: 'partner_simple_service_category_etc'
     },
 
     // ── 섹션 2. 만능맨 사용 경험 ──
-    { id: 'partner_v3_service_understanding', colKey: 'partner_v3_service_understanding',
+    { id: 'partner_simple_service_understanding', colKey: 'partner_simple_service_understanding',
       section: '2. 만능맨 사용 경험',
-      title: '만능맨이 고객과 업체를 어떻게 연결하는 플랫폼인지 쉽게 이해되었나요?',
+      title: '만능맨이 고객과 업체를 연결하는 방식이 쉽게 이해되었나요?',
       type: 'radio', required: true,
-      options: ['바로 이해되었다','설명을 들으니 이해되었다','일부 헷갈리는 부분이 있었다','전체적인 구조가 잘 이해되지 않았다']
+      options: ['바로 이해되었다','설명을 들으니 이해되었다','일부 헷갈리는 부분이 있었다','전체적으로 이해하기 어려웠다']
     },
-    { id: 'partner_v3_service_confusion_detail', colKey: 'partner_v3_service_confusion_detail',
-      section: '2. 만능맨 사용 경험',
-      title: '어떤 부분이 가장 이해하기 어려웠나요?',
-      type: 'checkbox', required: true, maxSelections: 3,
-      options: ['고객 요청이 들어오는 방식','견적서를 보내는 방식','고객이 업체를 선택하는 방식','고객과 상담하는 방식','결제 및 정산 방식','수수료 발생 방식','작업 완료 및 보증 방식','파트너·일반 사용자 화면 전환','기타'],
-      etcColKey: 'partner_v3_service_confusion_detail_etc',
-      condition: { parentId: 'partner_v3_service_understanding', values: ['일부 헷갈리는 부분이 있었다','전체적인 구조가 잘 이해되지 않았다'] }
-    },
-    { id: 'partner_v3_quote_flow', colKey: 'partner_v3_quote_flow',
+    { id: 'partner_simple_quote_flow', colKey: 'partner_simple_quote_flow',
       section: '2. 만능맨 사용 경험',
       title: '고객 요청을 확인하고 견적서를 보내는 과정은 어땠나요?',
       type: 'radio', required: true,
-      options: ['매우 편리했다','대체로 편리했다','조금 불편했지만 사용할 수 있다','많이 불편했다','실제 업무방식과 맞지 않는 것 같다']
+      options: ['매우 편리했다','대체로 편리했다','조금 불편했지만 사용할 수 있다','실제 업무방식과 맞지 않는 것 같다','많이 불편했다']
     },
-    { id: 'partner_v3_quote_flow_inconvenience', colKey: 'partner_v3_quote_flow_inconvenience',
+    { id: 'partner_simple_required_request_info', colKey: 'partner_simple_required_request_info',
       section: '2. 만능맨 사용 경험',
-      title: '어느 과정이 가장 불편했나요?',
-      type: 'checkbox', required: true, maxSelections: 3,
-      options: ['고객 요청 찾기','요청내용 확인','현장사진 확인','견적금액 입력','작업내용 작성','방문 가능일 입력','견적 최종 제출','제출 견적 재확인','고객 채팅·상담','기타'],
-      etcColKey: 'partner_v3_quote_flow_inconvenience_etc',
-      condition: { parentId: 'partner_v3_quote_flow', values: ['조금 불편했지만 사용할 수 있다','많이 불편했다','실제 업무방식과 맞지 않는 것 같다'] }
-    },
-    { id: 'partner_v3_request_information', colKey: 'partner_v3_request_information',
-      section: '2. 만능맨 사용 경험',
-      title: '견적서를 작성할 때 고객이 입력한 정보가 충분했나요?',
-      type: 'radio', required: true,
-      options: ['견적을 작성하기에 충분했다','간단한 작업은 충분하지만 큰 공사는 부족하다','고객에게 추가로 물어봐야 할 정보가 많다','현재 정보만으로는 견적 작성이 어렵다']
-    },
-    { id: 'partner_v3_additional_request_information', colKey: 'partner_v3_additional_request_information',
-      section: '2. 만능맨 사용 경험',
-      title: '어떤 정보가 더 필요하다고 생각하나요?',
+      title: '견적을 보내기 전에 꼭 확인되어야 하는 정보는 무엇인가요?',
       type: 'checkbox', required: true, maxSelections: 5,
-      options: ['현장 전체 사진','문제 부분 근접 사진','동영상','정확한 작업 주소','건물 종류','층수·현장 위치','엘리베이터 유무','주차·출입 정보','문제 발생 시점','이전 수리·공사 이력','고객이 원하는 작업 범위','자재·제품 정보','고객 예상 예산','희망 방문일','긴급 여부','전화 상담 가능 여부','현장 방문 후 견적 가능 여부','기타'],
-      etcColKey: 'partner_v3_additional_request_information_etc',
-      condition: { parentId: 'partner_v3_request_information', values: ['간단한 작업은 충분하지만 큰 공사는 부족하다','고객에게 추가로 물어봐야 할 정보가 많다','현재 정보만으로는 견적 작성이 어렵다'] }
+      options: ['현장 사진','자세한 작업 내용','작업 주소 또는 지역','건물 종류','고객 예상 예산','희망 방문일','긴급 작업 여부','전화 상담 가능 여부','주차 및 현장 출입 정보','기존 수리 또는 공사 이력','기타'],
+      etcColKey: 'partner_simple_required_request_info_etc'
     },
-    { id: 'partner_v3_priority_request_information', colKey: 'partner_v3_priority_request_information',
+    { id: 'partner_simple_main_concerns', colKey: 'partner_simple_main_concerns',
       section: '2. 만능맨 사용 경험',
-      title: '견적을 보내기 전에 가장 먼저 확인하고 싶은 정보는 무엇인가요?',
-      type: 'checkbox', required: true, maxSelections: 5,
-      options: ['현장 사진·동영상','자세한 증상','작업 주소·이동 거리','건물 종류','고객 예상 예산','희망 방문일','긴급 여부','문제 발생 시점','전화 상담 가능 여부','주차·출입 정보','이전 수리·공사 이력','다른 업체 견적 제출 여부','현장 방문 후 견적 가능 여부','기타'],
-      etcColKey: 'partner_v3_priority_request_information_etc'
-    },
-    { id: 'partner_v3_expected_useful_features', colKey: 'partner_v3_expected_useful_features',
-      section: '2. 만능맨 사용 경험',
-      title: '실제로 이용한다면 가장 자주 사용할 것 같은 기능은 무엇인가요?',
+      title: '실제 이용할 때 가장 걱정되는 부분은 무엇인가요?',
       type: 'checkbox', required: true, maxSelections: 3,
-      options: ['내 지역 요청만 확인','내 작업 분야 요청만 확인','실시간 요청 알림','요청내용·사진 확인','빠른 견적 작성','자주 쓰는 견적 저장','고객 채팅·전화상담','작업 일정 관리','결제·정산내역','프로필·시공사례 홍보','후기 관리','기타'],
-      etcColKey: 'partner_v3_expected_useful_features_etc'
-    },
-    { id: 'partner_v3_main_concerns', colKey: 'partner_v3_main_concerns',
-      section: '2. 만능맨 사용 경험',
-      title: '실제 이용 시 가장 걱정되는 부분은 무엇인가요?',
-      type: 'checkbox', required: true, maxSelections: 3,
-      options: ['허위·장난 요청','중복 요청','견적 후 연락 두절','과도한 가격 경쟁','현장정보 부족','견적 제출 이용료','무리한 가격 요구','작업범위 변경','현장 추가금액','정산 지연','하자·환불 분쟁','악성 후기','앱 사용 불편','특별히 걱정되는 부분 없음','기타'],
-      etcColKey: 'partner_v3_main_concerns_etc',
+      options: ['허위 또는 장난 요청','견적만 받고 연락이 끊기는 고객','너무 많은 업체와의 가격 경쟁','현장 정보 부족','견적 제출 이용료 부담','정산 지연','고객의 무리한 요구','작업 후 하자 또는 환불 분쟁','악성 후기','앱 사용의 불편함','특별히 걱정되는 부분 없음','기타'],
+      etcColKey: 'partner_simple_main_concerns_etc',
       exclusiveOptions: ['특별히 걱정되는 부분 없음']
     },
-    { id: 'partner_v3_concern_solution', colKey: 'partner_v3_concern_solution',
-      section: '2. 만능맨 사용 경험',
-      title: '걱정사항을 줄이기 위해 만능맨이 어떤 조치를 해주면 좋을까요?',
-      type: 'textarea', required: false,
-      condition: { parentId: 'partner_v3_main_concerns', values: ['허위·장난 요청','중복 요청','견적 후 연락 두절','과도한 가격 경쟁','현장정보 부족','견적 제출 이용료','무리한 가격 요구','작업범위 변경','현장 추가금액','정산 지연','하자·환불 분쟁','악성 후기','앱 사용 불편','기타'] }
-    },
 
-    // ── 섹션 3. 다른 플랫폼과 비교 ──
-    { id: 'partner_v3_competitor_experience', colKey: 'partner_v3_competitor_experience',
-      section: '3. 다른 플랫폼과 비교',
-      title: '숨고, 당근, 네이버 등 다른 방법으로 고객을 구해본 경험이 있나요?',
-      type: 'radio', required: true,
-      options: ['현재 이용 중','과거 이용 경험 있음','가입했지만 거의 이용하지 않음','이용 경험 없음']
-    },
-    { id: 'partner_v3_competitor_services', colKey: 'partner_v3_competitor_services',
-      section: '3. 다른 플랫폼과 비교',
-      title: '이용해본 서비스 또는 고객 모집 방법은 무엇인가요?',
-      type: 'checkbox', required: true,
-      options: ['숨고','당근','네이버 검색·플레이스','블로그·카페','인스타그램·SNS','지역 커뮤니티','다른 중개 플랫폼','전단지·지역광고','소개·지인 추천','기타'],
-      etcColKey: 'partner_v3_competitor_services_etc',
-      condition: { parentId: 'partner_v3_competitor_experience', values: ['현재 이용 중','과거 이용 경험 있음','가입했지만 거의 이용하지 않음'] }
-    },
-    { id: 'partner_v3_competitive_strength', colKey: 'partner_v3_competitive_strength',
-      section: '3. 다른 플랫폼과 비교',
-      title: '다른 플랫폼과 비교했을 때 만능맨의 좋은 점은 무엇인가요?',
+    // ── 섹션 3. 플랫폼 비교 ──
+    { id: 'partner_simple_competitive_priority', colKey: 'partner_simple_competitive_priority',
+      section: '3. 플랫폼 비교',
+      title: '숨고, 당근, 네이버 등 다른 방식과 비교했을 때 만능맨이 가장 잘해야 하는 부분은 무엇이라고 생각하시나요?',
       type: 'checkbox', required: true, maxSelections: 4,
-      options: ['집수리 분야 전문성','고객 요청 확인 편리','견적 작성 편리','지역·분야 요청 찾기 편리','삼양발브 본사 운영 신뢰','파트너 인증 신뢰','안전한 결제·정산','분쟁 지원 기대','프로필·시공사례 홍보','차이를 느끼지 못함','다른 플랫폼보다 불편함','기타'],
-      etcColKey: 'partner_v3_competitive_strength_etc',
-      exclusiveOptions: ['차이를 느끼지 못함','다른 플랫폼보다 불편함']
-    },
-    { id: 'partner_v3_competitive_weakness', colKey: 'partner_v3_competitive_weakness',
-      section: '3. 다른 플랫폼과 비교',
-      title: '다른 플랫폼보다 부족하다고 느낀 부분은 무엇인가요?',
-      type: 'checkbox', required: true, maxSelections: 3,
-      options: ['고객 요청 수','지역 요청 검색','고객 정보','견적 과정','고객 상담','업체 홍보','앱 사용법','비용 장점','결제·정산','차별점 부족','기타'],
-      etcColKey: 'partner_v3_competitive_weakness_etc',
-      condition: { parentId: 'partner_v3_competitive_strength', values: ['차이를 느끼지 못함','다른 플랫폼보다 불편함'] }
-    },
-    { id: 'partner_v3_competitive_priority', colKey: 'partner_v3_competitive_priority',
-      section: '3. 다른 플랫폼과 비교',
-      title: '만능맨이 다른 플랫폼보다 반드시 더 잘해야 하는 부분은 무엇인가요?',
-      type: 'checkbox', required: true, maxSelections: 3,
-      options: ['실제 작업 가능성이 높은 요청','허위·중복 차단','정확한 현장정보','합리적인 견적 비용','경쟁 업체 수 제한','지역·분야 필터','빠른 정산','미수금 방지','파트너 인증','분쟁 지원','작업 보증','쉬운 앱','업체 홍보','기타'],
-      etcColKey: 'partner_v3_competitive_priority_etc'
+      options: ['실제 작업으로 이어질 가능성이 높은 고객 요청','허위·중복 요청 차단','낮고 합리적인 견적 제출 이용료','견적 경쟁 업체 수 제한','고객 요청정보를 자세하게 제공','빠르고 안정적인 정산','고객과의 분쟁 해결 지원','작업 후 보증제도','쉬운 앱 사용법','파트너 업체 홍보 지원','기타'],
+      etcColKey: 'partner_simple_competitive_priority_etc'
     },
 
     // ── 섹션 4. 견적 제출 이용료 ──
-    { id: 'partner_v3_fee_method', colKey: 'partner_v3_fee_method',
+    { id: 'partner_simple_direct_fee_acceptance', colKey: 'partner_simple_direct_fee_acceptance',
       section: '4. 견적 제출 이용료',
-      title: '가장 합리적인 견적 제출 이용료 방식은 무엇인가요?',
+      title: '직접견적 요청에서 견적 제출 이용료가 발생하는 방식에 대해 어떻게 생각하시나요?',
       type: 'radio', required: true,
-      options: ['모든 요청 동일 금액','예상 작업금액별 차등','작업 분야별 차등','금액과 분야 함께 고려','견적 무료·성사 시 수수료','월 이용료','유료면 이용 어려움','아직 모름','기타'],
-      etcColKey: 'partner_v3_fee_method_etc'
+      options: ['고객 요청 정보가 충분하다면 소액 이용료는 이해할 수 있다','이용료가 낮다면 이용할 수 있다','실제 작업 가능성이 높은 요청이라면 이용할 수 있다','견적 제출 자체에 비용이 드는 것은 부담스럽다','작업이 성사됐을 때만 비용을 내고 싶다','직접견적 방식은 좋지만 이용료 기준이 중요하다','유료라면 이용하기 어렵다','아직 판단하기 어렵다','기타'],
+      etcColKey: 'partner_simple_direct_fee_acceptance_etc'
     },
-    { id: 'partner_v3_fee_under_300k_evaluation', colKey: 'partner_v3_fee_under_300k_evaluation',
+    { id: 'partner_simple_direct_fee_method', colKey: 'partner_simple_direct_fee_method',
       section: '4. 견적 제출 이용료',
-      title: '30만 원 미만 요청의 견적 제출비가 500원이라면 어떻게 생각하나요?',
+      title: '직접견적 이용료를 정한다면 어떤 방식이 가장 합리적이라고 생각하시나요?',
       type: 'radio', required: true,
-      options: ['저렴하다','적당하다','조금 비싸다','많이 비싸다','무료여야 한다']
+      options: ['견적금액의 일정 비율로 부과하는 방식','견적 1건당 고정 금액으로 부과하는 방식','소규모 작업은 고정금액, 큰 작업은 비율제로 나누는 방식','작업 분야별로 이용료를 다르게 정하는 방식','고객 요청의 신뢰도와 정보 충실도에 따라 다르게 정하는 방식','견적 제출은 무료이고 작업이 성사됐을 때만 비용을 내는 방식','아직 판단하기 어렵다','기타'],
+      etcColKey: 'partner_simple_direct_fee_method_etc'
     },
-    { id: 'partner_v3_fee_under_300k_acceptable', colKey: 'partner_v3_fee_under_300k_acceptable',
+    { id: 'partner_simple_fee_level', colKey: 'partner_simple_fee_level',
       section: '4. 견적 제출 이용료',
-      title: '어느 금액이면 견적을 보낼 의향이 있나요?',
+      title: '이용료 수준은 어느 정도가 적정하다고 생각하시나요?',
       type: 'radio', required: true,
-      options: ['무료','100원','300원','500원 미만 다른 금액','성사됐을 때만 비용 지불'],
-      condition: { parentId: 'partner_v3_fee_under_300k_evaluation', values: ['조금 비싸다','많이 비싸다','무료여야 한다'] }
+      options: ['견적금액의 0.03% 정도','견적금액의 0.05% 정도','견적금액의 0.1% 정도','견적금액의 0.2% 정도','견적 1건당 500원 이하','견적 1건당 1,000원 정도','견적 1건당 2,000원 정도','견적 1건당 3,000원 정도','고객 요청 품질이 좋다면 3,000원 이상도 가능','유료라면 이용하기 어렵다','아직 판단하기 어렵다','기타'],
+      etcColKey: 'partner_simple_fee_level_etc'
     },
-    { id: 'partner_v3_fee_300k_1m_evaluation', colKey: 'partner_v3_fee_300k_1m_evaluation',
+    { id: 'partner_simple_bid_fee_opinion', colKey: 'partner_simple_bid_fee_opinion',
       section: '4. 견적 제출 이용료',
-      title: '30만~100만 원 요청의 견적 제출비가 1,000원이라면 어떻게 생각하나요?',
+      title: '입찰견적에서 우선협상대상자로 선정된 경우에만 이용료가 발생하는 방식은 어떻게 생각하시나요?',
+      infoBox: '입찰견적은 여러 파트너가 고객 요청에 참여할 수 있는 방식입니다.\n\n이 경우 단순히 입찰에 참여했다는 이유만으로 바로 이용료를 받지 않고, 고객과 상담 가능성이 높은 우선협상대상자, 예를 들어 최대 5명 안에 선정된 경우에만 이용료가 발생하는 방식을 검토하고 있습니다.\n\n우선협상대상자로 선정되지 않은 경우에는 이용료가 발생하지 않습니다.',
       type: 'radio', required: true,
-      options: ['저렴하다','적당하다','조금 비싸다','많이 비싸다','무료여야 한다']
+      options: ['우선협상대상자로 선정된 경우에만 이용료가 발생한다면 합리적이다','단순 입찰 참여에는 비용이 없어 부담이 적을 것 같다','우선협상대상자 수가 제한된다면 이용할 수 있을 것 같다','우선협상대상자로 선정되더라도 실제 상담이 안 되면 이용료 반환이 필요하다','우선협상대상자 5명은 많고 더 적어야 한다','우선협상대상자 선정 기준이 명확해야 이용할 수 있다','입찰 방식보다는 직접견적 방식이 더 좋다','어떤 방식이든 유료라면 부담스럽다','아직 판단하기 어렵다','기타'],
+      etcColKey: 'partner_simple_bid_fee_opinion_etc'
     },
-    { id: 'partner_v3_fee_300k_1m_acceptable', colKey: 'partner_v3_fee_300k_1m_acceptable',
-      section: '4. 견적 제출 이용료',
-      title: '어느 금액이면 견적을 보낼 의향이 있나요?',
-      type: 'radio', required: true,
-      options: ['무료','300원','500원','700원','성사됐을 때만 비용 지불'],
-      condition: { parentId: 'partner_v3_fee_300k_1m_evaluation', values: ['조금 비싸다','많이 비싸다','무료여야 한다'] }
-    },
-    { id: 'partner_v3_fee_over_1m_evaluation', colKey: 'partner_v3_fee_over_1m_evaluation',
-      section: '4. 견적 제출 이용료',
-      title: '100만 원 이상 요청의 견적 제출비가 2,000~3,000원이라면 어떻게 생각하나요?',
-      type: 'radio', required: true,
-      options: ['저렴하다','적당하다','조금 비싸다','많이 비싸다','무료여야 한다']
-    },
-    { id: 'partner_v3_fee_over_1m_acceptable', colKey: 'partner_v3_fee_over_1m_acceptable',
-      section: '4. 견적 제출 이용료',
-      title: '어느 금액이면 견적을 보낼 의향이 있나요?',
-      type: 'radio', required: true,
-      options: ['무료','500원','1,000원','1,500원','2,000원','성사됐을 때만 비용 지불'],
-      condition: { parentId: 'partner_v3_fee_over_1m_evaluation', values: ['조금 비싸다','많이 비싸다','무료여야 한다'] }
-    },
-    { id: 'partner_v3_fee_scenario_intent', colKey: 'partner_v3_fee_scenario_intent',
-      section: '4. 견적 제출 이용료',
-      title: '아래 조건이라면 1,000원을 내고 견적서를 보내시겠습니까?',
-      infoBox: '· 예상 작업금액 50만~100만 원\n· 고객 본인인증 완료\n· 사진과 자세한 요청내용 확인 가능\n· 견적 업체 최대 3곳\n· 허위 요청·연락처 오류 시 환급',
-      type: 'radio', required: true,
-      options: ['적극적으로 보냄','내용·거리 확인 후 결정','더 저렴하면 보냄','성사 시에만 비용 지불','보내지 않음']
-    },
-    { id: 'partner_v3_fee_scenario_rejection_reason', colKey: 'partner_v3_fee_scenario_rejection_reason',
-      section: '4. 견적 제출 이용료',
-      title: '견적을 보내기 어려운 가장 큰 이유는 무엇인가요?',
-      type: 'radio', required: true,
-      options: ['성사 가능성이 낮음','업체 경쟁 부담','고객 정보 부족','연락 가능 여부 불확실','이동 거리·출장비','제출비 부담','수익 부족','미성사에도 비용 발생','플랫폼 신뢰 부족','기타'],
-      etcColKey: 'partner_v3_fee_scenario_rejection_reason_etc',
-      condition: { parentId: 'partner_v3_fee_scenario_intent', values: ['더 저렴하면 보냄','성사 시에만 비용 지불','보내지 않음'] }
-    },
-    { id: 'partner_v3_fee_protection', colKey: 'partner_v3_fee_protection',
+    { id: 'partner_simple_fee_protection', colKey: 'partner_simple_fee_protection',
       section: '4. 견적 제출 이용료',
       title: '견적 제출 이용료가 있다면 꼭 필요한 보호정책은 무엇인가요?',
       type: 'checkbox', required: true, maxSelections: 4,
-      options: ['허위 요청 환급','중복 요청 환급','연락처 오류 환급','고객 즉시 취소 환급','제출 전 금액 표시','견적 업체 수 제한','신규 파트너 무료 견적권','월 사용 한도','고객 본인인증','고객 견적 확인 여부 표시','간편한 환급 신청','기타'],
-      etcColKey: 'partner_v3_fee_protection_etc'
+      options: ['허위 요청이면 이용료 반환','중복 요청이면 이용료 반환','고객 연락처가 잘못되면 이용료 반환','고객이 바로 취소하면 이용료 반환','실제 상담이 이루어지지 않으면 이용료 일부 또는 전액 반환','견적 제출 전에 이용료 금액을 명확히 표시','고객 요청 1건당 견적 참여 업체 수 제한','입찰견적의 우선협상대상자 선정 기준 공개','신규 파트너에게 무료 견적권 제공','월별 이용금액 한도 설정','고객 본인인증 강화','이용료 반환 신청을 간편하게 제공','기타'],
+      etcColKey: 'partner_simple_fee_protection_etc'
     },
 
-    // ── 섹션 5. 결제·정산과 보증 ──
-    { id: 'partner_v3_safe_payment_evaluation', colKey: 'partner_v3_safe_payment_evaluation',
-      section: '5. 결제·정산과 보증',
-      title: '고객 선결제 후 작업 완료 시 정산되는 방식은 어떻게 생각하나요?',
+    // ── 섹션 5. 결제·정산 ──
+    { id: 'partner_simple_safe_payment', colKey: 'partner_simple_safe_payment',
+      section: '5. 결제·정산',
+      title: '고객이 만능맨을 통해 먼저 결제하고, 작업 완료 후 파트너에게 정산되는 방식은 어떻게 생각하시나요?',
       type: 'radio', required: true,
-      options: ['미수금 걱정이 줄어 매우 좋음','정산이 빠르면 이용 가능','추가금액 처리가 명확하면 괜찮음','고객 확인 지연 우려','분쟁으로 정산 보류 우려','직접 현장결제 선호','판단 어려움']
-    },
-    { id: 'partner_v3_required_payment_conditions', colKey: 'partner_v3_required_payment_conditions',
-      section: '5. 결제·정산과 보증',
-      title: '어떤 조건이면 만능맨 결제·정산 방식을 이용할 수 있나요?',
-      type: 'checkbox', required: true, maxSelections: 3,
-      options: ['일정 기간 후 자동 정산','고객 확인과 관계없이 정해진 날짜 정산','분쟁 없는 금액 먼저 정산','추가금액 앱 승인','정산 예정일 표시','보류 사유·처리과정 확인','소명자료 제출','직접결제 선택 가능','기타'],
-      etcColKey: 'partner_v3_required_payment_conditions_etc',
-      condition: { parentId: 'partner_v3_safe_payment_evaluation', values: ['고객 확인 지연 우려','분쟁으로 정산 보류 우려','직접 현장결제 선호'] }
-    },
-    { id: 'partner_v3_platform_protection_role', colKey: 'partner_v3_platform_protection_role',
-      section: '5. 결제·정산과 보증',
-      title: '파트너가 안심하고 이용하려면 만능맨이 어떤 역할을 해야 하나요?',
-      type: 'checkbox', required: true, maxSelections: 4,
-      options: ['고객 본인인증','악성 고객 제한','요청 변경 이력','견적·작업범위 기록','결제금 안전보관','빠른 정산','작업 전후 사진','채팅내역 보관','분쟁 상담','양쪽 의견 확인','파트너 소명 기회','무리한 환불 방지','보험 연계','기타'],
-      etcColKey: 'partner_v3_platform_protection_role_etc'
-    },
-    { id: 'partner_v3_guarantee_intent', colKey: 'partner_v3_guarantee_intent',
-      section: '5. 결제·정산과 보증',
-      title: '작업 보증 또는 분쟁조정 제도가 이용 의향에 도움이 될까요?',
-      type: 'radio', required: true,
-      options: ['크게 도움','어느 정도 도움','조건 확인 후 판단','큰 차이 없음','파트너 책임만 커질까 우려']
-    },
-    { id: 'partner_v3_guarantee_required_clarity', colKey: 'partner_v3_guarantee_required_clarity',
-      section: '5. 결제·정산과 보증',
-      title: '보증·분쟁정책에서 가장 명확해야 하는 내용은 무엇인가요?',
-      type: 'checkbox', required: true, maxSelections: 3,
-      options: ['보증 대상 작업','보증 기간','보증 금액','고객·파트너 과실 구분','노후시설·기존 하자 구분','추가 작업 구분','환불 조건','소명자료 제출','처리기간','정산 보류 조건','악성 민원 방지','기타'],
-      etcColKey: 'partner_v3_guarantee_required_clarity_etc',
-      condition: { parentId: 'partner_v3_guarantee_intent', values: ['조건 확인 후 판단','파트너 책임만 커질까 우려'] }
+      options: ['미수금 걱정이 줄어들어 좋다','정산이 빠르다면 이용할 수 있다','현장 추가금액 처리가 명확하면 괜찮다','고객이 작업 완료 확인을 늦게 할까 걱정된다','직접 현장에서 결제받는 방식이 더 좋다','아직 판단하기 어렵다']
     },
 
-    // ── 섹션 6. 참여 의향과 최종 의견 ──
-    { id: 'partner_v3_participation_intent', colKey: 'partner_v3_participation_intent',
-      section: '6. 참여 의향과 최종 의견',
-      title: '오늘 사용해본 기준으로 파트너 활동 의향이 있나요?',
+    // ── 섹션 6. 참여 의향 및 개선의견 ──
+    { id: 'partner_simple_participation_intent', colKey: 'partner_simple_participation_intent',
+      section: '6. 참여 의향 및 개선의견',
+      title: '오늘 사용해본 기준으로 만능맨 파트너로 활동할 의향이 있나요?',
       type: 'radio', required: true,
-      options: ['오픈하면 바로 이용','무료 체험 후 결정','이용료·정책 확인 후 결정','기능 개선 후 이용','참여 의향 낮음','참여하지 않음']
+      options: ['정식 오픈하면 바로 이용해보고 싶다','무료 체험 후 결정하고 싶다','이용료와 운영정책을 확인한 뒤 결정하겠다','기능이 조금 더 개선되면 이용하고 싶다','아직 참여 의향이 낮다','참여할 생각이 없다']
     },
-    { id: 'partner_v3_participation_requirement', colKey: 'partner_v3_participation_requirement',
-      section: '6. 참여 의향과 최종 의견',
-      title: '참여를 위해 먼저 개선되거나 확인되어야 할 것은 무엇인가요?',
-      type: 'checkbox', required: true, maxSelections: 3,
-      options: ['고객 요청 수','고객 요청 품질','이용료','허위·중복 차단','경쟁 업체 수 제한','안전결제','빠른 정산','공정한 보증·분쟁정책','책임 범위','쉬운 앱','업체 홍보','기타'],
-      etcColKey: 'partner_v3_participation_requirement_etc',
-      condition: { parentId: 'partner_v3_participation_intent', values: ['기능 개선 후 이용','참여 의향 낮음','참여하지 않음'] }
+    { id: 'partner_simple_most_important_improvement', colKey: 'partner_simple_most_important_improvement',
+      section: '6. 참여 의향 및 개선의견',
+      title: '오늘 사용하면서 가장 불편했거나 꼭 고쳐졌으면 하는 점을 적어주세요.',
+      type: 'textarea', required: true,
+      placeholder: '화면, 버튼, 고객 요청정보, 견적서 작성, 채팅, 이용료, 결제, 정산 등 어떤 내용이든 구체적으로 적어주세요.'
     },
-    { id: 'partner_v3_most_important_improvement', colKey: 'partner_v3_most_important_improvement',
-      section: '6. 참여 의향과 최종 의견',
-      title: '오늘 사용하면서 가장 불편했거나 꼭 고쳐졌으면 하는 한 가지를 적어주세요.',
-      type: 'textarea', required: true
-    },
-    { id: 'partner_v3_additional_suggestion', colKey: 'partner_v3_additional_suggestion',
-      section: '6. 참여 의향과 최종 의견',
-      title: '새롭게 제공했으면 하는 기능이나 정책을 자유롭게 적어주세요.',
-      type: 'textarea', required: false
+    { id: 'partner_simple_additional_suggestion', colKey: 'partner_simple_additional_suggestion',
+      section: '6. 참여 의향 및 개선의견',
+      title: '만능맨이 파트너를 위해 꼭 제공했으면 하는 기능이나 정책이 있다면 적어주세요.',
+      desc: '선택 문항입니다. 답하지 않아도 설문을 제출할 수 있습니다.',
+      type: 'textarea', required: false,
+      placeholder: '추가로 필요한 기능이나 운영정책이 있다면 자유롭게 작성해주세요.'
     }
   ]
 };
@@ -1485,19 +1347,18 @@ const SECTION_META = {
     '2. 만능맨 사용 경험': {
       desc: '오늘 만능맨을 실제로 사용해보신 경험을 바탕으로 답변해주세요.'
     },
-    '3. 다른 플랫폼과 비교': {
+    '3. 플랫폼 비교': {
       desc: '숨고, 당근, 네이버 등 다른 서비스와 비교했을 때의 생각을 들려주세요.'
     },
     '4. 견적 제출 이용료': {
       desc: '검토 중인 견적 제출 이용료 방식에 대한 의견을 여쭤봅니다.',
-      infoBox: '만능맨은 가입비·월 이용료·별도 광고비 없이 운영하고, 원하는 고객 요청에 견적서를 보낼 때만 소액의 이용료가 발생하는 방식을 검토 중입니다.\n\n검토 예시:\n30만 원 미만 작업 500원\n30만~100만 원 작업 1,000원\n100만 원 이상 작업 2,000~3,000원\n\n허위·중복 요청이나 잘못된 연락처는 확인 후 이용료 반환을 검토하고 있습니다. 아직 확정된 정책은 아닙니다.'
+      infoBox: '만능맨은 가입비, 월 이용료, 별도 광고비 없이 운영하고, 파트너가 고객 요청에 견적서를 보낼 때만 소액의 견적 제출 이용료가 발생하는 방식을 검토하고 있습니다.\n\n다만 고객 요청 방식에 따라 이용료 부과 기준은 다르게 운영하는 방향을 검토하고 있습니다.\n\n1. 직접견적 요청 방식\n\n직접견적 요청은 고객 요청 내용을 확인한 파트너가 직접 견적서를 보내는 방식입니다.\n이 경우 견적서를 제출할 때 소액의 견적 제출 이용료가 발생하는 방향을 검토하고 있습니다.\n\n다만 이용료를 어떤 기준으로 정할지는 아직 확정되지 않았습니다.\n\n예를 들어,\n· 견적금액의 일정 비율로 적용하는 방식\n· 견적 1건당 고정 금액으로 적용하는 방식\n· 작업금액과 작업 분야를 함께 고려하는 방식\n\n등을 검토하고 있습니다.\n\n2. 입찰견적 방식\n\n입찰견적은 여러 파트너가 고객 요청에 참여할 수 있는 방식입니다.\n이 경우 단순히 입찰에 참여했다는 이유만으로 바로 이용료를 받지 않고, 고객과 상담 가능성이 높은 우선협상대상자, 예를 들어 최대 5명 안에 선정된 경우에만 이용료가 발생하는 방식을 검토하고 있습니다.\n\n즉,\n· 입찰에 참여만 한 경우: 이용료 없음\n· 우선협상대상자로 선정되지 않은 경우: 이용료 없음\n· 우선협상대상자로 선정된 경우: 이용료 발생\n\n위 내용은 확정된 최종 정책이 아니며, 파트너분들의 의견을 듣기 위한 검토안입니다.\n실제 운영정책, 요율, 금액, 우선협상대상자 수는 설문 결과와 내부 검토에 따라 변경될 수 있습니다.'
     },
-    '5. 결제·정산과 보증': {
-      desc: '결제·정산 방식과 보증·분쟁조정 제도에 대한 의견을 여쭤봅니다.',
-      infoBox: '고객 결제금을 만능맨이 안전하게 보관하고 작업 완료 확인 후 파트너에게 정산하는 방식을 준비 중입니다. 견적·작업범위·대화내역을 보관하고 분쟁 발생 시 양쪽 의견을 확인하는 정책도 검토 중입니다. 보증 대상·기간·금액은 아직 확정되지 않았습니다.'
+    '5. 결제·정산': {
+      desc: '결제와 정산 방식에 대한 의견을 여쭤봅니다.'
     },
-    '6. 참여 의향과 최종 의견': {
-      desc: '마지막으로 실제 참여 의향과 자유 의견을 남겨주세요.'
+    '6. 참여 의향 및 개선의견': {
+      desc: '마지막으로 실제 참여 의향과 개선 의견을 남겨주세요. (마지막 문항은 선택 문항입니다.)'
     }
   }
 };
@@ -2312,9 +2173,9 @@ function collectFormData() {
     개인정보동의일시:    consentTimestamp || ''
   };
 
-  // 파트너 신규 설문(v3)만 설문버전을 표시 — 일반/임직원 및 기존 파트너 응답 형식에는 영향 없음
+  // 파트너 간략 설문만 설문버전을 표시 — 일반/임직원 및 기존 파트너 응답 형식에는 영향 없음
   if (currentType === 'partner') {
-    data.surveyVersion = 'partner_v3';
+    data.surveyVersion = 'partner_simplified_v1';
   }
 
   const questions = QUESTION_CONFIG[currentType] || [];
